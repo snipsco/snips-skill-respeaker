@@ -1,0 +1,3 @@
+[submodule "APA102_Pi"]
+	path = snipsrespeaker/APA102_Pi
+	url = https://github.com/tinue/APA102_Pi
