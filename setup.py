@@ -10,6 +10,7 @@ setup(
     download_url='',
     license='MIT',
     install_requires=[
+        'colour'
     ],
     test_suite="tests",
     keywords=['snips'],
