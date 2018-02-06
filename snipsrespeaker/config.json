@@ -1,0 +1,15 @@
+{
+        "waiting":{
+                "type":"one_color",
+                "color":"blue",
+                "dim":1,
+                "idle_time":0.01
+        },
+        "working":{
+                "type":"array",
+                "color":["blue", "black","blue"],
+                "dim":[1, 1, 1],
+                "idle_time": 0.1,
+                "rotate":1
+        }
+}

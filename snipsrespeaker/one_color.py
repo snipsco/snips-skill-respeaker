@@ -5,6 +5,7 @@ sys.path.append("APA102_Pi/")
 
 from colorcycletemplate import ColorCycleTemplate
 from colour import Color
+from math import ceil
 import utils
 
 class OneColor(ColorCycleTemplate):
@@ -17,25 +18,24 @@ class OneColor(ColorCycleTemplate):
                                     global_brightness, order="rgb")
 
         self.color = Color(color)
-        self.percent = percent
+        self.brightness = percent
         self.dim = dim
 
     def init(self, strip, num_led):
         for led in range(0, num_led):
-            strip.set_pixel_rgb(led, utils.color_2_hex(self.color), self.percent)
+            strip.set_pixel_rgb(led, utils.color_2_hex(self.color), self.brightness)
 
     def update(self, strip, num_led, num_steps_per_cycle, current_step,
                current_cycle):
         if (self.dim != 0):
-            brightness = utils.get_brightness(strip, 0)
-            brightness -= self.dim
-            if (brightness > 100):
-                brigthness = 100
+            self.brightness -= self.dim
+            if (self.brightness > 100):
+                self.brightness  = 100
                 self.dim *= -1
-            if (brightness < 0):
-                brightness = 0
+            if (self.brightness < 0):
+                self.brightness  = 0
                 self.dim *= -1
             for led in range(0, num_led):
-                utils.set_brightness(strip, led, brightness)
+                utils.set_brightness(strip, led, self.brightness)
             return 1
         return 0

@@ -27,4 +27,3 @@ def set_brightness(strip, led_num, value):
         ledstart = (brightness & 0b00011111) | strip.LED_START
         start_index = 4 * led_num
         strip.leds[start_index] = ledstart
-        print("set %u to %u" % (led_num, brightness))

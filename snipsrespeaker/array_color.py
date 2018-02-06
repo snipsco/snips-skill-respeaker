@@ -20,6 +20,8 @@ class ArrayColor(ColorCycleTemplate):
         self.rotate = rotate
         self.dim = dim
         self.dim_array = dim_array
+        self.brightness_array = [0] * num_led
+        self.brightness = 0
 
     def init(self, strip, num_led):
         for led in range(0, min(len(self.pixel), num_led)):
@@ -35,26 +37,24 @@ class ArrayColor(ColorCycleTemplate):
             strip.rotate(self.rotate)
         if (self.dim != 0):
                 res = 1
-                brightness = utils.get_brightness(strip, 0)
-                brightness -= self.dim
-                if (brightness > 100):
-                    brigthness = 100
+                self.brightness -= self.dim
+                if (self.brightness > 100):
+                    self.brigthness = 100
                     self.dim *= -1
-                if (brightness < 0):
-                    brightness = 0
+                if (self.brightness < 0):
+                    self.brightness = 0
                     self.dim *= -1
                 for led in range(0, num_led):
-                    utils.set_brightness(strip, led, brightness)
+                    utils.set_brightness(strip, led, self.brightness)
         if (len(self.dim_array)):
                 res = 1
                 for led in range(0, num_led):
-                    brightness = utils.get_brightness(strip, led)
-                    brightness -= self.dim_array[led]
-                    if (brightness > 100):
-                        brigthness = 100
+                    self.brightness_array[led] -= self.dim_array[led]
+                    if (self.brightness_array[led] > 100):
+                        self.brightness_array[led]  = 100
                         self.dim_array[led] *= -1
-                    if (brightness < 0):
-                        brightness = 0
+                    if (self.brightness_array[led] < 0):
+                        self.brightness_array[led]  = 0
                         self.dim_array[led] *= -1
-                    utils.set_brightness(strip, led, brightness)
+                    utils.set_brightness(strip, led, self.brightness_array[led])
         return res
