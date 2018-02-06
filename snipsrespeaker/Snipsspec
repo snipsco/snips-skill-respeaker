@@ -1,0 +1,17 @@
+package_name: snips_respeaker
+class_name: Respeaker
+description: "Led notification"
+params: ["num_led", "config_file"]
+dialogue_events:
+  - event: session_started
+    action: |
+      {%
+      print("->>>> Session started <<<<-")
+      snips.skill.hotword_detected()
+      %}
+  - event: session_ended
+    action: |
+      {%
+      print("->>>> Session started <<<<-")
+      snips.skill.stop_working()
+      %}
