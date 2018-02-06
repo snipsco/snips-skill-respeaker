@@ -1,19 +1,78 @@
-# respeaker skill for Snips
+# Respeaker skill for Snips
 
 [![Build Status](https://travis-ci.org/snipsco/snips-skill-hue.svg)](https://travis-ci.org/snipsco/snips-skill-hue)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/snipsco/snips-skill-hue/master/LICENSE.txt)
+
+## Install
+```sh
+sudo raspi-config
+# Select 7 Advanced Options
+# Select A4 Audio
+# Select 1 Force 3.5mm ('headphone') jack
+# Select Finish
+```
+### Using Respeaker 2
+```sh
+git clone https://github.com/respeaker/seeed-voicecard.git
+cd seeed-voicecard
+sudo ./install.sh 2mic
+reboot
+```
+### Using Respeaker 4
+```sh
+git clone https://github.com/respeaker/seeed-voicecard.git
+cd seeed-voicecard
+sudo ./install.sh 4mic
+reboot
+```
 
 ### Snips Skills Manager
 
 It is recommended that you use this skill with the [Snips Skills Manager](https://github.com/snipsco/snipsskills). Simply add the following section to your [Snipsfile](https://github.com/snipsco/snipsskills/wiki/The-Snipsfile):
 
+For Respeaker 2
 ```yaml
 skills:
   - package_name: snipsrespeaker
     class_name: SnipsRespeaker
     pip: https://github.com/snipsco/snips-skill-respeaker
+    dialogue_events:
+      - event: session_started
+        action: |
+          {%
+          print("->>>> Session started <<<<-")
+          snips.skill.hotword_detected()
+          %}
+      - event: session_ended
+        action: |
+          {%
+          print("->>>> Session started <<<<-")
+          snips.skill.stop_working()
+          %}
 ```      
 
+For Respeaker 4
+```yaml
+skills:
+  - package_name: snipsrespeaker
+    class_name: SnipsRespeaker
+    pip: https://github.com/snipsco/snips-skill-respeaker
+    params:
+      - num_led: 12
+    dialogue_events:
+      - event: session_started
+        action: |
+          {%
+          print("->>>> Session started <<<<-")
+          snips.skill.hotword_detected()
+          %}
+      - event: session_ended
+        action: |
+          {%
+          print("->>>> Session started <<<<-")
+          snips.skill.stop_working()
+          %}
+```      
 
 ## Contributing
 
