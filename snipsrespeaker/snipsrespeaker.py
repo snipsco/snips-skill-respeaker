@@ -1,13 +1,13 @@
 from array_color import ArrayColor
+from custom_color import CustomColor
 import json
 from math import ceil
 from one_color import OneColor
+import os
 from pprint import pprint
 import threading
 import time
 import Queue
-import os
-
 DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 
 class SnipsRespeaker:
@@ -18,6 +18,18 @@ class SnipsRespeaker:
     @staticmethod
     def get_num_step(dim):
         return ceil(100 / dim) * 2
+
+    @staticmethod
+    def parse_custom_color(data, num_led):
+        color = data["color"]
+        idle_time = float(data["idle_time"])
+        pixel = [map(lambda x:(x, 50),c) for c in color]
+        res = CustomColor(num_led = num_led,
+                         pause_value = idle_time,
+                         num_steps_per_cycle = 1,
+                         num_cycles = -1,
+                         pixel = pixel)
+        return res
 
     @staticmethod
     def parse_one_color(data, num_led):
@@ -67,6 +79,8 @@ class SnipsRespeaker:
             return SnipsRespeaker.parse_one_color(data, led_num)
         if (data["type"] == "array"):
             return SnipsRespeaker.parse_array_color(data, led_num)
+        if (data["type"] == "custom"):
+            return SnipsRespeaker.parse_custom_color(data, led_num)
 
     @staticmethod
     def worker():
