@@ -1,7 +1,8 @@
-
 """ Must append APA102_Pi path to PATH"""
+import os
+DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 import sys
-sys.path.append("APA102_Pi/")
+sys.path.append(DIR + "APA102_Pi/")
 
 from colorcycletemplate import ColorCycleTemplate
 from colour import Color

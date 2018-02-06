@@ -6,8 +6,11 @@ from pprint import pprint
 import threading
 import time
 import Queue
+import os
 
-class Respeaker:
+DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
+
+class SnipsRespeaker:
     queue = Queue.Queue()
     state_working = None
     state_working = None
@@ -24,7 +27,7 @@ class Respeaker:
         res = OneColor(num_led = num_led,
                        pause_value = idle_time,
                        num_steps_per_cycle = 1,
-                       num_cycles = Respeaker.get_num_step(dim),
+                       num_cycles = SnipsRespeaker.get_num_step(dim),
                        color = color,
                        dim = dim,
                        percent = 0)
@@ -41,7 +44,7 @@ class Respeaker:
             num_cycle = num_led / rotate + 1
         if (type(dim) is list):
             if (num_cycle == 0):
-                num_cycle = Respeaker.get_num_step(min(dim)) 
+                num_cycle = SnipsRespeaker.get_num_step(min(dim)) 
             dim_array = dim
             dim_value = 0
         else:
@@ -61,35 +64,35 @@ class Respeaker:
     @staticmethod
     def parse_state(data, led_num):
         if (data["type"] == "one_color"):
-            return Respeaker.parse_one_color(data, led_num)
+            return SnipsRespeaker.parse_one_color(data, led_num)
         if (data["type"] == "array"):
-            return Respeaker.parse_array_color(data, led_num)
+            return SnipsRespeaker.parse_array_color(data, led_num)
 
     @staticmethod
     def worker():
         item = ""
         while True:
-            if (not Respeaker.queue.empty()):
-                item = Respeaker.queue.get_nowait()
-                Respeaker.queue.task_done()
+            if (not SnipsRespeaker.queue.empty()):
+                item = SnipsRespeaker.queue.get_nowait()
+                SnipsRespeaker.queue.task_done()
             if (item == "working"):
-                Respeaker.state_working.start()
+                SnipsRespeaker.state_working.start()
             if (item == "waiting"):
-                Respeaker.state_waiting.start()
+                SnipsRespeaker.state_waiting.start()
 
-    def __init__(self, num_led=3, config_file="config.json"):
-        with open(config_file) as f:
+    def __init__(self, num_led=3, config_file="config.json", locale=None):
+        with open(DIR + config_file) as f:
             data = json.load(f)
-        Respeaker.state_waiting = Respeaker.parse_state(data["waiting"], num_led)
-        Respeaker.state_working = Respeaker.parse_state(data["working"], num_led)
-        Respeaker.queue.put("waiting")
-        t = threading.Thread(target=Respeaker.worker, args=())
+        SnipsRespeaker.state_waiting = SnipsRespeaker.parse_state(data["waiting"], num_led)
+        SnipsRespeaker.state_working = SnipsRespeaker.parse_state(data["working"], num_led)
+        SnipsRespeaker.queue.put("waiting")
+        t = threading.Thread(target=SnipsRespeaker.worker, args=())
         t.start()
 
     def hotword_detected(self):
         print("hotword detected")
-        Respeaker.queue.put("working")
+        SnipsRespeaker.queue.put("working")
 
     def stop_working(self):
         print("hotword detected")
-        Respeaker.queue.put("waiting")
+        SnipsRespeaker.queue.put("waiting")

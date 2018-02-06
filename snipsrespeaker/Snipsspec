@@ -1,5 +1,5 @@
-package_name: snips_respeaker
-class_name: Respeaker
+package_name: snipsrespeaker
+class_name: SnipsRespeaker
 description: "Led notification"
 params: ["num_led", "config_file"]
 dialogue_events:
