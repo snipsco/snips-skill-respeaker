@@ -81,8 +81,8 @@ Example are in snipsrespeaker/config.json and snipsrespeaker/config\_custom.json
 
 ```yaml
 params:
-  - num_led: 5
-  - config_file: <path_to_config_file>
+    num_led: 5
+    config_file: <path_to_config_file>
 ```
 
 ## Contributing

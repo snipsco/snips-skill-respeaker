@@ -94,8 +94,8 @@ class SnipsRespeaker:
             if (item == "waiting"):
                 SnipsRespeaker.state_waiting.start()
 
-    def __init__(self, num_led=3, config_file="config.json", locale=None):
-        with open(DIR + config_file) as f:
+    def __init__(self, num_led=3, config_file=DIR + "config.json", locale=None):
+        with open(config_file) as f:
             data = json.load(f)
         SnipsRespeaker.state_waiting = SnipsRespeaker.parse_state(data["waiting"], num_led)
         SnipsRespeaker.state_working = SnipsRespeaker.parse_state(data["working"], num_led)
