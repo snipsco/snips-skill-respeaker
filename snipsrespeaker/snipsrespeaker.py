@@ -9,11 +9,27 @@ import threading
 import time
 import Queue
 DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
+import RPi.GPIO as GPIO
+import paho.mqtt.publish as publish
+import socket
+import signal
+import sys
+import subprocess
+
+mqtt_master = 'localhost'
+
+""" LED """
+sys.path.append(DIR + "APA102_Pi/")
+
+from colorcycletemplate import ColorCycleTemplate
+from colour import Color
+import utils
 
 class SnipsRespeaker:
     queue = Queue.Queue()
     state_working = None
-    state_working = None
+    state_stopping = None
+    state_waiting = None
 
     @staticmethod
     def get_num_step(dim):
@@ -93,14 +109,20 @@ class SnipsRespeaker:
                 SnipsRespeaker.state_working.start()
             if (item == "waiting"):
                 SnipsRespeaker.state_waiting.start()
+            if (item == "stopping"):
+                SnipsRespeaker.state_stopping.start()
 
     def __init__(self, num_led=3, config_file=DIR + "config.json", locale=None):
         with open(config_file) as f:
             data = json.load(f)
         SnipsRespeaker.state_waiting = SnipsRespeaker.parse_state(data["waiting"], num_led)
         SnipsRespeaker.state_working = SnipsRespeaker.parse_state(data["working"], num_led)
+        SnipsRespeaker.state_stopping = SnipsRespeaker.parse_state(data["stopping"], num_led)
         SnipsRespeaker.queue.put("waiting")
         t = threading.Thread(target=SnipsRespeaker.worker, args=())
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	GPIO.add_event_detect(17, GPIO.FALLING, callback=hotword_toggle, bouncetime=300)
         t.start()
 
     def hotword_detected(self):
@@ -110,3 +132,33 @@ class SnipsRespeaker:
     def stop_working(self):
         print("hotword detected")
         SnipsRespeaker.queue.put("waiting")
+
+def hotword_turn_off():
+        SnipsRespeaker.queue.put("stopping")
+	p = subprocess.Popen(["systemctl", "stop", "snips-audio-server.service"])
+	p.wait()
+
+def hotword_turn_on():
+        SnipsRespeaker.queue.put("waiting")
+	p = subprocess.Popen(["systemctl", "start", "snips-audio-server.service"])
+	p.wait()
+
+def static_vars(**kwargs):
+	def decorate(func):
+		for k in kwargs:
+			setattr(func, k, kwargs[k])
+		return func
+	return decorate
+
+@static_vars(toggled=True)
+def hotword_toggle(toggled):
+	hotword_toggle.toggled = not hotword_toggle.toggled
+	if hotword_toggle.toggled:
+		print "starting the hotword detection"
+		hotword_turn_on()
+	else:
+		print "stopping the hotword detection"
+		hotword_turn_off()
+
+if __name__ == "__main__":
+	SnipsRespeaker()
