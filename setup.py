@@ -11,7 +11,8 @@ setup(
     license='MIT',
     install_requires=[
         'colour',
-        'Adafruit_GPIO'
+        'Adafruit_GPIO',
+        'RPi.GPIO'
     ],
     test_suite="tests",
     keywords=['snips'],
