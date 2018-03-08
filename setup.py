@@ -12,7 +12,8 @@ setup(
     install_requires=[
         'colour',
         'Adafruit_GPIO',
-        'RPi.GPIO'
+        'RPi.GPIO',
+        'paho-mqtt'
     ],
     test_suite="tests",
     keywords=['snips'],
