@@ -6,10 +6,9 @@
                 "idle_time":0.01
         },
         "stopping":{
-                "type":"one_color",
-                "color":"red",
-                "dim":1,
-                "idle_time":0.01
+                "type":"custom",
+                "color":[["black", "red","black", "blue", "black","blue","blue", "black","blue","blue", "black","blue"]],
+                "idle_time": 0.1
         },
         "working":{
                 "type":"array",

@@ -40,7 +40,7 @@ class SnipsRespeaker:
     def parse_custom_color(data, num_led):
         color = data["color"]
         idle_time = float(data["idle_time"])
-        pixel = [map(lambda x:(x, 50),c) for c in color]
+        pixel = [map(lambda x:(x, 0.2),c) for c in color]
         res = CustomColor(num_led = num_led,
                          pause_value = idle_time,
                          num_steps_per_cycle = 1,
@@ -148,7 +148,6 @@ class SnipsRespeaker:
 
 def hotword_turn_off():
         SnipsRespeaker.queue.put("stopping")
-        SnipsRespeaker.queue.put("waiting")
 	p = subprocess.Popen(["systemctl", "stop", "snips-audio-server.service"])
 	p.wait()
 
