@@ -5,6 +5,12 @@
                 "dim":1,
                 "idle_time":0.01
         },
+        "stopping":{
+                "type":"one_color",
+                "color":"red",
+                "dim":1,
+                "idle_time":0.01
+        },
         "working":{
                 "type":"array",
                 "color":["blue", "black","blue"],
