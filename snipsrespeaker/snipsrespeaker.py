@@ -148,6 +148,7 @@ class SnipsRespeaker:
 
 def hotword_turn_off():
         SnipsRespeaker.queue.put("stopping")
+        SnipsRespeaker.queue.put("nothing")
 	p = subprocess.Popen(["systemctl", "stop", "snips-audio-server.service"])
 	p.wait()
 
