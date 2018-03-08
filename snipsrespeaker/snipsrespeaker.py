@@ -30,6 +30,7 @@ class SnipsRespeaker:
     state_working = None
     state_stopping = None
     state_waiting = None
+    state_running = None
 
     @staticmethod
     def get_num_step(dim):
@@ -106,18 +107,30 @@ class SnipsRespeaker:
                 item = SnipsRespeaker.queue.get_nowait()
                 SnipsRespeaker.queue.task_done()
             if (item == "working"):
-                SnipsRespeaker.state_working.start()
+                if (SnipsRespeaker.state_working is not None):
+                    SnipsRespeaker.state_working.start()
             if (item == "waiting"):
-                SnipsRespeaker.state_waiting.start()
+                if (SnipsRespeaker.state_waiting is not None):
+                    SnipsRespeaker.state_waiting.start()
             if (item == "stopping"):
-                SnipsRespeaker.state_stopping.start()
+                if (SnipsRespeaker.state_stopping is not None):
+                    SnipsRespeaker.state_stopping.start()
+            if (item == "running"):
+                if (SnipsRespeaker.state_running is not None):
+                    SnipsRespeaker.state_running.start()
 
     def __init__(self, num_led=3, config_file=DIR + "config.json", locale=None):
         with open(config_file) as f:
             data = json.load(f)
-        SnipsRespeaker.state_waiting = SnipsRespeaker.parse_state(data["waiting"], num_led)
-        SnipsRespeaker.state_working = SnipsRespeaker.parse_state(data["working"], num_led)
-        SnipsRespeaker.state_stopping = SnipsRespeaker.parse_state(data["stopping"], num_led)
+        if ("waiting" in data):
+            SnipsRespeaker.state_waiting = SnipsRespeaker.parse_state(data["waiting"], num_led)
+        if ("working" in data):
+            SnipsRespeaker.state_working = SnipsRespeaker.parse_state(data["working"], num_led)
+        if ("stopping" in data):
+            SnipsRespeaker.state_stopping = SnipsRespeaker.parse_state(data["stopping"], num_led)
+        if ("running" in data):
+            SnipsRespeaker.state_running = SnipsRespeaker.parse_state(data["running"], num_led)
+        SnipsRespeaker.queue.put("working")
         SnipsRespeaker.queue.put("waiting")
         t = threading.Thread(target=SnipsRespeaker.worker, args=())
 	GPIO.setmode(GPIO.BCM)
@@ -135,10 +148,12 @@ class SnipsRespeaker:
 
 def hotword_turn_off():
         SnipsRespeaker.queue.put("stopping")
+        SnipsRespeaker.queue.put("waiting")
 	p = subprocess.Popen(["systemctl", "stop", "snips-audio-server.service"])
 	p.wait()
 
 def hotword_turn_on():
+        SnipsRespeaker.queue.put("running")
         SnipsRespeaker.queue.put("waiting")
 	p = subprocess.Popen(["systemctl", "start", "snips-audio-server.service"])
 	p.wait()

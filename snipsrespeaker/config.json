@@ -1,7 +1,7 @@
 {
-        "waiting":{
+        "running":{
                 "type":"one_color",
-                "color":"blue",
+                "color":"green",
                 "dim":1,
                 "idle_time":0.01
         },
