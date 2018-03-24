@@ -14,7 +14,7 @@ sudo raspi-config
 # Select 4 Enable SPI
 # Select Finish
 ```
-### Using Respeaker 2
+### Using Respeaker
 ```sh
 git clone https://github.com/respeaker/seeed-voicecard.git
 cd seeed-voicecard
