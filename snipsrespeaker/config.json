@@ -18,7 +18,7 @@
 	},
         "working":{
                 "type":"array",
-                "color":["blue", "black","blue"],
+                "color":["black", "blue","black", "blue", "black","blue","blue", "black","blue","blue", "black","blue"],
                 "dim":[1, 1, 1],
                 "idle_time": 0.1,
                 "rotate":1

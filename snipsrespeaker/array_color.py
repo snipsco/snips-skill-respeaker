@@ -21,7 +21,7 @@ class ArrayColor(ColorCycleTemplate):
         self.rotate = rotate
         self.dim = dim
         self.dim_array = dim_array
-        self.brightness_array = [0] * num_led
+        self.brightness_array = [0,0,0,0,0,0,0,0,0,0,0,0]
         self.brightness = 0
 
     def init(self, strip, num_led):
@@ -49,7 +49,7 @@ class ArrayColor(ColorCycleTemplate):
                     utils.set_brightness(strip, led, self.brightness)
         if (len(self.dim_array)):
                 res = 1
-                for led in range(0, num_led):
+                for led in range(0, num_led - 1):
                     self.brightness_array[led] -= self.dim_array[led]
                     if (self.brightness_array[led] > 100):
                         self.brightness_array[led]  = 100

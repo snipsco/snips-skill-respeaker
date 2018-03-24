@@ -119,7 +119,18 @@ class SnipsRespeaker:
                 if (SnipsRespeaker.state_running is not None):
                     SnipsRespeaker.state_running.start()
 
-    def __init__(self, num_led=3, config_file=DIR + "config.json", locale=None):
+    def __init__(self, config_file=DIR + "config.json", locale=None):
+        num_led = 0
+
+        p = subprocess.Popen(['arecord', '-l'], stdout=subprocess.PIPE)
+        out, err = p.communicate()
+        if (out.find("seeed-4mic-voicecard") != -1):
+            num_led = 12
+        if (out.find("seeed-2mic-voicecard") != -1):
+            num_led = 3
+        if (num_led == 0):
+            print("no Respeaker Hat installed")
+            return
         with open(config_file) as f:
             data = json.load(f)
         if ("waiting" in data):
@@ -139,11 +150,9 @@ class SnipsRespeaker:
         t.start()
 
     def hotword_detected(self):
-        print("hotword detected")
         SnipsRespeaker.queue.put("working")
 
     def stop_working(self):
-        print("hotword detected")
         SnipsRespeaker.queue.put("waiting")
 
 def hotword_turn_off():

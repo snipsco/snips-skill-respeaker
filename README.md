@@ -18,14 +18,7 @@ sudo raspi-config
 ```sh
 git clone https://github.com/respeaker/seeed-voicecard.git
 cd seeed-voicecard
-sudo ./install.sh 2mic
-reboot
-```
-### Using Respeaker 4
-```sh
-git clone https://github.com/respeaker/seeed-voicecard.git
-cd seeed-voicecard
-sudo ./install.sh 4mic
+sudo ./install.sh
 reboot
 ```
 
@@ -33,22 +26,12 @@ reboot
 
 It is recommended that you use this skill with the [Snips Skills Manager](https://github.com/snipsco/snipsskills). Simply add the following section to your [Snipsfile](https://github.com/snipsco/snipsskills/wiki/The-Snipsfile):
 
-For Respeaker 2
+For Respeaker 2 Hat and Respeaker 4 Hat
 ```yaml
 skills:
   - package_name: snipsrespeaker
     class_name: SnipsRespeaker
     pip: https://github.com/snipsco/snips-skill-respeaker
-```      
-
-For Respeaker 4
-```yaml
-skills:
-  - package_name: snipsrespeaker
-    class_name: SnipsRespeaker
-    pip: https://github.com/snipsco/snips-skill-respeaker
-    params:
-      - num_led: 12
 ```      
 
 ### custom animation
@@ -58,10 +41,8 @@ Example are in snipsrespeaker/config.json and snipsrespeaker/config\_custom.json
 
 ```yaml
 params:
-    num_led: 5
     config_file: <path_to_config_file>
 ```
-
 ## Contributing
 
 Please see the [Contribution Guidelines](https://github.com/snipsco/snips-skill-hue/blob/master/CONTRIBUTING.rst).
