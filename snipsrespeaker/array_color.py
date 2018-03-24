@@ -49,7 +49,7 @@ class ArrayColor(ColorCycleTemplate):
                     utils.set_brightness(strip, led, self.brightness)
         if (len(self.dim_array)):
                 res = 1
-                for led in range(0, num_led - 1):
+                for led in range(0, num_led):
                     self.brightness_array[led] -= self.dim_array[led]
                     if (self.brightness_array[led] > 100):
                         self.brightness_array[led]  = 100
