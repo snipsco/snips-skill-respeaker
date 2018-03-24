@@ -39,19 +39,6 @@ skills:
   - package_name: snipsrespeaker
     class_name: SnipsRespeaker
     pip: https://github.com/snipsco/snips-skill-respeaker
-    dialogue_events:
-      - event: session_started
-        action: |
-          {%
-          print("->>>> Session started <<<<-")
-          snips.skill.hotword_detected()
-          %}
-      - event: session_ended
-        action: |
-          {%
-          print("->>>> Session started <<<<-")
-          snips.skill.stop_working()
-          %}
 ```      
 
 For Respeaker 4
@@ -62,19 +49,6 @@ skills:
     pip: https://github.com/snipsco/snips-skill-respeaker
     params:
       - num_led: 12
-    dialogue_events:
-      - event: session_started
-        action: |
-          {%
-          print("->>>> Session started <<<<-")
-          snips.skill.hotword_detected()
-          %}
-      - event: session_ended
-        action: |
-          {%
-          print("->>>> Session started <<<<-")
-          snips.skill.stop_working()
-          %}
 ```      
 
 ### custom animation

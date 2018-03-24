@@ -1,7 +1,7 @@
 {
         "running":{
                 "type":"one_color",
-                "color":"green",
+                "color":"blue",
                 "dim":1,
                 "idle_time":0.01
         },
