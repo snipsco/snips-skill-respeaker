@@ -122,10 +122,12 @@ class SnipsRespeaker:
     def __init__(self, config_file=DIR + "config.json", locale=None):
         num_led = 0
 
+	GPIO.setmode(GPIO.BCM)
         p = subprocess.Popen(['arecord', '-l'], stdout=subprocess.PIPE)
         out, err = p.communicate()
         if (out.find("seeed-4mic-voicecard") != -1):
             num_led = 12
+            GPIO.setup(5, GPIO.OUT, initial=GPIO.HIGH)
         if (out.find("seeed-2mic-voicecard") != -1):
             num_led = 3
         if (num_led == 0):
@@ -144,7 +146,6 @@ class SnipsRespeaker:
         SnipsRespeaker.queue.put("working")
         SnipsRespeaker.queue.put("waiting")
         t = threading.Thread(target=SnipsRespeaker.worker, args=())
-	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 	GPIO.add_event_detect(17, GPIO.FALLING, callback=hotword_toggle, bouncetime=300)
         t.start()
