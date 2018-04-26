@@ -10,8 +10,8 @@ sudo raspi-config
 # Select A4 Audio
 # Select 1 Force 3.5mm ('headphone') jack
 # Go back to main menu
-# Select 5 Interface Config
-# Select 4 Enable SPI
+# Select 5 Interface Options
+# Select 4 Enable SPI (set Yes)
 # Select Finish
 ```
 ### Using Respeaker
