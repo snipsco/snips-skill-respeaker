@@ -1,12 +1,11 @@
 """ Must append APA102_Pi path to PATH"""
 import os
-DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 import sys
+DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 sys.path.append(DIR + "APA102_Pi/")
 
 from colorcycletemplate import ColorCycleTemplate
 from colour import Color
-from math import ceil
 import utils
 
 class OneColor(ColorCycleTemplate):
@@ -28,13 +27,13 @@ class OneColor(ColorCycleTemplate):
 
     def update(self, strip, num_led, num_steps_per_cycle, current_step,
                current_cycle):
-        if (self.dim != 0):
+        if self.dim != 0:
             self.brightness -= self.dim
-            if (self.brightness > 100):
-                self.brightness  = 100
+            if self.brightness > 100:
+                self.brightness = 100
                 self.dim *= -1
-            if (self.brightness < 0):
-                self.brightness  = 0
+            if self.brightness < 0:
+                self.brightness = 0
                 self.dim *= -1
             for led in range(0, num_led):
                 utils.set_brightness(strip, led, self.brightness)
