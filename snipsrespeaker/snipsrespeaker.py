@@ -119,13 +119,14 @@ class SnipsRespeaker:
         GPIO.setmode(GPIO.BCM)
         p = subprocess.Popen(['arecord', '-l'], stdout=subprocess.PIPE)
         out, err = p.communicate()
+        print(out)
         if (out.find("seeed-4mic-voicecard") != -1):
             num_led = 12
             GPIO.setup(5, GPIO.OUT, initial=GPIO.HIGH)
         if (out.find("seeed-2mic-voicecard") != -1):
             num_led = 3
         if (num_led == 0):
-            print("no Respeaker Hat installed")
+            print("No Respeaker Hat installed")
             return
         with open(config_file) as f:
             data = json.load(f)
