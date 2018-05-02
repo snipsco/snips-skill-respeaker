@@ -15,9 +15,9 @@ class Skill:
     def __init__(self):
         self.thread_handler = ThreadHandler()
 
-        config = SnipsConfigParser.read_configuration_file('conf.ini')
-        if config.get('global') is not None and config.get('global').get('configuration') is not None:
-            customConfig = config['global']['configuration']
+        config = SnipsConfigParser.read_configuration_file('config.ini')
+        if config.get('configuration') is not None:
+            customConfig = config['configuration']
             self.respeaker = SnipsRespeaker(customConfig)
         else:
             self.respeaker = SnipsRespeaker()
