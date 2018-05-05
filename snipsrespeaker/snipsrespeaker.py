@@ -4,26 +4,19 @@ import json
 from math import ceil
 from one_color import OneColor
 import os
-from pprint import pprint
 import threading
-import time
 import Queue
-DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 import RPi.GPIO as GPIO
-import paho.mqtt.publish as publish
-import socket
-import signal
 import sys
 import subprocess
+
+DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 
 mqtt_master = 'localhost'
 
 """ LED """
 sys.path.append(DIR + "APA102_Pi/")
 
-from colorcycletemplate import ColorCycleTemplate
-from colour import Color
-import utils
 
 class SnipsRespeaker:
     queue = Queue.Queue()
@@ -40,12 +33,12 @@ class SnipsRespeaker:
     def parse_custom_color(data, num_led):
         color = data["color"]
         idle_time = float(data["idle_time"])
-        pixel = [map(lambda x:(x, 0.2),c) for c in color]
-        res = CustomColor(num_led = num_led,
-                         pause_value = idle_time,
-                         num_steps_per_cycle = 1,
-                         num_cycles = -1,
-                         pixel = pixel)
+        pixel = [map(lambda x: (x, 0.2), c) for c in color]
+        res = CustomColor(num_led=num_led,
+                          pause_value=idle_time,
+                          num_steps_per_cycle=1,
+                          num_cycles=-1,
+                          pixel=pixel)
         return res
 
     @staticmethod
@@ -53,13 +46,13 @@ class SnipsRespeaker:
         color = data["color"]
         dim = int(data["dim"])
         idle_time = float(data["idle_time"])
-        res = OneColor(num_led = num_led,
-                       pause_value = idle_time,
-                       num_steps_per_cycle = 1,
-                       num_cycles = SnipsRespeaker.get_num_step(dim),
-                       color = color,
-                       dim = dim,
-                       percent = 0)
+        res = OneColor(num_led=num_led,
+                       pause_value=idle_time,
+                       num_steps_per_cycle=1,
+                       num_cycles=SnipsRespeaker.get_num_step(dim),
+                       color=color,
+                       dim=dim,
+                       percent=0)
         return res
 
     @staticmethod
@@ -68,28 +61,29 @@ class SnipsRespeaker:
         dim = data["dim"]
         idle_time = float(data["idle_time"])
         rotate = int(data["rotate"])
-        pixel = list(map(lambda x:(x, 0),color))
-        if (rotate != 0):
+        pixel = list(map(lambda x: (x, 0), color))
+        if rotate != 0:
             num_cycle = num_led / rotate + 1
-        if (type(dim) is list):
-            if (num_cycle == 0):
-                num_cycle = SnipsRespeaker.get_num_step(min(dim)) 
+        if type(dim) is list:
+            if num_cycle == 0:
+                num_cycle = SnipsRespeaker.get_num_step(min(dim))
             dim_array = dim
             dim_value = 0
         else:
-            if (num_step == 0):
-                num_cycle = get_num_step(dim) 
+            if num_step == 0:
+                num_cycle = get_num_step(dim)
             dim_array = []
             dim_value = dim
-        res = ArrayColor(num_led = num_led,
-                         pause_value = idle_time,
-                         num_steps_per_cycle = 1,
-                         num_cycles = num_cycle,
-                         pixel = pixel,
-                         dim_array = dim_array,
-                         dim = dim_value,
-                         rotate = rotate)
+        res = ArrayColor(num_led=num_led,
+                         pause_value=idle_time,
+                         num_steps_per_cycle=1,
+                         num_cycles=num_cycle,
+                         pixel=pixel,
+                         dim_array=dim_array,
+                         dim=dim_value,
+                         rotate=rotate)
         return res
+
     @staticmethod
     def parse_state(data, led_num):
         if (data["type"] == "one_color"):
@@ -122,16 +116,17 @@ class SnipsRespeaker:
     def __init__(self, config_file=DIR + "config.json", locale=None):
         num_led = 0
 
-	GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BCM)
         p = subprocess.Popen(['arecord', '-l'], stdout=subprocess.PIPE)
         out, err = p.communicate()
+        print(out)
         if (out.find("seeed-4mic-voicecard") != -1):
             num_led = 12
             GPIO.setup(5, GPIO.OUT, initial=GPIO.HIGH)
         if (out.find("seeed-2mic-voicecard") != -1):
             num_led = 3
         if (num_led == 0):
-            print("no Respeaker Hat installed")
+            print("No Respeaker Hat installed")
             return
         with open(config_file) as f:
             data = json.load(f)
@@ -146,8 +141,8 @@ class SnipsRespeaker:
         SnipsRespeaker.queue.put("working")
         SnipsRespeaker.queue.put("waiting")
         t = threading.Thread(target=SnipsRespeaker.worker, args=())
-	GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.add_event_detect(17, GPIO.FALLING, callback=hotword_toggle, bouncetime=300)
+        GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(17, GPIO.FALLING, callback=hotword_toggle, bouncetime=300)
         t.start()
 
     def hotword_detected(self):
@@ -156,34 +151,39 @@ class SnipsRespeaker:
     def stop_working(self):
         SnipsRespeaker.queue.put("waiting")
 
+
 def hotword_turn_off():
-        SnipsRespeaker.queue.put("stopping")
-        SnipsRespeaker.queue.put("nothing")
-	p = subprocess.Popen(["systemctl", "stop", "snips-audio-server.service"])
-	p.wait()
+    SnipsRespeaker.queue.put("stopping")
+    SnipsRespeaker.queue.put("nothing")
+    p = subprocess.Popen(["systemctl", "stop", "snips-audio-server.service"])
+    p.wait()
+
 
 def hotword_turn_on():
-        SnipsRespeaker.queue.put("running")
-        SnipsRespeaker.queue.put("waiting")
-	p = subprocess.Popen(["systemctl", "start", "snips-audio-server.service"])
-	p.wait()
+    SnipsRespeaker.queue.put("running")
+    SnipsRespeaker.queue.put("waiting")
+    p = subprocess.Popen(["systemctl", "start", "snips-audio-server.service"])
+    p.wait()
+
 
 def static_vars(**kwargs):
-	def decorate(func):
-		for k in kwargs:
-			setattr(func, k, kwargs[k])
-		return func
-	return decorate
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+
+    return decorate
+
 
 @static_vars(toggled=True)
 def hotword_toggle(toggled):
-	hotword_toggle.toggled = not hotword_toggle.toggled
-	if hotword_toggle.toggled:
-		print "starting the hotword detection"
-		hotword_turn_on()
-	else:
-		print "stopping the hotword detection"
-		hotword_turn_off()
+    hotword_toggle.toggled = not hotword_toggle.toggled
+    if hotword_toggle.toggled:
+        print "starting the hotword detection"
+        hotword_turn_on()
+    else:
+        print "stopping the hotword detection"
+        hotword_turn_off()
 
-if __name__ == "__main__":
-	SnipsRespeaker()
+# if __name__ == "__main__":
+#    SnipsRespeaker()

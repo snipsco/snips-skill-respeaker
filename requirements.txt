@@ -1,0 +1,4 @@
+hermes_python>=0.1
+colour
+Adafruit_GPIO
+RPi.GPIO

@@ -5,8 +5,8 @@ class CustomColor:
     def __init__(self, num_led, pause_value = 0, num_steps_per_cycle = 1,
                  num_cycles = 1, global_brightness = 255,
                  pixel=[[("blue", 5)]]):
-        self.array_color=list(
-            map(lambda x:ArrayColor(num_led = num_led,
+        self.array_color = list(
+            map(lambda x: ArrayColor(num_led = num_led,
                                     pause_value = pause_value,
                                     num_steps_per_cycle = 1,
                                     num_cycles = 1,
