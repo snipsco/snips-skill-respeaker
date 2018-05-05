@@ -3,14 +3,15 @@
 [![Build Status](https://travis-ci.org/snipsco/snips-skill-hue.svg)](https://travis-ci.org/snipsco/snips-skill-hue)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/snipsco/snips-skill-hue/master/LICENSE.txt)
 
-This skills animates the leds of the ReSpeaker hat when a dialogue has started with the user. The animation can be customised.
+This skill animates the leds of the ReSpeaker hat when a dialogue session has begun with the user. The animation can be customised.
 
 ## Installation with Sam
 
 The easiest way to use this Skill is to install it with [Sam](https://snips.gitbook.io/getting-started/installation)
+
 `sam install skills -g https://github.com/snipsco/snips-skill-hue.git`
 
-Sam will take care of the drivers installation and put the skill at path `/var/lib/snips/skills/`. It will be run by the Snips component snips-skill-server automatically.
+Sam will take care of the drivers installation and put the skill at path `/var/lib/snips/skills/`. It will be run by the `snips-skill-server` component automatically.
 
 ## Manual Installation
 
