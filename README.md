@@ -9,24 +9,29 @@ This skill animates the leds of the ReSpeaker hat when a dialogue session has be
 
 The easiest way to use this Skill is to install it with [Sam](https://snips.gitbook.io/getting-started/installation)
 
-`sam install skills -g https://github.com/snipsco/snips-skill-hue.git`
+`sam install skills -g https://github.com/snipsco/snips-skill-respeaker.git`
 
 Sam will take care of the drivers installation and put the skill at path `/var/lib/snips/skills/`. It will be run by the `snips-skill-server` component automatically.
 
 ## Manual Installation
 
+#### Enable SPI to control the LEDs
 ```sh
-sudo raspi-config
-# Select 7 Advanced Options
-# Select A4 Audio
-# Select 1 Force 3.5mm ('headphone') jack
-# Go back to main menu
-# Select 5 Interfacing Options
-# Select 4 Enable SPI (set Yes)
-# Select Finish
+sudo raspi-config nonint do_spi 1
 ```
 
-### Using Respeaker
+#### Installing Respeaker's drivers
+Beware that the official seeed drivers will overwrite your /etc/asound.conf each time the seeed service is run. [See Issue](https://github.com/respeaker/seeed-voicecard/pull/59)
+You can install our version that fixes this issue but can be outdated:
+
+```sh
+https://github.com/mtrey/seeed-voicecard
+cd seeed-voicecard
+sudo ./install.sh
+reboot
+```
+
+Or install the official version :
 ```sh
 git clone https://github.com/respeaker/seeed-voicecard.git
 cd seeed-voicecard
@@ -34,12 +39,11 @@ sudo ./install.sh
 reboot
 ```
 
-Beware that the seeed drivers will overwrite your /etc/asound.conf each time the seeed service is run. [See Issue](https://github.com/respeaker/seeed-voicecard/pull/59)
-If you didn't use Sam to setup Snips platform and skills, and you wish the skill to be run by snips-skill-server, you need to add privileges to the _snips-skills group and also add your current user to the snips-skills-admin group:
-```
-sudo usermod -a -G spi,gpio,audio _snips-skills
-sudo usermod -a -G snips-skills-admin $USER
-```
+If you didn't use Sam to setup Snips platform and skills, and you wish the skill to be run by `snips-skill-server`, you need to add privileges to the `_snips-skills` user:
+`sudo usermod -a -G spi,gpio,audio _snips-skills`
+
+Also add your current user to the `snips-skills-admin` group:
+`sudo usermod -a -G snips-skills-admin $USER`
 
 ### custom animation
 
