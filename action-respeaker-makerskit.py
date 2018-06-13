@@ -20,6 +20,8 @@ class Skill:
             customConfig = config['global']['configuration']
             if customConfig is not None and len(customConfig) > 0:
                 self.respeaker = SnipsRespeaker(customConfig)
+            else:
+                self.respeaker = SnipsRespeaker()
         else:
             self.respeaker = SnipsRespeaker()
 
