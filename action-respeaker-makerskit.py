@@ -18,7 +18,8 @@ class Skill:
         config = SnipsConfigParser.read_configuration_file('config.ini')
         if config.get('global') is not None:
             customConfig = config['global']['configuration']
-            self.respeaker = SnipsRespeaker(customConfig)
+            if customConfig is not None and len(customConfig) > 0:
+                self.respeaker = SnipsRespeaker(customConfig)
         else:
             self.respeaker = SnipsRespeaker()
 
