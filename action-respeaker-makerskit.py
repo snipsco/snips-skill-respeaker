@@ -36,11 +36,9 @@ class Skill:
                     .start()
 
     def action_session_started(self, hermes, session):
-        print('Session STARTED')
         self.thread_handler.run(target=self.dialogue_session_started)
 
     def action_session_ended(self, hermes, session):
-        print('Session ENDED')
         self.thread_handler.run(target=self.dialogue_session_ended)
 
     def dialogue_session_started(self, run_event):
