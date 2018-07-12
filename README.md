@@ -40,9 +40,11 @@ reboot
 ```
 
 If you didn't use Sam to setup Snips platform and skills, and you wish the skill to be run by `snips-skill-server`, you need to add privileges to the `_snips-skills` user:
+
 `sudo usermod -a -G spi,gpio,audio _snips-skills`
 
 Also add your current user to the `snips-skills-admin` group:
+
 `sudo usermod -a -G snips-skills-admin $USER`
 
 ### custom animation
