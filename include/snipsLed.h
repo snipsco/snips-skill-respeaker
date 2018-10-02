@@ -4,6 +4,7 @@
 #include <time.h>
 #include <string.h>
 #include <fcntl.h>
+#include <pthread.h>
 
 #include <sys/mman.h>
 #include <sys/ioctl.h>
@@ -29,15 +30,15 @@ void show(int brightness);
 void clear();
 
 // States
-void on_off();
-void on_idle();
-void on_listen();
-void on_think();
-void on_speak();
-void to_mute();
-void to_unmute();
-void on_error();
-void on_success();
+void *on_off();
+void *on_idle();
+void *on_listen();
+void *on_think();
+void *on_speak();
+void *to_mute();
+void *to_unmute();
+void *on_error();
+void *on_success();
 
 // Basic actions
-void _all_breathe(uint8_t max_bri, unsigned long duration, uint32_t color);
+void _all_breathe(uint8_t max_bri, unsigned long duration);

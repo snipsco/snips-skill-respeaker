@@ -13,15 +13,18 @@ uint8_t     rOffset = 1;
 uint8_t     gOffset = 2;
 uint8_t     bOffset = 3;
 
+pthread_t global_thread[9];
+void (*f[9])(const char *)={on_idle, on_listen, on_think, on_speak, to_mute, to_unmute, on_error, on_success, on_off};
+
 int main(int argc, const char *argv[]) 
 {
     const char* addr;
     const char* port;
     const char* topic[NUM_TOPIC];
-    
+    int temp;
     generate_client_id();
     short i;
-    printf("Client id is: %s\n", client_id);
+    printf("[Info] Client id is: %s\n", client_id);
 
     /* get address (argv[1] if present) */
     if (argc > 1) {
@@ -92,28 +95,64 @@ int main(int argc, const char *argv[])
         printf("%s listening for '%s' messages.\n", argv[0], topic[i]);
     }
 
-    /* start publishing the time */
-    
-    printf("Press CTRL-D to terminate.\n\n");
-    
+
+    memset(&global_thread, 0, sizeof(global_thread));
+
+    if((temp = pthread_create(&global_thread[state], NULL, on_idle, NULL)) != 0)
+        printf("faild to create 1st thread!\n"); 
+    else 
+        printf("created thread.\n");
+
     /* block */
     /* block */
     // fgetc(stdin) != EOF
     while(1){
 
-        printf("Current state is %d\n", state);
+        //printf("[Info] State is changed to %d\n", state);
 
-        while(state == -1) on_off();
-        while(state == 0) on_idle();
-        while(state == 1) on_listen();
-        while(state == 2) on_think();
-        while(state == 3) on_speak();
-        while(state == 4) to_mute(), state = 0;
-        while(state == 5) to_unmute(), state = 0;
-        while(state == 6) on_error();
-        while(state == 7) on_success();
+        // if(state == -1) on_off();
+        // if(state == 0) on_idle();
+        // if(state == 1) on_listen();
+        // if(state == 2) on_think();
+        // if(state == 3) on_speak();
+        // if(state == 4) to_mute(), state = 0;
+        // if(state == 5) to_unmute(), state = 0;
+        // if(state == 6) on_error();
+        // if(state == 7) on_success();
 
-    } 
+        // switch(state){
+        //     case 9:
+
+        //         break;
+        //     case 0:
+        //         on_idle();
+        //         break;
+        //     case 1:
+        //         on_listen();
+        //         break;
+        //     case 2:
+        //         on_think();
+        //         break;
+        //     case 3:
+        //         on_speak();
+        //         break;
+        //     case 4:
+        //         to_mute();
+        //         state = 0;
+        //         break;
+        //     case 5:
+        //         to_unmute();
+        //         state = 0;
+        //         break;
+        //     case 6:
+        //         on_error();
+        //         break;
+        //     case 7:
+        //         on_success();
+        //         break;
+        // }
+
+    }
     
     /* disconnect */
     printf("\n%s disconnecting from %s\n", argv[0], addr);
@@ -149,54 +188,64 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
     // hermes/feedback/sound/toggleOn
     // hermes/feedback/sound/toggleOff
 
-    printf("Received publish('%s'): %s\n", topic_name, (const char*) published->application_message);
+    printf("[Received] %s \n", topic_name);
     
 
     switch(state){
         case 0:
             if (strcmp(topic_name, "hermes/asr/startListening") == 0)
-                state = 1;
+                pre_state = state, state = 1;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
-                state = 5;
+                pre_state = state, state = 5;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
-                state = 4;
+                pre_state = state, state = 4;
             else if (strcmp(topic_name, "hermes/feedback/led/toggleOff") == 0)
-                state = -1;
+                pre_state = state, state = 9;
             else if (strcmp(topic_name, "hermes/tts/say") == 0)
-                state = 3;
+                pre_state = state, state = 3;
             break;
         case 1:
             if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
-                state = 2;
+                pre_state = state, state = 2;
             break;
         case 2:
             if (strcmp(topic_name, "hermes/tts/say") == 0)
-                state = 3;
+                pre_state = state, state = 3;
             else if (strcmp(topic_name, "hermes/nlu/intentParsed") == 0)
-                state = 6;
+                pre_state = state, state = 6;
             else if (strcmp(topic_name, "hermes/nlu/intentNotRecognized") == 0)
-                state = 7;
+                pre_state = state, state = 7;
             break;
         case 3:
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                state = 0;
+                pre_state = state, state = 0;
             break;
         case 6:
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                state = 0;
+                pre_state = state, state = 0;
             break;
         case 7:
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                state = 0;
+                pre_state = state, state = 0;
             break;
         case -1:
             if (strcmp(topic_name, "hermes/feedback/led/toggleOn") == 0)
-                state = 0;
+                pre_state = state, state = 0;
             break;
-    }   
+        
+    }
+    printf("[Info] State is changed to %d\n", state);
+    fresh_state();
     free(topic_name);
 }
 
+void fresh_state(){
+    if (pre_state != state)
+    {
+        //pthread_cancel(&global_thread[pre_state]);
+        pthread_create(&global_thread[state], NULL, f[state], NULL);
+    }
+}
 void* client_refresher(void* client)
 {
     while(1) 
@@ -236,7 +285,7 @@ void hw_init(){
 
 void begin(){
     if((fd = open("/dev/spidev0.0", O_RDWR)) < 0) {
-        printf("Can't open /dev/spidev0.0 (try 'sudo')");
+        printf("[Error] Can't open /dev/spidev0.0 (try 'sudo')");
         terminate(EXIT_FAILURE, NULL);
     }
 
@@ -304,45 +353,68 @@ void clear(){
 
 // States API
 
-void on_off(){
+void *on_off(){
+    clear();
+    while(1);
+}
+
+void *on_idle(){
+    uint32_t i;
+    for(i=0; i<numLEDs; i++){
+       set_color(i, 0x00FF00);
+    }
+    while(state == 0){
+        
+        _all_breathe(64, 80000);
+        sleep(3);
+        pthread_testcancel();
+    }
     clear();
 }
 
-void on_idle(){
-    _all_breathe(64, 50000, 0x00FF00);
+void *on_listen(){
+    uint32_t i;
+    for(i=0; i<numLEDs; i++){
+        set_color(i, 0xFF0000);
+    }
+    while(state == 1){
+        _all_breathe(255, 2000);
+        usleep(50000);
+        pthread_testcancel(); 
+    }
+    clear();
 }
-
-void on_listen(){
-    return;
+void *on_think(){
 }
-void on_think(){
-    return;
+void *on_speak(){
 }
-void on_speak(){
-    return;
+void *to_mute(){
 }
-void to_mute(){
-    return;
+void *to_unmute(){
 }
-void to_unmute(){
-    return; 
+void *on_error(){
+    uint32_t i;
+    for(i=0; i<numLEDs; i++){
+        set_color(i, 0x0000FF);
+    }
+    show(128);
+    while(state == 6);
+    clear();
 }
-void on_error(){
-    return;
-}
-void on_success(){
-    return;
+void *on_success(){
+    uint32_t i;
+    for(i=0; i<numLEDs; i++){
+        set_color(i, 0x00FF00);
+    }
+    show(128);
+    while(state == 7);
+    clear();
 }
 
 // Led actions
 
-void _all_breathe(uint8_t max_bri, unsigned long duration, uint32_t color){
+void _all_breathe(uint8_t max_bri, unsigned long duration){
     int curr_bri = 0;
-    uint32_t i;
-
-    for(i=0; i<numLEDs; i++){
-        set_color(i, color);
-    }
 
     while(curr_bri <= max_bri){
         show(curr_bri);
@@ -355,6 +427,9 @@ void _all_breathe(uint8_t max_bri, unsigned long duration, uint32_t color){
         curr_bri -= 5;
         usleep(duration);
     }
-    sleep(3);
+}
+
+void _all_on(uint8_t max_bri){
+
 }
 
