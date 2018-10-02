@@ -1,5 +1,7 @@
 CC = gcc
-CFLAGS = -Wextra -Wall -std=gnu99 -Iinclude -Wno-unused-parameter -Wno-unused-variable -Wno-duplicate-decl-specifier
+CFLAGS = -Ofast -Wextra -Wall -std=gnu99 -Iinclude -Wno-unused-parameter -Wno-unused-variable -Wno-duplicate-decl-specifier \
+			 -fomit-frame-pointer \
+			 -I/opt/vc/include -L/opt/vc/lib
 
 MQTT_C_SOURCES = src/mqtt.c src/mqtt_pal.c
 snipsLed = bin/snipsLed
