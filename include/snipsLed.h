@@ -26,7 +26,7 @@ void terminate(int status, pthread_t *client_daemon);
 void hw_init();
 void begin();
 void set_color(uint32_t index, uint32_t vcolor);
-void show(int brightness);
+void show(uint8_t brightness);
 void clear();
 
 // States

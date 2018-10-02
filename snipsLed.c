@@ -195,7 +195,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
 void fresh_state(){
     if (pre_state != state)
     {
-        //pthread_cancel(&global_thread[pre_state]);
+        pthread_cancel(&global_thread[pre_state]);
         pthread_create(&global_thread[state], NULL, f[state], NULL);
     }
 }
@@ -210,12 +210,9 @@ void* client_refresher(void* client)
 }
 
 void generate_client_id(){
-    
     int i, flag;
-
     srand(time(NULL));
-    for (int i = 0; i < CLIENT_ID_LEN; i++)
-    {
+    for (int i = 0; i < CLIENT_ID_LEN; i++){
         flag = rand()%3;
         switch(flag){
             case 0:
@@ -307,10 +304,11 @@ void clear(){
 
 void *on_off(){
     clear();
+    pthread_exit((void *)-1);
 }
 
 void *on_idle(){
-    printf("[State] ------>  on_idle\n");
+    
     uint8_t i;
     for(i=0; i<numLEDs; i++){
         set_color(i, 0x00FF00);
@@ -321,12 +319,13 @@ void *on_idle(){
         }
         _all_breathe(64, 80000);
         sleep(3);
+        printf("[State] ------>  on_idle\n");
     }
-    //clear();
+    pthread_exit((void *)-1);
 }
 
 void *on_listen(){
-    printf("[State] ------>  on_listen\n");
+    
     uint8_t i;
     
     while(state == 1){
@@ -335,11 +334,12 @@ void *on_listen(){
         }
         _all_breathe(255, 2000);
         usleep(50000);
+        printf("[State] ------>  on_listen\n");
     }
-    //clear();
+    pthread_exit((void *)-1);
 }
 void *on_think(){
-    printf("[State] ------>  on_think\n");
+    
     uint8_t i;
     while(state == 2){
         for(i=0; i<numLEDs; i++){
@@ -350,10 +350,12 @@ void *on_think(){
             usleep(80000);
             clear();
         }
+        printf("[State] ------>  on_think\n");
     }
+    pthread_exit((void *)-1);
 }
 void *on_speak(){
-    printf("[State] ------>  on_speak\n");
+    
     uint8_t i;
     while(state == 3){
         for(i=0; i<numLEDs; i++){
@@ -364,7 +366,9 @@ void *on_speak(){
             usleep(80000);
             clear();
         }
+        printf("[State] ------>  on_speak\n");
     }
+    pthread_exit((void *)-1);
 }
 void *to_mute(){
     printf("[State] ------>  to_mute\n");
@@ -375,6 +379,7 @@ void *to_mute(){
     _all_breathe(64, 80000);
     pre_state = state, state = 0;
     fresh_state();
+    pthread_exit((void *)-1);
 }
 void *to_unmute(){
     printf("[State] ------>  to_unmute\n");
@@ -385,6 +390,7 @@ void *to_unmute(){
     _all_breathe(64, 80000);
     pre_state = state, state = 0;
     fresh_state();
+    pthread_exit((void *)-1);
 }
 void *on_success(){
     printf("[State] ------>  on_success\n");
@@ -392,9 +398,9 @@ void *on_success(){
     for(i=0; i<numLEDs; i++){
         set_color(i, 0x00FF00);
     }
-    while(state == 6)
-        show(128);
-    //clear();
+    show(128);
+    sleep(1);
+    pthread_exit((void *)-1);
 }
 void *on_error(){
     printf("[State] ------>  on_error\n");
@@ -402,10 +408,9 @@ void *on_error(){
     for(i=0; i<numLEDs; i++){
         set_color(i, 0x0000FF);
     }
-    
-    while(state == 7) 
-        show(128);
-    //clear();
+    show(128);
+    sleep(1);
+    pthread_exit((void *)-1);
 }
 
 // Led actions
