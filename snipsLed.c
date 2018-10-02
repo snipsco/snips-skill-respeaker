@@ -215,6 +215,8 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
                 pre_state = state, state = 6;
             else if (strcmp(topic_name, "hermes/nlu/intentNotRecognized") == 0)
                 pre_state = state, state = 7;
+            else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
+                pre_state = state, state = 0;
             break;
         case 3:
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
@@ -360,11 +362,11 @@ void *on_off(){
 
 void *on_idle(){
     uint32_t i;
-    for(i=0; i<numLEDs; i++){
-       set_color(i, 0x00FF00);
-    }
+    
     while(state == 0){
-        
+        for(i=0; i<numLEDs; i++){
+            set_color(i, 0x00FF00);
+        }
         _all_breathe(64, 80000);
         sleep(3);
         pthread_testcancel();
@@ -374,10 +376,11 @@ void *on_idle(){
 
 void *on_listen(){
     uint32_t i;
-    for(i=0; i<numLEDs; i++){
-        set_color(i, 0xFF0000);
-    }
+    
     while(state == 1){
+        for(i=0; i<numLEDs; i++){
+            set_color(i, 0xFF0000);
+        }
         _all_breathe(255, 2000);
         usleep(50000);
         pthread_testcancel(); 
@@ -398,7 +401,8 @@ void *on_error(){
         set_color(i, 0x0000FF);
     }
     show(128);
-    while(state == 6);
+    while(state == 6)
+        ;
     clear();
 }
 void *on_success(){
