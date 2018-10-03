@@ -1,6 +1,6 @@
 #include "include/snipsLed.h"
 
-short       pre_state = 0;
+short       last_state = 0;
 short       state = 0;
 char        *client_id;
 
@@ -14,7 +14,10 @@ uint8_t     gOffset = 2;
 uint8_t     bOffset = 3;
 
 pthread_t global_thread[9];
+
 pthread_t curr_thread;
+pthread_t last_thread;
+
 void (*f[9])(const char *)={on_idle, on_listen, on_think, on_speak, to_mute, to_unmute, on_success, on_error, on_off};
 
 int main(int argc, const char *argv[]) 
@@ -100,6 +103,10 @@ int main(int argc, const char *argv[])
         printf("%s listening for '%s' messages.\n", argv[0], topic[i]);
     }
 
+    for (i = 0; i < 9; i++)
+    {
+        pthread_create(&global_thread[i], NULL, f[i], NULL);
+    }
 
     memset(&global_thread, 0, sizeof(global_thread));
 
@@ -144,67 +151,68 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
     switch(state){
         case 0:
             if (strcmp(topic_name, "hermes/asr/startListening") == 0)
-                pre_state = state, state = 1;
+                last_state = state, state = 1;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
-                pre_state = state, state = 5;
+                last_state = state, state = 5;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
-                pre_state = state, state = 4;
+                last_state = state, state = 4;
             else if (strcmp(topic_name, "hermes/feedback/led/toggleOff") == 0)
-                pre_state = state, state = 9;
+                last_state = state, state = 9;
             else if (strcmp(topic_name, "hermes/tts/say") == 0)
-                pre_state = state, state = 3;
+                last_state = state, state = 3;
             break;
         case 1:
             if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
-                pre_state = state, state = 2;
+                last_state = state, state = 2;
             break;
         case 2:
             if (strcmp(topic_name, "hermes/tts/say") == 0)
-                pre_state = state, state = 3;
+                last_state = state, state = 3;
             else if (strcmp(topic_name, "hermes/nlu/intentParsed") == 0)
-                pre_state = state, state = 6;
+                last_state = state, state = 6;
             else if (strcmp(topic_name, "hermes/nlu/intentNotRecognized") == 0)
-                pre_state = state, state = 7;
+                last_state = state, state = 7;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                pre_state = state, state = 0;
+                last_state = state, state = 0;
             break;
         case 3:
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                pre_state = state, state = 0;
+                last_state = state, state = 0;
             break;
         case 6:
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                pre_state = state, state = 0;
+                last_state = state, state = 0;
             else if (strcmp(topic_name, "hermes/tts/say") == 0)
-                pre_state = state, state = 3;
+                last_state = state, state = 3;
             break;
         case 7:
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                pre_state = state, state = 0;
+                last_state = state, state = 0;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                pre_state = state, state = 0;
+                last_state = state, state = 0;
             break;
         case 9:
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                pre_state = state, state = 0;
+                last_state = state, state = 0;
             else if (strcmp(topic_name, "hermes/feedback/led/toggleOn") == 0)
-                pre_state = state, state = 0;
+                last_state = state, state = 0;
             break;
         
     }
-    fresh_state();
+    //fresh_state();
     printf("[Info] State is changed to %d\n", state);
     
     free(topic_name);
 }
 
 void fresh_state(){
-    if (pre_state != state)
+    if (last_state != state)
     {
         //void *thread_ret;
-        pthread_cancel(&global_thread[pre_state]);
+        last_thread = curr_thread; 
+        pthread_cancel(&last_thread);
         //pthread_join(curr_thread,&thread_ret);
-        pthread_create(&global_thread[state], NULL, f[state], NULL);
+        pthread_create(&curr_thread, NULL, f[state], NULL);
     }
 }
 void* client_refresher(void* client)
@@ -316,120 +324,210 @@ void *on_off(){
     clear();
     pthread_exit(1);
 }
-
+// 0
 void *on_idle(){
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     uint8_t i;
-    time_t sec, stamp;
-    printf("[State] ------>  on_idle %ld\n", stamp);
-    stamp = time(NULL);
-    for(i=0; i<numLEDs; i++){
-        set_color(i, 0x00FF00);
+    time_t sec;
+    int curr_bri = 0;
+    printf("[Thread] ------>  on_idle started\n");
+    while(1){
+        if(state == 0){
+            sec = time(NULL);
+            if(sec % 5 == 0){
+                for(i=0; i<numLEDs; i++)
+                    set_color(i, 0x00FF00);
+                while(curr_bri <= 255){
+                    show(curr_bri);
+                    curr_bri += 5;
+                    usleep(80000);
+                }
+                curr_bri = 255;
+                while(curr_bri >= 0){
+                    show(curr_bri);
+                    curr_bri -= 5;
+                    usleep(80000);
+                }
+                curr_bri = 0;
+            }
+        }    
     }
-    while(state == 0){
-        sec = time(NULL);
-        while(sec%3 == 0){
-            _all_breathe(64, 80000);
-            pthread_testcancel();
-        }
+}
+// 1
+void *on_listen(){
+    uint8_t i;
+    time_t sec;
+    int curr_bri = 0;
+    printf("[Thread] ------>  on_idle started\n");
+    while(1){
+        if(state == 1){
+            sec = time(NULL);
+            if(sec % 2 == 0){
+                for(i=0; i<numLEDs; i++)
+                    set_color(i, 0xFF0000);
+                while(curr_bri <= 255){
+                    show(curr_bri);
+                    curr_bri += 5;
+                    usleep(2000);
+                }
+                curr_bri = 255;
+                while(curr_bri >= 0){
+                    show(curr_bri);
+                    curr_bri -= 5;
+                    usleep(2000);
+                }
+                curr_bri = 0;
+            }
+        }    
     }
-    pthread_exit(1);
 }
 
-void *on_listen(){
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-    uint8_t i;
-    for(i=0; i<numLEDs; i++){
-        set_color(i, 0xFF0000);
-    }
-    while(state == 1){
-        _all_breathe(255, 2000);
-        usleep(50000);
-        printf("[State] ------>  on_listen\n");
-    }
-    pthread_exit(1);
-}
+// 2
 void *on_think(){
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     uint8_t i;
-    while(state == 2){
-        for(i=0; i<numLEDs; i++){
-            set_color(i, 0xFF0000);
-            show(125);
-            pthread_testcancel();
-            usleep(80000);
-            show(0);
-            pthread_testcancel();
-            usleep(80000);
-            clear();
-        }
-        printf("[State] ------>  on_think\n");
+    printf("[Thread] ------>  on_think started\n");
+
+    while(1){
+        if(state == 2){
+            for(i=0; i<numLEDs; i++){
+                clear();
+                set_color(i, 0xFF0000);
+                show(255);
+                usleep(80000);
+                show(0);
+                usleep(80000);
+                clear();
+            }
+        } 
     }
-    pthread_exit(1);
 }
+
+// 3
 void *on_speak(){
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     uint8_t i;
-    while(state == 3){
-        for(i=0; i<numLEDs; i++){
-            set_color(i, 0x00FF00);
-            show(125);
-            pthread_testcancel();
-            usleep(80000);
-            show(0);
-            pthread_testcancel();
-            usleep(80000);
-            clear();
-        }
-        printf("[State] ------>  on_speak\n");
+    printf("[Thread] ------>  on_speak started\n");
+    while(1){
+        if(state == 3){
+            for(i=0; i<numLEDs; i++){
+                clear();
+                set_color(i, 0x00FF00);
+                show(255);
+                usleep(80000);
+                show(0);
+                usleep(80000);
+                clear();
+            }
+        } 
     }
-    pthread_exit(1);
 }
+
+// 4
 void *to_mute(){
-    printf("[State] ------>  to_mute\n");
     uint8_t i;
-    for(i=0; i<numLEDs; i++){
-        set_color(i, 0x00FFFF);
+    int curr_bri = 0;
+    printf("[State] ------>  to_mute started\n");
+
+    while(1){
+        if (state == 4)
+        {
+            state = last_state;
+            for(i=0; i<numLEDs; i++)
+                set_color(i, 0x00FFFF);
+            while(curr_bri <= 255){
+                show(curr_bri);
+                curr_bri += 5;
+                usleep(80000);
+            }
+            curr_bri = 255;
+            while(curr_bri >= 0){
+                show(curr_bri);
+                curr_bri -= 5;
+                usleep(80000);
+            }
+        }
     }
-    _all_breathe(64, 80000);
-    pre_state = state, state = 0;
-    fresh_state();
-    pthread_exit(1);
 }
+
+// 5
 void *to_unmute(){
-    printf("[State] ------>  to_unmute\n");
     uint8_t i;
-    for(i=0; i<numLEDs; i++){
-        set_color(i, 0xFFFF00);
+    int curr_bri = 0;
+    printf("[State] ------>  to_unmute started\n");
+
+    while(1){
+        if (state == 5)
+        {
+            state = last_state;
+            for(i=0; i<numLEDs; i++)
+                set_color(i, 0x00FF00);
+            while(curr_bri <= 255){
+                show(curr_bri);
+                curr_bri += 5;
+                usleep(80000);
+            }
+            curr_bri = 255;
+            while(curr_bri >= 0){
+                show(curr_bri);
+                curr_bri -= 5;
+                usleep(80000);
+            }
+        }
     }
-    _all_breathe(64, 80000);
-    pre_state = state, state = 0;
-    fresh_state();
-    pthread_exit(1);
 }
+
+// 7 
 void *on_success(){
-    printf("[State] ------>  on_success\n");
     uint8_t i;
-    for(i=0; i<numLEDs; i++){
-        set_color(i, 0x00FF00);
+    int curr_bri = 0;
+    printf("[State] ------>  on_success started\n");
+
+    while(1){
+        if (state == 7)
+        {
+            state = last_state;
+            for(i=0; i<numLEDs; i++)
+                set_color(i, 0x00FF00);
+            while(curr_bri <= 255){
+                show(curr_bri);
+                curr_bri += 5;
+                usleep(20000);
+            }
+            curr_bri = 255;
+            while(curr_bri >= 0){
+                show(curr_bri);
+                curr_bri -= 5;
+                usleep(20000);
+            curr_bri = 0;  
+            }
+        }
     }
-    show(128);
-    sleep(2);
-    pthread_exit(1);
 }
+
+// 6
 void *on_error(){
-    printf("[State] ------>  on_error\n");
     uint8_t i;
-    for(i=0; i<numLEDs; i++){
-        set_color(i, 0x0000FF);
+    int curr_bri = 0;
+    printf("[State] ------>  on_error started\n");
+
+    while(1){
+        if (state == 6)
+        {
+            state = last_state;
+            for(i=0; i<numLEDs; i++)
+                set_color(i, 0x0000FF);
+            while(curr_bri <= 255){
+                show(curr_bri);
+                curr_bri += 5;
+                usleep(20000);
+            }
+            curr_bri = 255;
+            while(curr_bri >= 0){
+                show(curr_bri);
+                curr_bri -= 5;
+                usleep(20000);
+            curr_bri = 0;  
+            }
+        }
     }
-    show(128);
-    sleep(2);
-    pthread_exit(1);
 }
 
 // Led actions
