@@ -17,7 +17,7 @@
 #define NUM_TOPIC 10
 
 // MQTT
-void generate_client_id();
+char* generate_client_id();
 void publish_callback(void** unused, struct mqtt_response_publish *published);
 void*client_refresher(void* client);
 void terminate(int status, pthread_t *client_daemon);
