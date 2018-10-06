@@ -26,7 +26,6 @@ int main(int argc, const char *argv[])
     const char* addr;
     const char* port;
     const char* topic[NUM_TOPIC];
-    int temp;
     client_id = generate_client_id();
     short i;
     printf("[Info] Client id is: %s\n", client_id);
@@ -55,7 +54,7 @@ int main(int argc, const char *argv[])
         numLEDs = 3;
     }
     
-    hw_init();
+    
 
     topic[0] = "hermes/hotword/toggleOff";
     topic[1] = "hermes/asr/startListening";
@@ -111,10 +110,7 @@ int main(int argc, const char *argv[])
 
     memset(&global_thread, 0, sizeof(global_thread));
 
-    if((temp = pthread_create(&curr_thread, NULL, on_idle, NULL)) != 0)
-        printf("faild to create 1st thread!\n"); 
-    else 
-        printf("created thread.\n");
+    hw_init();
 
     printf("LEDs : %d\n", numLEDs);
     printf("Press CTRL-D to exit.\n\n");
@@ -142,6 +138,8 @@ void terminate(int status, pthread_t *client_daemon)
 
 void publish_callback(void** unused, struct mqtt_response_publish *published) 
 {
+    int temp;
+    pthread_t fresh_state;
     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
     char* topic_name = (char*) malloc(published->topic_name_size + 1);
     memcpy(topic_name, published->topic_name, published->topic_name_size);
@@ -153,6 +151,10 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
         case 0:
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
                 last_state = state, state = 1;
+            else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
+                last_state = state, state = 4;
+            else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
+                last_state = state, state = 5;
             break;
         case 1:
             if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
@@ -176,23 +178,12 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
     }
 
     printf("[Info] State is changed to %d\n", state);
-    fresh_state();
-    
+    if (last_state != state)
+        pthread_create(&curr_thread, NULL, f[state], NULL);
+
     free(topic_name);
 }
 
-void fresh_state(){
-    if (last_state != state)
-    {
-        //void *thread_ret;
-        //last_thread = curr_thread; 
-        pthread_cancel(&curr_thread);
-        //pthread_join(curr_thread,&thread_ret);
-        //while(state_flag == 0);
-        pthread_create(&curr_thread, NULL, f[state], NULL);
-
-    }
-}
 void* client_refresher(void* client)
 {
     while(1) 
@@ -225,8 +216,13 @@ char* generate_client_id(){
 }
 
 void hw_init(){
+    int temp;
     pixels = (uint8_t *)malloc(numLEDs * 4);
     begin();
+    if((temp = pthread_create(&curr_thread, NULL, on_idle, NULL)) != 0)
+        printf("faild to create 1st thread!\n"); 
+    else 
+        printf("created thread.\n");
 }
 
 void begin(){
@@ -283,8 +279,9 @@ void show(uint8_t brightness){
     }
 
     // Stop Signal:
-    x[0] = 0;
-    i = (numLEDs + 15) / 16;
+    x[0] = 0x01;
+    //i = (numLEDs + 15) / 16;
+    i = 32;
     while(i--) (void)write(fd, x, 1);
 }
 
@@ -299,56 +296,56 @@ void clear(){
 
 // States API
 
-void *on_off(){
-    clear();
-    pthread_exit(1);
-}
-
 // 0
 void *on_idle(){
     uint8_t i,j;
     int curr_bri = 0;
     printf("[Thread] ------>  on_idle started\n");
-    state_flag = 0;
     clear();
     while(state == 0){
         // every 5 seconds
         for(i=0; i<numLEDs; i++){
-            if(state != 0) {clear();state_flag = 1;return;}
+            if(state != 0) {clear();return((void *)0);}
             set_color(i, 0x00FF00);
         }
         while(curr_bri <= 64){
-            if(state != 0) {clear();state_flag = 1;return;}
+            // each 0.1s
+            if(state != 0) {clear();return((void *)0);}
             show(curr_bri);
             curr_bri += 5;
-            usleep(80000);
+            for (int j = 0; j < 10; j++){
+                // each 0.01s check
+                if(state != 0) {clear();return((void *)0);}
+                usleep(10000);
+            }
         }
         curr_bri = 64;
         while(curr_bri >= 0){
-            if(state != 0) {clear();state_flag = 1;return;}
+            // each 0.1s
+            if(state != 0) {clear();return((void *)0);}
             show(curr_bri);
             curr_bri -= 5;
-            usleep(80000);
+            for (int j = 0; j < 10; j++){
+                // each 0.01s check
+                if(state != 0) {clear();return((void *)0);}
+                usleep(10000);
+            }
         }
         curr_bri = 0;
-
-        for (int j = 0; j < 100; j++)
-        {
+        for (int j = 0; j < 500; j++){
             // each 0.05s check
-            if(state != 0) {clear();state_flag = 1;return;}
-            usleep(50000);
+            if(state != 0) {clear();return((void *)0);}
+            usleep(10000);
         }
-
     }
     clear();
-    state_flag = 1;
+    return((void *)0);
 }
 
 // 1
 void *on_listen(){
     uint8_t i,g,group;
     printf("[Thread] ------>  on_listen started\n");
-    state_flag = 0;
     clear();
     group = numLEDs/3;
     while(state == 1){
@@ -357,149 +354,139 @@ void *on_listen(){
             for (g=0; g < group; g++)
                 set_color(g*3+i, 0xFF0000);
             show(255);
-            if(state != 1) {clear();state_flag = 1;return;}
+            if(state != 1) {clear();return((void *)1);}
             usleep(100000);
             show(5);
-            if(state != 1) {clear();state_flag = 1;return;}
+            if(state != 1) {clear();return((void *)1);}
             usleep(100000);
             clear();
         }
-
-        // every 2 seconds
-        // show(5);
-        // for(i=0; i<numLEDs; i++){
-        //     if(state != 1) {clear();state_flag = 1;return;}
-        //     set_color(i, 0xFF0000);
-        // }
-        // show(128);
-        // for (int j = 0; j < 3; j++)
-        // {
-        //     // each 0.05s check
-        //     if(state != 1) {clear();state_flag = 1;return;}
-        //     usleep(50000);
-        // }
-        // show(5);
-        // for (int j = 0; j < 3; j++)
-        // {
-        //     // each 0.05s check
-        //     if(state != 1) {clear();state_flag = 1;return;}
-        //     usleep(50000);
-        // }
-
     }
     clear();
-    state_flag = 1;     
+    return((void *)1);   
 }
 
 // 2
 void *on_think(){
     uint8_t i,g,group;
     printf("[Thread] ------>  on_think started\n");
-    state_flag = 0;
     clear();
     group = numLEDs/3;
     while(state == 2){
-        for(i=0; i<3; i++){
+        for(i=2; i>0; i--){
             clear();
             for (g=0; g < group; g++)
                 set_color(g*3+i, 0x00FF00);
             show(255);
-            if(state != 2) {clear();state_flag = 1;return;}
+            if(state != 2) {clear();return((void *)2);}
             usleep(100000);
             show(5);
-            if(state != 2) {clear();state_flag = 1;return;}
+            if(state != 2) {clear();return((void *)2);}
             usleep(100000);
             clear();
         }
     }
     clear();
-    state_flag = 1;
+    return((void *)2);
 }
 
 // 3
 void *on_speak(){
-    uint8_t i;
+    uint8_t i,g,group;
     printf("[Thread] ------>  on_speak started\n");
-    state_flag = 0;
-    while(1){
-        if(state == 3){
-            for(i=0; i<numLEDs; i++){
-                clear();
-                set_color(i, 0x00FF00);
-                show(255);
-                if(state != 3) {clear();state_flag = 1;return;}
-                usleep(80000);
-                show(0);
-                if(state != 3) {clear();state_flag = 1;return;}
-                usleep(80000);
-                clear();
-            }
-        } 
+    clear();
+    group = numLEDs/3;
+    while(state == 3){
+        for(i=2; i>0; i--){
+            clear();
+            for (g=0; g < group; g++)
+                set_color(g*3+i, 0x00FF00);
+            show(255);
+            if(state != 3) {clear();return((void *)3);}
+            usleep(100000);
+            show(5);
+            if(state != 3) {clear();return((void *)3);}
+            usleep(100000);
+            clear();
+        }
     }
     clear();
-    state_flag = 1;
+    return((void *)3);
 }
 
 // 4
 void *to_mute(){
-    uint8_t i;
-    int curr_bri = 0;
-    printf("[State] ------>  to_mute started\n");
-
-    while(1){
-        if (state == 4)
-        {
-            state = last_state;
-            for(i=0; i<numLEDs; i++){
-                if(state != 4) break;
-                set_color(i, 0x00FFFF);
-            }
-            while(curr_bri <= 255){
-                if(state != 4) break;
-                show(curr_bri);
-                curr_bri += 20;
-                usleep(80000);
-            }
-            curr_bri = 255;
-            while(curr_bri >= 0){
-                if(state != 4) break;
-                show(curr_bri);
-                curr_bri -= 20;
-                usleep(80000);
-            }
+    uint8_t i,j,k;
+    int curr_bri = 5;
+    printf("[Thread] ------>  to_mute started\n");
+    clear();
+    clear();
+    clear();
+    for (int k = 0; k < 2; ++k){
+        for(i=0; i<numLEDs; i++){
+            if(state != 4) {clear();return((void *)4);}
+            set_color(i, 0x0000FF);
         }
+        printf("set color done\n");
+        while(curr_bri <= 128){
+            if(state != 4) {clear();return((void *)4);}
+            show(curr_bri);
+            curr_bri += 10;
+            usleep(80000);
+        }
+        printf("Turn up done\n");
+        curr_bri = 128;
+        while(curr_bri >= 0){
+            if(state != 4) {clear();return((void *)4);}
+            show(curr_bri);
+            curr_bri -= 10;
+            usleep(80000);
+        }
+        curr_bri = 0;
+        printf("Turn down done\n");  
     }
+
+    last_state = state;
+    state = 0;
+    clear();
+    if (last_state != state)
+        pthread_create(&curr_thread, NULL, f[state], NULL);
+    return((void *)4);
 }
 
 // 5
 void *to_unmute(){
-    uint8_t i;
+    uint8_t i,j;
     int curr_bri = 0;
-    printf("[State] ------>  to_unmute started\n");
-
-    while(1){
-        if (state == 5)
-        {
-            state = last_state;
-            for(i=0; i<numLEDs; i++){
-                if(state != 5) break;
-                set_color(i, 0x00FF00);
-            }
-            while(curr_bri <= 255){
-                if(state != 5) break;
-                show(curr_bri);
-                curr_bri += 20;
-                usleep(80000);
-            }
-            curr_bri = 255;
-            while(curr_bri >= 0){
-                if(state != 5) break;
-                show(curr_bri);
-                curr_bri -= 20;
-                usleep(80000);
-            }
+    printf("[Thread] ------>  to_unmute started\n");
+    clear();
+    while(state == 5){
+        // every 5 seconds
+        for(i=0; i<numLEDs; i++){
+            if(state != 5) {clear();return((void *)5);}
+            set_color(i, 0x00FF00);
         }
+        while(curr_bri <= 64){
+            if(state != 5) {clear();return((void *)5);}
+            show(curr_bri);
+            curr_bri += 5;
+            usleep(80000);
+        }
+        curr_bri = 64;
+        while(curr_bri >= 0){
+            if(state != 5) {clear();return((void *)5);}
+            show(curr_bri);
+            curr_bri -= 5;
+            usleep(80000);
+        }
+        curr_bri = 0;
+        last_state = state;
+        state = 0;
     }
+    clear();
+    if (last_state != state)
+        pthread_create(&curr_thread, NULL, f[state], NULL);
+    return((void *)5);
 }
 
 // 7 
@@ -566,21 +553,10 @@ void *on_error(){
     }
 }
 
-// Led actions
-void _all_breathe(uint8_t max_bri, unsigned long duration){
-    int curr_bri = 0;
-
-    while(curr_bri <= max_bri){
-        show(curr_bri);
-        curr_bri += 5;
-        usleep(duration);
-    }
-    curr_bri = max_bri;
-    while(curr_bri >= 0){
-        show(curr_bri);
-        curr_bri -= 5;
-        usleep(duration);
-    }
+// 7
+void *on_off(){
+    clear();
+    pthread_exit(1);
 }
 
 
