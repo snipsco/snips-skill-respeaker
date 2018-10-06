@@ -46,13 +46,13 @@ int main(int argc, const char *argv[])
     }
 
     if (argc > 3) {
-        if (argv[3] == "rvt"){
-            numLEDs = 12;
-        }else{
+        if (strcmp(argv[3],"3") == 0){
             numLEDs = 3;
+        }else if(strcmp(argv[3],"12") == 0){
+            numLEDs = 12;
         }
     }else{
-        numLEDs = 12;
+        numLEDs = 3;
     }
     
     hw_init();
@@ -292,9 +292,9 @@ void clear(){
     uint8_t *ptr;
     uint32_t i;
     for(ptr = pixels, i=0; i<numLEDs; i++, ptr += 4) {
-        ptr[1] = 0x00; ptr[2] = 0x00; ptr[3] = 0x00;
+        ptr[1] = 0x05; ptr[2] = 0x05; ptr[3] = 0x05;
     }
-    show(0);
+    show(5);
 }
 
 // States API
@@ -306,34 +306,39 @@ void *on_off(){
 
 // 0
 void *on_idle(){
-    uint8_t i;
-    time_t sec;
+    uint8_t i,j;
     int curr_bri = 0;
     printf("[Thread] ------>  on_idle started\n");
     state_flag = 0;
-
+    clear();
     while(state == 0){
-        sec = time(NULL);
-        if(sec % 7 == 0){
-            for(i=0; i<numLEDs; i++){
-                if(state != 0) {clear();state_flag = 1;return;}
-                set_color(i, 0x00FF00);
-            }
-            while(curr_bri <= 64){
-                if(state != 0) {clear();state_flag = 1;return;}
-                show(curr_bri);
-                curr_bri += 5;
-                usleep(80000);
-            }
-            curr_bri = 64;
-            while(curr_bri >= 0){
-                if(state != 0) {clear();state_flag = 1;return;}
-                show(curr_bri);
-                curr_bri -= 5;
-                usleep(80000);
-            }
-            curr_bri = 0;
-        }  
+        // every 5 seconds
+        for(i=0; i<numLEDs; i++){
+            if(state != 0) {clear();state_flag = 1;return;}
+            set_color(i, 0x00FF00);
+        }
+        while(curr_bri <= 64){
+            if(state != 0) {clear();state_flag = 1;return;}
+            show(curr_bri);
+            curr_bri += 5;
+            usleep(80000);
+        }
+        curr_bri = 64;
+        while(curr_bri >= 0){
+            if(state != 0) {clear();state_flag = 1;return;}
+            show(curr_bri);
+            curr_bri -= 5;
+            usleep(80000);
+        }
+        curr_bri = 0;
+
+        for (int j = 0; j < 100; j++)
+        {
+            // each 0.05s check
+            if(state != 0) {clear();state_flag = 1;return;}
+            usleep(50000);
+        }
+
     }
     clear();
     state_flag = 1;
@@ -341,33 +346,46 @@ void *on_idle(){
 
 // 1
 void *on_listen(){
-    uint8_t i;
-    time_t sec;
-    int curr_bri = 0;
+    uint8_t i,g,group;
     printf("[Thread] ------>  on_listen started\n");
     state_flag = 0;
+    clear();
+    group = numLEDs/3;
     while(state == 1){
-        sec = time(NULL);
-        if(sec % 2 == 0){
-            for(i=0; i<numLEDs; i++){
-                if(state != 1) {clear();state_flag = 1;return;}
-                set_color(i, 0xFF0000);
-            }
-            while(curr_bri <= 128){
-                if(state != 1) {clear();state_flag = 1;return;}
-                show(curr_bri);
-                curr_bri += 5;
-                usleep(6000);
-            }
-            curr_bri = 128;
-            while(curr_bri >= 0){
-                if(state != 1) {clear();state_flag = 1;return;}
-                show(curr_bri);
-                curr_bri -= 5;
-                usleep(6000);
-            }
-            curr_bri = 0;
+        for(i=0; i<3; i++){
+            clear();
+            for (g=0; g < group; g++)
+                set_color(g*3+i, 0xFF0000);
+            show(255);
+            if(state != 1) {clear();state_flag = 1;return;}
+            usleep(100000);
+            show(5);
+            if(state != 1) {clear();state_flag = 1;return;}
+            usleep(100000);
+            clear();
         }
+
+        // every 2 seconds
+        // show(5);
+        // for(i=0; i<numLEDs; i++){
+        //     if(state != 1) {clear();state_flag = 1;return;}
+        //     set_color(i, 0xFF0000);
+        // }
+        // show(128);
+        // for (int j = 0; j < 3; j++)
+        // {
+        //     // each 0.05s check
+        //     if(state != 1) {clear();state_flag = 1;return;}
+        //     usleep(50000);
+        // }
+        // show(5);
+        // for (int j = 0; j < 3; j++)
+        // {
+        //     // each 0.05s check
+        //     if(state != 1) {clear();state_flag = 1;return;}
+        //     usleep(50000);
+        // }
+
     }
     clear();
     state_flag = 1;     
@@ -375,17 +393,20 @@ void *on_listen(){
 
 // 2
 void *on_think(){
-    uint8_t i;
+    uint8_t i,g,group;
     printf("[Thread] ------>  on_think started\n");
     state_flag = 0;
+    clear();
+    group = numLEDs/3;
     while(state == 2){
-        for(i=0; i<numLEDs; i++){
+        for(i=0; i<3; i++){
             clear();
-            set_color(i, 0xFF0000);
+            for (g=0; g < group; g++)
+                set_color(g*3+i, 0x00FF00);
             show(255);
             if(state != 2) {clear();state_flag = 1;return;}
             usleep(100000);
-            show(0);
+            show(5);
             if(state != 2) {clear();state_flag = 1;return;}
             usleep(100000);
             clear();
