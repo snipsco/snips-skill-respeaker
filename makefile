@@ -1,16 +1,18 @@
 CC = gcc
-CFLAGS = -Ofast -Wextra -Wall -std=gnu99 -Iinclude -Wno-unused-parameter -Wno-unused-variable -Wno-duplicate-decl-specifier \
-			 -fomit-frame-pointer \
-			 -I/opt/vc/include -L/opt/vc/lib
+CFLAGS = -Ofast -Wextra -Wall -std=gnu99 -Iinclude\
+			-Wno-unused-parameter\
+			-Wno-unused-variable\
+			-fomit-frame-pointer \
+			-I/opt/vc/include -L/opt/vc/lib
 
-MQTT_C_SOURCES = src/mqtt.c src/mqtt_pal.c
-snipsLed = bin/snipsLed
+SOURCES = src/mqtt.c src/mqtt_pal.c src/animation.c src/apa102.c src/get_config.c
+action-skill_respeaker_c = bin/action-skill_respeaker_c
 
 BINDIR = bin
 
-all: $(BINDIR) $(snipsLed)
+all: $(BINDIR) $(action-skill_respeaker_c)
 
-bin/snips%: snips%.c $(MQTT_C_SOURCES)
+bin/action-skill_respeaker_c: action-skill_respeaker_c.c $(SOURCES)
 	$(CC) $(CFLAGS) $^ -lpthread -o $@
 
 $(BINDIR):
