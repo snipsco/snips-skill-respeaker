@@ -10,7 +10,7 @@ void begin(void){
     ioctl(leds.fd_spi, SPI_IOC_WR_MAX_SPEED_HZ, BITRATE);
 }
 
-void set_index_rgb(uint8_t index, uint8_t b, uint8_t g, uint8_t r){
+void set_index_rgb(uint8_t index, uint8_t r, uint8_t g, uint8_t b){
     if(index < leds.numLEDs && index >= 0) {
         uint8_t *ptr = &leds.pixels[index * 4];
         ptr[ROFFSET] = r;
@@ -64,7 +64,7 @@ void show(void){ // global bri range: 0 - 31
     while(i--) (void)write(leds.fd_spi, x, 1);
 }
 
-void clear(){
+void clear(void){
     uint8_t *ptr;
     uint32_t i;
     for(ptr = leds.pixels, i=0; i<leds.numLEDs; i++, ptr += 4) {

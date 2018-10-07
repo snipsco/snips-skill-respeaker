@@ -8,8 +8,10 @@ short curr_state = 0;
 // devices number
 int         fd_sock = -1;
 pthread_t   curr_thread;
+
 const char	*addr;
 const char	*port;
+
 char 		*client_id;
 
 const char* topic[NUM_TOPIC]={
@@ -51,7 +53,8 @@ void (*status[9])(const char *)={
 };
 
 int main(int argc, char const *argv[])
-{
+{	
+	int i;
 	// generate a random id as client id
 	client_id = generate_client_id();
 
@@ -60,15 +63,41 @@ int main(int argc, char const *argv[])
     addr = (argc > 2)? argv[2] : "localhost";
     port = (argc > 3)? argv[3] : "1883";
     
+    /* open the non-blocking TCP socket (connecting to the broker) */
+    int sockfd = open_nb_socket(addr, port);
+    if (sockfd == -1) {
+        perror("Failed to open socket: ");
+        close_all(EXIT_FAILURE, NULL);
+    }
+    /* setup a client */
+    struct mqtt_client client;
+    uint8_t sendbuf[2048]; /* sendbuf should be large enough to hold multiple whole mqtt messages */
+    uint8_t recvbuf[1024]; /* recvbuf should be large enough any whole mqtt message expected to be received */
+    mqtt_init(&client, sockfd, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback);
+    mqtt_connect(&client, "subscribing_client", NULL, NULL, 0, NULL, NULL, 0, 400);
+    /* check that we don't have any errors */
+    if (client.error != MQTT_OK) {
+        fprintf(stderr, "error: %s\n", mqtt_error_str(client.error));
+        close_all(EXIT_FAILURE, NULL);
+    }
+    /* start a thread to refresh the client (handle egress and ingree client traffic) */
     pthread_t client_daemon;
-    client_daemon = mqtt_setup();
-	apa102_spi_setup();
-
-	printf("Press CTRL-D to exit.\n\n");
-	printf("Press CTRL-D to exit.\n\n");
+    if(pthread_create(&client_daemon, NULL, client_refresher, &client)) {
+        fprintf(stderr, "Failed to start client daemon.\n");
+        close_all(EXIT_FAILURE, NULL);
+    }
+    /* subscribe */
+    for(i=0;i<NUM_TOPIC;i++){
+        mqtt_subscribe(&client, topic[i], 0);
+        printf("[Info] Subscribed to '%s'.\n", topic[i]);
+    }
+    apa102_spi_setup();
+    /* start publishing the time */
+    printf("%s listening to MQTT bus: '%s:%s'\n", argv[0],addr, port);
+    printf("Press CTRL-D to exit.\n\n");
     
-    // start block
-    while(fgetc(stdin) != EOF);
+    /* block */
+    while(fgetc(stdin) != EOF); 
 
     // disconnect
     printf("\n%s disconnecting from %s\n", argv[0], addr);
@@ -87,43 +116,6 @@ void apa102_spi_setup(){
         printf("[Error] Failed to create 1st thread!\n"); 
     	close_all(EXIT_FAILURE, NULL);
     }
-}
-
-pthread_t mqtt_setup(){
-	int i;
-	fd_sock = open_nb_socket(addr, port);
-	if (fd_sock == -1) {
-        perror("[Error] Failed to open socket!\n");
-        close_all(EXIT_FAILURE, NULL);
-    }
-
-    struct mqtt_client client;
-    uint8_t sendbuf[2048]; /* sendbuf should be large enough to hold multiple whole mqtt messages */
-    uint8_t recvbuf[1024]; /* recvbuf should be large enough any whole mqtt message expected to be received */
-    mqtt_init(&client, fd_sock, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback);
-    mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
-
-    // check that we don't have any errors
-    if (client.error != MQTT_OK) {
-        fprintf(stderr, "[Error] %s\n", mqtt_error_str(client.error));
-        close_all(EXIT_FAILURE, NULL);
-    }
-
-    // start a thread to refresh the client (handle egress and ingree client traffic)
-    pthread_t client_daemon;
-    if(pthread_create(&client_daemon, NULL, client_refresher, &client)) {
-        fprintf(stderr, "[Error] Failed to start client daemon.\n");
-        close_all(EXIT_FAILURE, NULL);
-
-    }
-
-    // subscribe to topics
-    for(i=0;i<NUM_TOPIC;i++){
-        mqtt_subscribe(&client, topic[i], 0);
-        printf("[Info] Subscribed to '%s'.\n", topic[i]);
-    }
-
-    return client_daemon;
 }
 
 void publish_callback(void** unused, struct mqtt_response_publish *published) {
@@ -202,11 +194,17 @@ char* generate_client_id(){
 }
 
 void close_all(int status, pthread_t *client_daemon){
-    show();
+    printf("1\n");
     if (fd_sock != -1) close(fd_sock);
+    printf("2\n");
     if (leds.fd_spi != -1) close(leds.fd_spi);
+    printf("3\n");
     if (leds.pixels) free(leds.pixels);
+    printf("4\n");
     if (client_daemon != NULL) pthread_cancel(*client_daemon);
+    printf("5\n");
+    pthread_cancel(curr_thread);
+    printf("6\n");
     exit(status);
 }
 
