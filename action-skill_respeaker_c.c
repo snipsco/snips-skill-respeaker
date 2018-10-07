@@ -12,7 +12,7 @@ pthread_t   curr_thread;
 const char	*addr;
 const char	*port;
 
-char 		*client_id;
+
 
 const char* topic[NUM_TOPIC]={
 	"hermes/hotword/toggleOff",
@@ -55,6 +55,7 @@ void (*status[9])(const char *)={
 int main(int argc, char const *argv[])
 {	
 	int i;
+	char 	*client_id;
 	// generate a random id as client id
 	client_id = generate_client_id();
 
@@ -74,7 +75,7 @@ int main(int argc, char const *argv[])
     uint8_t sendbuf[2048]; /* sendbuf should be large enough to hold multiple whole mqtt messages */
     uint8_t recvbuf[1024]; /* recvbuf should be large enough any whole mqtt message expected to be received */
     mqtt_init(&client, sockfd, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback);
-    mqtt_connect(&client, "subscribing_client", NULL, NULL, 0, NULL, NULL, 0, 400);
+    mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
     /* check that we don't have any errors */
     if (client.error != MQTT_OK) {
         fprintf(stderr, "error: %s\n", mqtt_error_str(client.error));
@@ -93,7 +94,9 @@ int main(int argc, char const *argv[])
     }
     apa102_spi_setup();
     /* start publishing the time */
-    printf("%s listening to MQTT bus: '%s:%s'\n", argv[0],addr, port);
+    printf("[Info] Client id : %s\n", client_id);
+    printf("[Info] Program : %s\n", argv[0]);
+    printf("Listening to MQTT bus: %s:%s with id: %s\n",addr, port, client_id);
     printf("Press CTRL-D to exit.\n\n");
     
     /* block */
@@ -172,7 +175,7 @@ void* client_refresher(void* client){
     return NULL;
 }
 
-char* generate_client_id(){
+char *generate_client_id(){
     int i ,flag;
     static char id[CLIENT_ID_LEN + 1] = {0};
     srand(time(NULL));
