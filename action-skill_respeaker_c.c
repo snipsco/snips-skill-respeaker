@@ -28,16 +28,16 @@ const char* topic[NUM_TOPIC]={
 };
 
 snipsSkillConfig configList[]={
-    {"model", "rsp2mic"},
-    {"spi_dev", "0:0"},
-    {"led_num", "3"},
-    {"mqtt_host", "localhost"},
-    {"mqtt_port", "1883"},
-    {"if_idle", "True"},
-    {"if_listen", "True"},
-    {"if_think", "True"},
-    {"if_mute", "True"},
-    {"if_unmute", "True"}
+    {"model", 0},
+    {"spi_dev", 0},
+    {"led_num", 0},
+    {"mqtt_host", 0},
+    {"mqtt_port", 0},
+    {"if_idle", 0},
+    {"if_listen", 0},
+    {"if_think", 0},
+    {"if_mute", 0},
+    {"if_unmute", 0}
 };
 
 void (*status[9])(const char *)={ 
@@ -54,11 +54,17 @@ void (*status[9])(const char *)={
 
 int main(int argc, char const *argv[])
 {	
-	int i;
+	int i,j;
 	char 	*client_id;
 	// generate a random id as client id
 	client_id = generate_client_id();
 
+	// get config.ini
+	config("config.ini", configList, sizeof(configList)/sizeof(snipsSkillConfig));
+	
+	for(j=0; j<sizeof(configList)/sizeof(snipsSkillConfig); j++){
+        printf("[CONFIG] %s = %s \n", configList[j].key, configList[j].value);
+    }
 	// get input parameters
     leds.numLEDs = (argc > 1)? atoi(argv[1]) : 3;
     addr = (argc > 2)? argv[2] : "localhost";
@@ -109,6 +115,15 @@ int main(int argc, char const *argv[])
     // clean
     close_all(EXIT_SUCCESS, &client_daemon);
 	return 0;
+}
+
+void switch_on_power(){
+	char *value;
+	value = get_config_value("model", configList);
+	if (strcmp(value, "rsp_corev2") == 0)
+	{
+		printf("[Info] Need to power on! \n");
+	}
 }
 
 void apa102_spi_setup(){

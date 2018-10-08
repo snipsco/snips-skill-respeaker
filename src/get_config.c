@@ -7,7 +7,7 @@ int strkv(char *src, char *key, char *value)
  
     if(*src == '#') return 0; // # ignore commento
     p = strchr(src, '=');   // p find =
-    q = strchr(src, 'n');   // q find \n
+    q = strchr(src, '\n');   // q find \n
  
     // if both p & q
     if (p != NULL && q != NULL){
@@ -29,16 +29,16 @@ void config(char *configFilePath, snipsSkillConfig *configVar, int configNum)
     char value[50]=""; 
  
     // open config file
-    fd = fopen(configFilePath, "r");
+    fd = fopen("/home/respeaker/snips-skill-respeaker-c/bin/config.ini" , "r");
  
     if (fd == NULL){
         printf("can not open config file");
-        system("pause");
         exit(-1);
     }
  
     // get one line by one line
     while(fgets(buf, 50, fd)){
+        printf("[BUF] %s\n", buf);
         // get key-value
         if (strkv(buf, key, value)){
             // if read success, compare with pre-set key
@@ -55,7 +55,7 @@ void config(char *configFilePath, snipsSkillConfig *configVar, int configNum)
     fclose(fd);
 }
 
-char *get_default_config_value(char *key, snipsSkillConfig *configVar){
+char *get_config_value(char *key, snipsSkillConfig *configVar){
     char *target_key = key;
     int i;
     static char *res_value="";

@@ -40,7 +40,9 @@ void *on_idle(){
                 usleep(10000);
             }
         }
-        
+
+        set_index_rgb(led, 0, 0, 0);
+        show();
         // every 5 seconds
         for (int j = 0; j < 500; j++){
             // each 0.05s check
