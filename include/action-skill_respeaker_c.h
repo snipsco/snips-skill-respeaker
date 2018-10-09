@@ -13,6 +13,8 @@
 #include <get_config.h>
 #include <animation.h>
 
+#include <unistd.h>
+
 #define CLIENT_ID_LEN 	10
 #define NUM_TOPIC 		10
 

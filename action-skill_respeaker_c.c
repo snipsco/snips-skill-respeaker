@@ -1,6 +1,7 @@
 #include "action-skill_respeaker_c.h"
 // all share
-APA102 leds = {0, -1, NULL};
+
+APA102 leds = {0, -1, NULL, 127};
 short last_state = 0;
 short curr_state = 0;
 
@@ -29,6 +30,7 @@ snipsSkillConfig configList[]={
     {"model", 0},
     {"spi_dev", 0},
     {"led_num", 0},
+    {"led_bri", 0},
     {"mqtt_host", 0},
     {"mqtt_port", 0},
     {"if_idle", 0},
@@ -71,12 +73,15 @@ int main(int argc, char const *argv[])
     
 	// get config.ini
 	config(configList, CONFIG_NUM);
-    
+
     switch_on_power();
 	// get input parameters
     leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[2].value);
-    addr = (argc > 2)? argv[2] : configList[3].value; // mqtt_host
-    port = (argc > 3)? argv[3] : configList[4].value; // mqtt_port
+    addr = (argc > 2)? argv[2] : configList[4].value; // mqtt_host
+    port = (argc > 3)? argv[3] : configList[5].value; // mqtt_port
+    
+    // get config parameters
+    leds.brightness = (strlen(configList[3].value) != 0) ? atoi(configList[3].value) : 127;
     
     /* open the non-blocking TCP socket (connecting to the broker) */
     int sockfd = open_nb_socket(addr, port);
@@ -111,9 +116,9 @@ int main(int argc, char const *argv[])
     printf("[Info] Initilisation looks good.....\n");
     printf("[Info] Client id : %s\n", client_id);
     printf("[Info] Program : %s\n", argv[0]);
-    printf("[Info] LED number : %d\n", leds.numLEDs);
+    printf("[Info] LED number : %d with max brightness: %d\n", leds.numLEDs, leds.brightness);
     printf("[Info] Device : %s\n", configList[0].value);
-    printf("[Info] Listening to MQTT bus: %s:%s with id: %s\n",addr, port, client_id);
+    printf("[Info] Listening to MQTT bus: %s:%s \n",addr, port);
     printf("[Info] Press CTRL-D to exit.\n\n");
     
     /* block */
@@ -129,8 +134,43 @@ int main(int argc, char const *argv[])
 }
 
 void switch_on_power(){
+    int fd_gpio;
+    char gpio_66 = {'6','6'};
+    char direction[] = {'o','u','t'};
+    char value[] = {'0'};
+
     if(if_config_true("model", configList, "rsp_corev2")){
-        printf("[Info] Need to power on! \n");
+        // export gpio
+        fd_gpio = open("/sys/class/gpio/export", O_RDWR);
+        if(write(fd_gpio, gpio_66, sizeof(gpio_66))){
+            printf("[Info] Exported GPIO66..\n");
+            close(fd_gpio);
+        }
+        else{
+            printf("[Info] Failed to GPIO66..\n");
+            return;
+        }
+        // set direction
+        fd_gpio = open("/sys/class/gpio/export/gpio66/direction", O_RDWR);
+        if(write(fd_gpio, direction, sizeof(direction))){
+            printf("[Info] Set GPIO66 direction out..\n");
+            close(fd_gpio);
+        }
+        else{
+            printf("[Info] Failed to set GPIO66 direction..\n");
+            return;
+        }
+        // enable by set to 0
+        fd_gpio = open("/sys/class/gpio/export/gpio66/value", O_RDWR);
+        if(write(fd_gpio, value, sizeof(value))){
+            printf("[Info] Set GPIO66 direction out..\n");
+            close(fd_gpio);
+        }
+        else{
+            printf("[Info] Failed to set GPIO66 direction..\n");
+            return;
+        }
+
     }
 }
 
@@ -155,33 +195,50 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     last_state = curr_state;
 
     switch(curr_state){
-        case 0:
+        case 0: // on idle
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
                 curr_state = 1;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
                 curr_state = 4;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
                 curr_state = 5;
-            break;
-        case 1:
-            if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
-                curr_state = 2;
-            else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                curr_state = 0;
-            break;
-        case 2:
-            if (strcmp(topic_name, "hermes/tts/say") == 0)
+            else if (strcmp(topic_name, "hermes/tts/say") == 0)
                 curr_state = 3;
+            break;
+        case 1: // on listen
+            if (strcmp(topic_name, "hermes/nlu/intentParsed") == 0)
+                curr_state = 6;
+            else if (strcmp(topic_name, "hermes/nlu/intentNotRecognized") == 0)
+                curr_state = 7;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
                 curr_state = 0;
             break;
-        case 3:
+        case 2: // on think -> too fast to perform
+            if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
+                curr_state = 0;
+            break;
+        case 3: // on speak
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
                 curr_state = 0;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
                 curr_state = 0;
             break;
-        
+        case 4: // to mute
+            if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
+                curr_state = 1;
+            break;
+        case 5:// to unmute
+            if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
+                curr_state = 1;
+            break;
+        case 6: // on success
+            if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
+                curr_state = 0;
+            break;
+        case 7: // on error
+            if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
+                curr_state = 0;
+            break;
     }
 
     
@@ -224,6 +281,18 @@ char *generate_client_id(){
 }
 
 void close_all(int status, pthread_t *client_daemon){
+    int fd_gpio;
+    char gpio_66[]={'6','6'};
+
+    if(if_config_true("model", configList, "rsp_corev2")){
+        fd_gpio = open("/sys/class/gpio/unexport", O_RDWR);
+        if(write(fd_gpio, gpio_66, sizeof(gpio_66))){
+            printf("[Info] Closed GPIO66..\n");
+            close(fd_gpio);
+        }  
+    }
+    
+
     printf("1\n");
     if (fd_sock != -1) close(fd_sock);
     printf("2\n");

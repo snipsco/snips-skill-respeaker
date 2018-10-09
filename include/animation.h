@@ -5,6 +5,8 @@
 	#include <typedef.h>
 #endif
 
+#define STEP_COUNT 20
+
 void *on_off(void);
 void *on_idle(void);
 void *on_listen(void);
