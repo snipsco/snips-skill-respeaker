@@ -9,7 +9,7 @@ typedef struct{
 
 
 int strkv(char *src, char *key, char *value);
-void config(char *configFilePath, snipsSkillConfig *configVar, int configNum);
+void config(snipsSkillConfig *configVar, int configNum);
 char *get_config_value(char *key, snipsSkillConfig *configVar);
 
 // Usage

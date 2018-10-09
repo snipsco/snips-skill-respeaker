@@ -60,7 +60,7 @@ int main(int argc, char const *argv[])
 	client_id = generate_client_id();
 
 	// get config.ini
-	config("config.ini", configList, sizeof(configList)/sizeof(snipsSkillConfig));
+	config(configList, sizeof(configList)/sizeof(snipsSkillConfig));
 	
 	for(j=0; j<sizeof(configList)/sizeof(snipsSkillConfig); j++){
         printf("[CONFIG] %s = %s \n", configList[j].key, configList[j].value);
