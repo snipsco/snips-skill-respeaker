@@ -48,7 +48,7 @@ const char* status_s[]={
     "on_success",   //6
     "on_error",     //7
     "on_off"        //8
-}
+};
 
 void (*status[9])(const char *)={ 
 	on_idle, 
@@ -76,9 +76,9 @@ int main(int argc, char const *argv[])
     }
     switch_on_power();
 	// get input parameters
-    leds.numLEDs = (argc > 1)? atoi(argv[1]) : 3;
-    addr = (argc > 2)? argv[2] : "localhost";
-    port = (argc > 3)? argv[3] : "1883";
+    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[2].value);
+    addr = (argc > 2)? argv[2] : configList[3].value; // mqtt_host
+    port = (argc > 3)? argv[3] : configList[4].value; // mqtt_port
     
     /* open the non-blocking TCP socket (connecting to the broker) */
     int sockfd = open_nb_socket(addr, port);
@@ -112,14 +112,14 @@ int main(int argc, char const *argv[])
     /* start publishing the time */
     printf("[Info] Client id : %s\n", client_id);
     printf("[Info] Program : %s\n", argv[0]);
-    printf("Listening to MQTT bus: %s:%s with id: %s\n",addr, port, client_id);
-    printf("Press CTRL-D to exit.\n\n");
+    printf("[Info] Listening to MQTT bus: %s:%s with id: %s\n",addr, port, client_id);
+    printf("[Info] Press CTRL-D to exit.\n\n");
     
     /* block */
     while(fgetc(stdin) != EOF); 
 
     // disconnect
-    printf("\n%s disconnecting from %s\n", argv[0], addr);
+    printf("[Info] %s disconnecting from %s\n", argv[0], addr);
     sleep(1);
 
     // clean
@@ -151,40 +151,43 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
 
     printf("[Received] %s \n", topic_name);
 
+    last_state = curr_state;
+
     switch(curr_state){
         case 0:
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                last_state = curr_state, curr_state = 1;
+                curr_state = 1;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
-                last_state = curr_state, curr_state = 4;
+                curr_state = 4;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
-                last_state = curr_state, curr_state = 5;
+                curr_state = 5;
             break;
         case 1:
             if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
-                last_state = curr_state, curr_state = 2;
+                curr_state = 2;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                last_state = curr_state, curr_state = 0;
+                curr_state = 0;
             break;
         case 2:
             if (strcmp(topic_name, "hermes/tts/say") == 0)
-                last_state = curr_state, curr_state = 3;
+                curr_state = 3;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                last_state = curr_state, curr_state = 0;
+                curr_state = 0;
             break;
         case 3:
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                last_state = curr_state, curr_state = 0;
+                curr_state = 0;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                last_state = curr_state, curr_state = 0;
+                curr_state = 0;
             break;
         
     }
 
-    printf("[Info] State is changed to %d\n", curr_state);
-    if (last_state != curr_state && if_config_true(status_s[curr], configList, NULL))
-
+    
+    if (last_state != curr_state && if_config_true(status_s[curr_state], configList, NULL)){
+        printf("[Info] State is changed to %d\n", curr_state);
         pthread_create(&curr_thread, NULL, status[curr_state], NULL);
+    }
 
     free(topic_name);
 }

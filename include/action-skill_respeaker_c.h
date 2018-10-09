@@ -13,8 +13,8 @@
 #include <get_config.h>
 #include <animation.h>
 
-#define CLIENT_ID_LEN 10
-#define NUM_TOPIC 10
+#define CLIENT_ID_LEN 	10
+#define NUM_TOPIC 		10
 
 void apa102_spi_setup(void);
 void publish_callback(void** unused, struct mqtt_response_publish *published);
