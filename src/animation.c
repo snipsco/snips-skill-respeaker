@@ -1,7 +1,9 @@
 #include "animation.h"
 
-extern APA102 leds;
-extern short curr_state;
+extern APA102       leds;
+extern short        curr_state;
+extern short        last_state;
+extern pthread_t    curr_thread;
 
 extern numLEDs;
 extern fd_spi;
@@ -19,8 +21,7 @@ void *on_idle(){
         clear();
         led = rand()%leds.numLEDs;
 
-        for (curr_bri = 0; curr_bri < 101; curr_bri += 5)
-        {
+        for (curr_bri = 0; curr_bri < 101; curr_bri += 5){
             set_index_rgb(led, 0, curr_bri, 0);
             show();
             for (int j = 0; j < 10; j++){
@@ -30,8 +31,7 @@ void *on_idle(){
             }
         }
 
-        for (curr_bri = 100; curr_bri > 0; curr_bri -= 5)
-        {
+        for (curr_bri = 100; curr_bri > 0; curr_bri -= 5){
             set_index_rgb(led, 0, curr_bri, 0);
             show();
             for (int j = 0; j < 10; j++){
@@ -83,9 +83,9 @@ void *on_think(){
     clear();
     group = leds.numLEDs/3;
     while(curr_state == 2){
-        for(i=2; i>0; i--){
+        for(i=3; i>0; i--){
             for (g=0; g < group; g++)
-                set_index_rgb(g*3+i, 0, 255, 255);
+                set_index_rgb(g*3+i-1, 0, 255, 255);
             show();
             if(curr_state != 2) {clear();return((void *)2);}
             usleep(100000);
@@ -105,12 +105,86 @@ void *on_speak(){
 
 // 4
 void *to_mute(){
-    ;
+    uint8_t j;
+    uint8_t curr_bri = 0;
+    printf("[Thread] ------>  to_mute started\n");
+    clear();
+        
+    for (curr_bri = 0; curr_bri < 101; curr_bri += 5){
+        for (j = 0; j < leds.numLEDs; j++)
+            set_index_rgb(j, 0, 0, curr_bri);
+
+        show();
+        for (int j = 0; j < 10; j++){
+            // each 0.01s check
+            if(curr_state != 4) {clear();return((void *)0);}
+            usleep(10000);
+        }
+    }
+
+    for (curr_bri = 100; curr_bri > 0; curr_bri -= 5){
+        for (j = 0; j < leds.numLEDs; j++)
+            set_index_rgb(j, 0, 0, curr_bri);
+
+        show();
+        for (int j = 0; j < 10; j++){
+            // each 0.01s check
+            if(curr_state != 4) {clear();return((void *)0);}
+            usleep(10000);
+        }
+    }
+
+    for (j = 0; j < leds.numLEDs; j++)
+        set_index_rgb(j, 0, 0, 0);
+    show();
+
+    last_state = curr_state;
+    curr_state = 0;
+    pthread_create(&curr_thread, NULL, on_idle, NULL);
+    clear();
+    return((void *)0);
 }
 
 // 5
 void *to_unmute(){
-    ;
+    uint8_t j;
+    uint8_t curr_bri = 0;
+    printf("[Thread] ------>  to_mute started\n");
+    clear();
+        
+    for (curr_bri = 0; curr_bri < 101; curr_bri += 5){
+        for (j = 0; j < leds.numLEDs; j++)
+            set_index_rgb(j, curr_bri, 0, 0);
+
+        show();
+        for (int j = 0; j < 10; j++){
+            // each 0.01s check
+            if(curr_state != 5) {clear();return((void *)0);}
+            usleep(10000);
+        }
+    }
+
+    for (curr_bri = 100; curr_bri > 0; curr_bri -= 5){
+        for (j = 0; j < leds.numLEDs; j++)
+            set_index_rgb(j, curr_bri, 0, 0);
+
+        show();
+        for (int j = 0; j < 10; j++){
+            // each 0.01s check
+            if(curr_state != 5) {clear();return((void *)0);}
+            usleep(10000);
+        }
+    }
+
+    for (j = 0; j < leds.numLEDs; j++)
+        set_index_rgb(j, 0, 0, 0);
+    show();
+
+    last_state = curr_state;
+    curr_state = 0;
+    pthread_create(&curr_thread, NULL, on_idle, NULL);
+    clear();
+    return((void *)0);
 }
 
 // 7 

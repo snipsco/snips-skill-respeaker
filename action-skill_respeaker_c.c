@@ -64,16 +64,14 @@ void (*status[9])(const char *)={
 
 int main(int argc, char const *argv[])
 {	
-	int i,j;
+	int i;
 	char 	*client_id;
 	// generate a random id as client id
 	client_id = generate_client_id();
     
 	// get config.ini
 	config(configList, CONFIG_NUM);
-	for(j=0; j<CONFIG_NUM; j++){
-        printf("[CONFIG] %s = %s \n", configList[j].key, configList[j].value);
-    }
+    
     switch_on_power();
 	// get input parameters
     leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[2].value);
@@ -110,8 +108,11 @@ int main(int argc, char const *argv[])
     }
     apa102_spi_setup();
     /* start publishing the time */
+    printf("[Info] Initilisation looks good.....\n");
     printf("[Info] Client id : %s\n", client_id);
     printf("[Info] Program : %s\n", argv[0]);
+    printf("[Info] LED number : %d\n", leds.numLEDs);
+    printf("[Info] Device : %s\n", configList[0].value);
     printf("[Info] Listening to MQTT bus: %s:%s with id: %s\n",addr, port, client_id);
     printf("[Info] Press CTRL-D to exit.\n\n");
     
