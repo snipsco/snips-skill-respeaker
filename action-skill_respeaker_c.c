@@ -12,8 +12,6 @@ pthread_t   curr_thread;
 const char	*addr;
 const char	*port;
 
-
-
 const char* topic[NUM_TOPIC]={
 	"hermes/hotword/toggleOff",
     "hermes/asr/startListening",
@@ -40,6 +38,18 @@ snipsSkillConfig configList[]={
     {"if_unmute", 0}
 };
 
+const char* status_s[]={
+    "on_idle",      //0
+    "on_listen",    //1
+    "on_think",     //2
+    "on_speak",     //3
+    "to_mute",      //4
+    "to_unmute",    //5
+    "on_success",   //6
+    "on_error",     //7
+    "on_off"        //8
+}
+
 void (*status[9])(const char *)={ 
 	on_idle, 
 	on_listen, 
@@ -58,13 +68,13 @@ int main(int argc, char const *argv[])
 	char 	*client_id;
 	// generate a random id as client id
 	client_id = generate_client_id();
-
+    
 	// get config.ini
-	config(configList, sizeof(configList)/sizeof(snipsSkillConfig));
-	
-	for(j=0; j<sizeof(configList)/sizeof(snipsSkillConfig); j++){
+	config(configList, CONFIG_NUM);
+	for(j=0; j<CONFIG_NUM; j++){
         printf("[CONFIG] %s = %s \n", configList[j].key, configList[j].value);
     }
+    switch_on_power();
 	// get input parameters
     leds.numLEDs = (argc > 1)? atoi(argv[1]) : 3;
     addr = (argc > 2)? argv[2] : "localhost";
@@ -118,12 +128,9 @@ int main(int argc, char const *argv[])
 }
 
 void switch_on_power(){
-	char *value;
-	value = get_config_value("model", configList);
-	if (strcmp(value, "rsp_corev2") == 0)
-	{
-		printf("[Info] Need to power on! \n");
-	}
+    if(if_config_true("model", configList, "rsp_corev2")){
+        printf("[Info] Need to power on! \n");
+    }
 }
 
 void apa102_spi_setup(){
@@ -175,7 +182,8 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     }
 
     printf("[Info] State is changed to %d\n", curr_state);
-    if (last_state != curr_state)
+    if (last_state != curr_state && if_config_true(status_s[curr], configList, NULL))
+
         pthread_create(&curr_thread, NULL, status[curr_state], NULL);
 
     free(topic_name);
