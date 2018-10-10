@@ -1,6 +1,12 @@
 #include "action-skill_respeaker_c.h"
 // all share
 
+volatile sig_atomic_t flag = 0;
+
+static void int_handler(int sig){
+  flag = 1;
+}
+
 APA102 leds = {0, -1, NULL, 127};
 short last_state = 0;
 short curr_state = 0;
@@ -72,7 +78,7 @@ int main(int argc, char const *argv[])
 	char 	*client_id;
 	// generate a random id as client id
 	client_id = generate_client_id();
-    
+    signal(SIGINT, int_handler);
 	// get config.ini
 	config(configList, CONFIG_NUM);
 
@@ -121,11 +127,14 @@ int main(int argc, char const *argv[])
     printf("[Info] LED number : %d with max brightness: %d\n", leds.numLEDs, leds.brightness);
     printf("[Info] Device : %s\n", configList[0].value);
     printf("[Info] Listening to MQTT bus: %s:%s \n",addr, port);
-    printf("[Info] Press CTRL-D to exit.\n\n");
+    printf("[Info] Press CTRL-C to exit.\n\n");
     
     /* block */
-    while(fgetc(stdin) != EOF); 
-
+    //while(fgetc(stdin) != EOF); 
+    while(1){
+        if (flag) break;
+        sleep(1);
+    }
     // disconnect
     printf("[Info] %s disconnecting from %s\n", argv[0], addr);
     sleep(1);
