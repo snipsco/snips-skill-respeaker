@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 #define CLIENT_ID_LEN 	10
-#define NUM_TOPIC 		10
+#define NUM_TOPIC 		12
 
 void apa102_spi_setup(void);
 void publish_callback(void** unused, struct mqtt_response_publish *published);

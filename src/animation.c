@@ -139,7 +139,6 @@ void *on_speak(){
         }
         curr_bri = leds.brightness;
         for (curr_bri = leds.brightness; curr_bri > 0; curr_bri -= step){
-            printf("current brightness is %d\n", curr_bri);
             for (j = 0; j < leds.numLEDs; j++)
                 set_index_rgb(j, curr_bri, 0, curr_bri);
 
@@ -309,7 +308,18 @@ void *on_error(){
     return((void *)2);
 }
 
-// 7
+// 8
 void *on_off(){
-    ;
+    uint8_t j;
+    printf("[Thread] ------>  on_off started\n");
+    while(curr_state == 8){
+        clear();
+        for (int j = 0; j < 10; j++){
+            // each 0.01s check
+            if(curr_state != 8) {clear();return((void *)0);}
+            usleep(10000);
+        }
+    }
+    clear();
+    return((void *)0);
 }
