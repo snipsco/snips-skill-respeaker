@@ -200,9 +200,18 @@ void switch_on_power(){
 }
 
 void apa102_spi_setup(){
-    int temp;
+    int temp,i;
     leds.pixels = (uint8_t *)malloc(leds.numLEDs * 4);
-    begin();
+    if (begin()){
+        for (i = 0; i < 3; i++){
+            printf("[Error] Failed to start SPI! Retrying..%d\n",i+1); 
+            sleep(30);
+            if (begin() == 0) goto START_THREAD;
+        }
+        printf("[Error] Failed to start SPI!\n"); 
+        close_all(EXIT_FAILURE, NULL);
+    }
+    START_THREAD:
     if((temp = pthread_create(&curr_thread, NULL, on_idle, NULL)) != 0){
         printf("[Error] Failed to create 1st thread!\n"); 
     	close_all(EXIT_FAILURE, NULL);

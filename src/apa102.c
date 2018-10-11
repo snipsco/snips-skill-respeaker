@@ -2,12 +2,14 @@
 
 extern APA102 leds;
 
-void begin(void){
+int begin(void){
     if((leds.fd_spi = open("/dev/spidev0.0", O_RDWR)) < 0) {
         printf("[Error] Can't open /dev/spidev0.0 (try 'sudo')");
+        return -1;
     }
     ioctl(leds.fd_spi, SPI_IOC_WR_MODE, SPI_MODE_0 | SPI_NO_CS);
     ioctl(leds.fd_spi, SPI_IOC_WR_MAX_SPEED_HZ, BITRATE);
+    return 0;
 }
 
 void set_index_rgb(uint8_t index, uint8_t r, uint8_t g, uint8_t b){
