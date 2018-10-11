@@ -1,4 +1,4 @@
-#include "action-skill_respeaker_c.h"
+#include "app.h"
 // all share
 
 volatile sig_atomic_t flag = 0;
