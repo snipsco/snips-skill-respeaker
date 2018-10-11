@@ -2,7 +2,7 @@
 
 make
 
-if [ -e "./action-skill_respeaker" ]
+if [ -e "./action-app_respeaker" ]
 then
     echo "compile done"
 else
