@@ -8,9 +8,9 @@ CFLAGS = 	-Ofast -std=gnu99 -w\
 
 SOURCES = src/mqtt.c src/mqtt_pal.c src/animation.c src/apa102.c src/get_config.c
 
-APP = action-skill_respeaker
+APP = action-app_respeaker
 
 all: $(APP)
 
-$(APP): main/action-skill_respeaker_c.c $(SOURCES)
+$(APP): main/app.c $(SOURCES)
 	$(CC) $(CFLAGS) $^ -lpthread -o $@
