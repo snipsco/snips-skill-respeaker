@@ -1,9 +1,7 @@
 CC = gcc
 
-CFLAGS = 	-Ofast -Wextra -std=gnu99 -Wall\
+CFLAGS = 	-Ofast -std=gnu99 -w\
 		 	-Iinclude\
-			-Wno-unused-parameter\
-			-Wno-unused-variable\
 			-fomit-frame-pointer \
 			-I/opt/vc/include\
 			-L/opt/vc/lib
