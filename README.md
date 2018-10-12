@@ -37,11 +37,11 @@ cd /var/lib/snips/skills/snips-skill-respeaker-c
 
 Mode change follows hermes procotol
 
-#### To turn on/
+#### Turn on
 ```
 hermes/feedback/sound/toggleOn
 ```
-#### To turn off/
+#### Turn off
 ```
 hermes/feedback/sound/toggleOff
 ```
