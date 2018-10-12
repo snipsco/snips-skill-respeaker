@@ -1,20 +1,20 @@
 ## Status
 
-***```"On idle: random led breathe in green"```***
+***```On idle: random led breathe in green```***
 
-***```"On listen: all leds start to flush in blue"```***
+***```On listen: all leds start to flush in blue```***
 
-***```"On speak: all leds start to breathe in purple"```***
+***```On speak: all leds start to breathe in purple```***
 
-***```"On success: all leds reverse flush in green"```***
+***```On success: all leds reverse flush in green```***
 
-***```"On error: all leds reverse flush in red"```***
+***```On error: all leds reverse flush in red```***
 
-***```"To mute: all leds breathe once in red"```***
+***```To mute: all leds breathe once in red```***
 
-***```"To unmute: all leds breathe once in blue"```***
+***```To unmute: all leds breathe once in blue```***
 
-***```"On off: all leds turn off"```***
+***```On off: all leds turn off```***
 
 ## Installation
 
@@ -45,3 +45,7 @@ hermes/feedback/sound/toggleOn
 ```
 hermes/feedback/sound/toggleOff
 ```
+
+## Brightness
+
+You can adjust the max brightness in the `config.ini` file, keep in mind that the range is between 0-255(Most bright). 
