@@ -20,7 +20,7 @@ const char	*addr;
 const char	*port;
 
 const char* topic[NUM_TOPIC]={
-	"hermes/hotword/toggleOff",
+    "hermes/hotword/toggleOff",
     "hermes/asr/startListening",
     "hermes/asr/stopListening",
     "hermes/tts/say",
@@ -61,36 +61,36 @@ const char* status_s[]={
 };
 
 void (*status[9])(const char *)={ 
-	on_idle, 
-	on_listen, 
-	on_think, 
-	on_speak, 
-	to_mute, 
-	to_unmute, 
-	on_success, 
-	on_error, 
-	on_off
+    on_idle, 
+    on_listen, 
+    on_think, 
+    on_speak, 
+    to_mute, 
+    to_unmute, 
+    on_success, 
+    on_error, 
+    on_off
 };
 
 int main(int argc, char const *argv[])
 {	
-	int i;
-	char 	*client_id;
-	// generate a random id as client id
-	client_id = generate_client_id();
+    int i;
+    char *client_id;
+    // generate a random id as client id
+    client_id = generate_client_id();
     signal(SIGINT, int_handler);
-	// get config.ini
-	config(configList, CONFIG_NUM);
+    // get config.ini
+    config(configList, CONFIG_NUM);
 
     switch_on_power();
-	// get input parameters
+    // get input parameters
     leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[2].value);
     addr = (argc > 2)? argv[2] : configList[4].value; // mqtt_host
     port = (argc > 3)? argv[3] : configList[5].value; // mqtt_port
-    
+
     // get config parameters
     leds.brightness = (strlen(configList[3].value) != 0) ? atoi(configList[3].value) : 127;
-    
+
     /* open the non-blocking TCP socket (connecting to the broker) */
     int sockfd = open_nb_socket(addr, port);
     if (sockfd == -1) {
@@ -128,7 +128,7 @@ int main(int argc, char const *argv[])
     printf("[Info] Device : %s\n", configList[0].value);
     printf("[Info] Listening to MQTT bus: %s:%s \n",addr, port);
     printf("[Info] Press CTRL-C to exit.\n\n");
-    
+
     /* block */
     //while(fgetc(stdin) != EOF); 
     while(1){
@@ -141,7 +141,7 @@ int main(int argc, char const *argv[])
 
     // clean
     close_all(EXIT_SUCCESS, &client_daemon);
-	return 0;
+    return 0;
 }
 
 void switch_on_power(){
