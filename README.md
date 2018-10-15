@@ -1,20 +1,20 @@
 ## Status
 
-***:sleeping: ``` On idle: random led breathe in green```***
+:sleeping: ***``` On idle: random led breathe in green```***
 
-***:smiley: ```On listen: all leds start to flush in blue```***
+:smiley: ***```On listen: all leds start to blink in blue```***
 
-***:loudspeaker: ```On speak: all leds start to breathe in purple```***
+:loudspeaker: ***```On speak: all leds start to breathe in purple```***
 
-***:ok_hand: ```On success: all leds reverse flush in green```***
+:ok_hand: ***```On success: all leds reverse blink in green```***
 
-***:exclamation: ```On error: all leds reverse flush in red```***
+:exclamation: ***```On error: all leds reverse blink in red```***
 
-***:speak_no_evil: ```To mute: all leds breathe once in red```***
+:speak_no_evil: ***```To mute: all leds breathe once in red```***
 
-***:smile_cat: ```To unmute: all leds breathe once in blue```***
+:smile_cat: ***```To unmute: all leds breathe once in blue```***
 
-***:see_no_evil: ```On off: all leds turn off```***
+:see_no_evil: ***```On off: all leds turn off```***
 
 ## Installation
 
@@ -59,6 +59,9 @@ You can enable or disable a certain animation. By doing this, modify the `config
 By default, the `on_success` and `on_error` animation is disabled.
 
 ## Nightmode(Coming)
+
 `nightmode`: enable/disable night mode.
+
 `go_sleep` : set the time when led turn itself off. 
+
 `go_weak` : set the time when the led turn itself on.
