@@ -33,7 +33,7 @@ cd /var/lib/snips/skills/snips-skill-respeaker-c
 ./setup.sh
 ```
 
-## ON/OFF mode
+## On/Off mode
 
 Mode change follows hermes procotol
 
@@ -49,3 +49,11 @@ hermes/feedback/sound/toggleOff
 ## Brightness
 
 You can adjust the max brightness in the `config.ini` file, keep in mind that the range is between 0-255(Most bright). 
+
+## Animation
+
+You can enable or disable a certain animation. By doing this, modify the `config.ini` file. 
+
+`1` stands for turn on and `0` stands for turn off.
+
+By default, the `on_success` and `on_error` animation is disabled.
