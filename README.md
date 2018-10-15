@@ -1,20 +1,20 @@
 ## Status
 
-***```On idle: random led breathe in green```***
+***:sleeping: ``` On idle: random led breathe in green```***
 
-***```On listen: all leds start to flush in blue```***
+***:smiley: ```On listen: all leds start to flush in blue```***
 
-***```On speak: all leds start to breathe in purple```***
+***:loudspeaker: ```On speak: all leds start to breathe in purple```***
 
-***```On success: all leds reverse flush in green```***
+***:ok_hand: ```On success: all leds reverse flush in green```***
 
-***```On error: all leds reverse flush in red```***
+***:exclamation: ```On error: all leds reverse flush in red```***
 
-***```To mute: all leds breathe once in red```***
+***:speak_no_evil: ```To mute: all leds breathe once in red```***
 
-***```To unmute: all leds breathe once in blue```***
+***:smile_cat: ```To unmute: all leds breathe once in blue```***
 
-***```On off: all leds turn off```***
+***:see_no_evil: ```On off: all leds turn off```***
 
 ## Installation
 
@@ -35,7 +35,7 @@ cd /var/lib/snips/skills/snips-skill-respeaker-c
 
 ## On/Off mode
 
-Mode change follows hermes procotol
+Mode change follows hermes procotol.
 
 #### Turn on
 ```
@@ -57,3 +57,8 @@ You can enable or disable a certain animation. By doing this, modify the `config
 `1` stands for turn on and `0` stands for turn off.
 
 By default, the `on_success` and `on_error` animation is disabled.
+
+## Nightmode(Coming)
+`nightmode`: enable/disable night mode.
+`go_sleep` : set the time when led turn itself off. 
+`go_weak` : set the time when the led turn itself on.
