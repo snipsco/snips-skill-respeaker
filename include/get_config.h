@@ -1,6 +1,6 @@
 #include "snips_led.h"
 
-#define 	CONFIG_NUM 		10
+#define 	CONFIG_NUM 		13
 
 typedef struct{
     char key[20];

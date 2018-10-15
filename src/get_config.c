@@ -74,9 +74,11 @@ int if_config_true(char *key, snipsSkillConfig *configVar, char *value){
     res_value = get_config_value(key, configVar);
     if (value != NULL){
         return (strcmp(value, res_value) == 0 ) ? 1: 0;
-    }else{
-        if (strcmp("True", res_value) == 0 ) return 1;
-        if (strcmp("False", res_value) == 0 ) return 0;
+    }else if (value == NULL){
+	printf("key is %s\n",key);
+	printf("value is %s\n",res_value);
+        if (strcmp("1", res_value) == 0 ) return 1;
+        if (strcmp("0", res_value) == 0 ) return 0;
     }
     return -1;
 }

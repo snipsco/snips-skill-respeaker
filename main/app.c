@@ -41,11 +41,13 @@ snipsSkillConfig configList[]={
     {"led_bri", 0},
     {"mqtt_host", 0},
     {"mqtt_port", 0},
-    {"if_idle", 0},
-    {"if_listen", 0},
-    {"if_think", 0},
-    {"if_mute", 0},
-    {"if_unmute", 0}
+    {"on_idle", 0},
+    {"on_listen", 0},
+    {"on_speak", 0},
+    {"to_mute", 0},
+    {"to_unmute", 0},
+    {"on_success", 0},
+    {"on_error", 0}
 };
 
 const char* status_s[]={
@@ -118,6 +120,9 @@ int main(int argc, char const *argv[])
     for(i=0;i<NUM_TOPIC;i++){
         mqtt_subscribe(&client, topic[i], 0);
         printf("[Info] Subscribed to '%s'.\n", topic[i]);
+    }
+    for(i=0;i<13;i++){
+        printf("[Conf] %s - '%s'\n", configList[i].key, configList[i].value);
     }
     apa102_spi_setup();
     /* start publishing the time */
@@ -282,7 +287,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     }
 
     
-    if (last_state != curr_state && if_config_true(status_s[curr_state], configList, NULL)){
+    if (last_state != curr_state && if_config_true(status_s[curr_state], configList, NULL) == 1){
         printf("[Info] State is changed to %d\n", curr_state);
         pthread_create(&curr_thread, NULL, status[curr_state], NULL);
     }

@@ -70,13 +70,13 @@ void *on_listen(){
                 set_index_rgb(g*3+i, leds.brightness, 0, 0);
             if(curr_state != 1) {clear();return((void *)0);}
             show();
-            for (int j = 0; j < 10; j++){
+            for (int j = 0; j < 8; j++){
                 // each 0.01s check
                 if(curr_state != 1) {clear();return((void *)0);}
                 usleep(10000);
             }
             clear();
-            for (int j = 0; j < 10; j++){
+            for (int j = 0; j < 8; j++){
                 // each 0.01s check
                 if(curr_state != 1) {clear();return((void *)0);}
                 usleep(10000);
@@ -263,13 +263,13 @@ void *on_success(){
             for (g=0; g < group; g++)
                 set_index_rgb(g*3+i-1, 0, leds.brightness, 0);
             show();
-            for (int j = 0; j < 10; j++){
+            for (int j = 0; j < 8; j++){
                 // each 0.01s check
                 if(curr_state != 6) {clear();return((void *)0);}
                 usleep(10000);
             }
             clear();
-            for (int j = 0; j < 10; j++){
+            for (int j = 0; j < 8; j++){
                 // each 0.01s check
                 if(curr_state != 6) {clear();return((void *)0);}
                 usleep(10000);
@@ -291,13 +291,13 @@ void *on_error(){
             for (g=0; g < group; g++)
                 set_index_rgb(g*3+i-1, 0, 0, leds.brightness);
             show();
-            for (int j = 0; j < 10; j++){
+            for (int j = 0; j < 8; j++){
                 // each 0.01s check
                 if(curr_state != 7) {clear();return((void *)0);}
                 usleep(10000);
             }
             clear();
-            for (int j = 0; j < 10; j++){
+            for (int j = 0; j < 8; j++){
                 // each 0.01s check
                 if(curr_state != 7) {clear();return((void *)0);}
                 usleep(10000);
