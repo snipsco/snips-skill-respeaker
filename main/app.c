@@ -170,7 +170,7 @@ int main(int argc, char const *argv[])
 }
 
 void update_state_machine(void){
-    void *ret_val;
+    void *ret_val="NONE";
 
     if (if_config_true(status_s[curr_state], configList, NULL) == 1){
         printf("[Debug] State is changed to %d\n", curr_state);
