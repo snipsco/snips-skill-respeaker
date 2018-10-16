@@ -7,7 +7,6 @@ short                   flag_update = 1,
 
 
 APA102      leds = {0, -1, NULL, 127};
-short       last_state = 0;
 short       curr_state = 0;
 
 // self use
@@ -194,7 +193,6 @@ void check_nightmode(void){
     if(read_time->tm_hour == sleep_hour && 
         read_time->tm_min == sleep_minute &&
         curr_state != 8){
-        last_state = curr_state;
         curr_state = 8;
         flag_update = 1;
         printf("[Info] ------>  Nightmode started\n");
@@ -202,7 +200,6 @@ void check_nightmode(void){
     if(read_time->tm_hour == weak_hour && 
         read_time->tm_min == weak_minute &&
         curr_state == 8){
-        last_state = curr_state;
         curr_state = 0;
         flag_update = 1;
         printf("[Info] ------>  Nightmode terminated\n");
@@ -290,8 +287,6 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     topic_name[published->topic_name_size] = '\0';
 
     printf("[Received] %s \n", topic_name);
-
-    last_state = curr_state;
 
     switch(curr_state){
         case 0: // on idle

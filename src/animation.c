@@ -2,7 +2,6 @@
 
 extern APA102       leds;
 extern short        curr_state;
-extern short        last_state;
 extern short        flag_update;
 extern pthread_t    curr_thread;
 
@@ -215,9 +214,8 @@ void *to_mute(){
         set_index_rgb(j, 0, 0, 0);
     show();
     if(curr_state != 4) goto TERMINATE_THREAD;
-    last_state = curr_state;
     curr_state = 0;
-    pthread_create(&curr_thread, NULL, on_idle, NULL);
+    flag_update = 0;
     TERMINATE_THREAD:
     clear();
     return((void *)"TO_MUTE");
@@ -261,9 +259,8 @@ void *to_unmute(){
         set_index_rgb(j, 0, 0, 0);
     show();
     if(curr_state != 5) goto TERMINATE_THREAD;
-    last_state = curr_state;
     curr_state = 0;
-    pthread_create(&curr_thread, NULL, on_idle, NULL);
+    flag_update = 0;
     TERMINATE_THREAD:
     clear();
     return((void *)"TO_UNMUTE");
