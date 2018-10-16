@@ -78,9 +78,9 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | `go_sleep` | The time when it sleep | `HH:MM` (24h) | 
 | `go_weak` | The time when it weak up | `HH:MM` (24h) | 
 
-***To be able to use this function, please properly set your timezone***
+> ***To be able to use this function, please properly set your timezone***
 
-***Timezone setting: `sudo raspi-config` -> `Localisation Options` -> `Change Timezone` ***
+> ***Timezone setting: `sudo raspi-config` -> `Localisation Options` -> `Change Timezone`***
 
 ## On/Off mode
 
