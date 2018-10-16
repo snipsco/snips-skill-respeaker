@@ -1,3 +1,10 @@
+# APA102 LED / Respeaker hat
+
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/snipsco/snips-skill-owm/master/LICENSE.txt)
+![RPi 0](https://img.shields.io/badge/RPi%200-success-brightgreen.svg)
+![RPi 3](https://img.shields.io/badge/RPi%203-success-brightgreen.svg)
+![respeaker core v2](https://img.shields.io/badge/respeaker%20core%20v2-success-brightgreen.svg)
+
 ## Status
 
 :rocket: ***``` On idle: random led breathe in green```***
