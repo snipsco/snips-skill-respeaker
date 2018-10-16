@@ -1,6 +1,6 @@
 ## Status
 
-:sleeping: ***``` On idle: random led breathe in green```***
+:rocket: ***``` On idle: random led breathe in green```***
 
 :smiley: ***```On listen: all leds start to blink in blue```***
 
@@ -14,7 +14,7 @@
 
 :smile_cat: ***```To unmute: all leds breathe once in blue```***
 
-:see_no_evil: ***```On off: all leds turn off```***
+:zzz: ***```On off: all leds turn off```***
 
 ## Installation
 
@@ -88,12 +88,12 @@ Mode change follows hermes procotol.
 
 #### Turn on
 ```
-hermes/feedback/sound/toggleOn
+hermes/feedback/led/toggleOn
 ```
 No payload required for the moment, need to apply siteId later. 
 
 #### Turn off
 ```
-hermes/feedback/sound/toggleOff
+hermes/feedback/led/toggleOff
 ```
 No payload required for the moment, need to apply siteId later. 
