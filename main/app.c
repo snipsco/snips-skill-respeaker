@@ -329,6 +329,7 @@ void close_all(int status, pthread_t *client_daemon){
     int fd_gpio;
     char gpio_66[]={'6','6'};
 
+    clear();
     if(if_config_true("model", configList, "rsp_corev2")){
         fd_gpio = open("/sys/class/gpio/unexport", O_RDWR);
         if(write(fd_gpio, gpio_66, sizeof(gpio_66))){
