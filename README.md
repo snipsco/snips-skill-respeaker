@@ -58,7 +58,11 @@ You can enable or disable a certain animation. By doing this, modify the `config
 
 By default, the `on_success` and `on_error` animation is disabled.
 
-## Nightmode(Coming)
+## Nightmode
+
+***To be able to use this function, please properly set your timezone***
+
+***Timezone setting: `sudo raspi-config` -> `Localisation Options` -> `Change Timezone` ***
 
 `nightmode`: enable/disable night mode.
 

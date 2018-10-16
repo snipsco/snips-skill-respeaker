@@ -3,7 +3,6 @@
 int strkv(char *src, char *key, char *value)
 {
     char *p,*q;
-    int len;
  
     if(*src == '#') return 0; // # ignore commento
     p = strchr(src, '=');   // p find =
@@ -81,4 +80,21 @@ int if_config_true(char *key, snipsSkillConfig *configVar, char *value){
         if (strcmp("0", res_value) == 0 ) return 0;
     }
     return -1;
+}
+
+void parse_hour_minute(char *raw_value, uint8_t *hour, uint8_t *minute){
+    char *p;
+    char h[3]="";
+    char m[3]="";
+
+    p = strchr(raw_value, ':');
+    if (p != NULL){
+        strncpy(h, raw_value, p - raw_value); 
+        strcpy(m, p+1); 
+        *hour = atoi(h);
+        *minute = atoi(m);
+        return 1;
+    }else{
+        return 0;
+    }
 }

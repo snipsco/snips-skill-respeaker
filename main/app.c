@@ -1,20 +1,23 @@
 #include "app.h"
-// all share
 
-volatile sig_atomic_t flag = 0;
+/* global flags */
+volatile sig_atomic_t   flag_terminate = 0;
+short                   flag_update = 1,
+                        flag_sleepmode = 0;
 
-static void int_handler(int sig){
-  flag = 1;
-}
 
-APA102 leds = {0, -1, NULL, 127};
-short last_state = 0;
-short curr_state = 0;
+APA102      leds = {0, -1, NULL, 127};
+short       last_state = 0;
+short       curr_state = 0;
 
 // self use
 // devices number
 int         fd_sock = -1;
 pthread_t   curr_thread;
+uint8_t     sleep_hour,
+            sleep_minute,
+            weak_hour,
+            weak_minute;
 
 const char	*addr;
 const char	*port;
@@ -35,19 +38,23 @@ const char* topic[NUM_TOPIC]={
 };
 
 snipsSkillConfig configList[]={
-    {"model", 0},
-    {"spi_dev", 0},
-    {"led_num", 0},
-    {"led_bri", 0},
-    {"mqtt_host", 0},
-    {"mqtt_port", 0},
-    {"on_idle", 0},
-    {"on_listen", 0},
-    {"on_speak", 0},
-    {"to_mute", 0},
-    {"to_unmute", 0},
-    {"on_success", 0},
-    {"on_error", 0}
+    {"model", 0},       //0
+    {"spi_dev", 0},     //1
+    {"led_num", 0},     //2
+    {"led_bri", 0},     //3
+    {"mqtt_host", 0},   //4
+    {"mqtt_port", 0},   //5
+    {"on_idle", 0},     //6
+    {"on_listen", 0},   //7
+    {"on_speak", 0},    //8
+    {"to_mute", 0},     //9
+    {"to_unmute", 0},   //10
+    {"on_success", 0},  //11
+    {"on_error", 0},    //12
+    {"nightmode", 0},   //13
+    {"go_sleep", 0},    //14
+    {"go_weak", 0},     //15
+    {"on_off", "1"}     //16
 };
 
 const char* status_s[]={
@@ -78,6 +85,7 @@ int main(int argc, char const *argv[])
 {	
     int i;
     char *client_id;
+
     // generate a random id as client id
     client_id = generate_client_id();
     signal(SIGINT, int_handler);
@@ -90,9 +98,16 @@ int main(int argc, char const *argv[])
     addr = (argc > 2)? argv[2] : configList[4].value; // mqtt_host
     port = (argc > 3)? argv[3] : configList[5].value; // mqtt_port
 
-    // get config parameters
+    // get brightness
     leds.brightness = (strlen(configList[3].value) != 0) ? atoi(configList[3].value) : 127;
 
+    // if sleep mode is enabled
+    if (if_config_true("nightmode", configList, NULL) == 1){
+        flag_sleepmode = 1;
+        parse_hour_minute(configList[14].value, &sleep_hour, &sleep_minute);
+        parse_hour_minute(configList[15].value, &weak_hour, &weak_minute);
+    }
+    
     /* open the non-blocking TCP socket (connecting to the broker) */
     int sockfd = open_nb_socket(addr, port);
     if (sockfd == -1) {
@@ -121,7 +136,7 @@ int main(int argc, char const *argv[])
         mqtt_subscribe(&client, topic[i], 0);
         printf("[Info] Subscribed to '%s'.\n", topic[i]);
     }
-    for(i=0;i<13;i++){
+    for(i=0;i<CONFIG_NUM;i++){
         printf("[Conf] %s - '%s'\n", configList[i].key, configList[i].value);
     }
     apa102_spi_setup();
@@ -135,10 +150,16 @@ int main(int argc, char const *argv[])
     printf("[Info] Press CTRL-C to exit.\n\n");
 
     /* block */
-    //while(fgetc(stdin) != EOF); 
     while(1){
-        if (flag) break;
-        sleep(1);
+        if(flag_sleepmode)
+            check_nightmode();
+
+        if (flag_update) 
+            update_state_machine();
+
+        if (flag_terminate) break;
+
+        usleep(10000);
     }
     // disconnect
     printf("[Info] %s disconnecting from %s\n", argv[0], addr);
@@ -149,7 +170,46 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-void switch_on_power(){
+void update_state_machine(void){
+    void *ret_val;
+
+    if (if_config_true(status_s[curr_state], configList, NULL) == 1){
+        printf("[Debug] State is changed to %d\n", curr_state);
+        // block until the previous terminate
+        pthread_join(curr_thread,&ret_val);
+        printf("[Debug] Previous thread %s terminated with success\n",(char*)ret_val);
+        pthread_create(&curr_thread, NULL, status[curr_state], NULL);
+    }else{
+        flag_update = 0;
+    }
+}
+
+void check_nightmode(void){
+    time_t curr_time;
+    struct tm *read_time = NULL;
+
+    curr_time = time(NULL);
+    read_time = localtime(&curr_time);
+
+    if(read_time->tm_hour == sleep_hour && 
+        read_time->tm_min == sleep_minute &&
+        curr_state != 8){
+        last_state = curr_state;
+        curr_state = 8;
+        flag_update = 1;
+        printf("[Info] ------>  Nightmode started\n");
+    }
+    if(read_time->tm_hour == weak_hour && 
+        read_time->tm_min == weak_minute &&
+        curr_state == 8){
+        last_state = curr_state;
+        curr_state = 0;
+        flag_update = 1;
+        printf("[Info] ------>  Nightmode terminated\n");
+    }
+}
+
+void switch_on_power(void){
     int fd_gpio;
     char gpio_66[] = {'6','6'};
     char direction[] = {'o','u','t'};
@@ -204,29 +264,28 @@ void switch_on_power(){
     }
 }
 
-void apa102_spi_setup(){
+void apa102_spi_setup(void){
     int temp,i;
     leds.pixels = (uint8_t *)malloc(leds.numLEDs * 4);
     if (begin()){
         for (i = 0; i < 3; i++){
             printf("[Error] Failed to start SPI! Retrying..%d\n",i+1); 
             sleep(30);
-            if (begin() == 0) goto START_THREAD;
+            if (begin() == 0) return;
         }
         printf("[Error] Failed to start SPI!\n"); 
         close_all(EXIT_FAILURE, NULL);
     }
-    START_THREAD:
-    if((temp = pthread_create(&curr_thread, NULL, on_idle, NULL)) != 0){
-        printf("[Error] Failed to create 1st thread!\n"); 
-    	close_all(EXIT_FAILURE, NULL);
-    }
+    // START_THREAD:
+    // if((temp = pthread_create(&curr_thread, NULL, on_idle, NULL)) != 0){
+    //     printf("[Error] Failed to create 1st thread!\n"); 
+    // 	close_all(EXIT_FAILURE, NULL);
+    // }
 }
 
 void publish_callback(void** unused, struct mqtt_response_publish *published) {
     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
     char* topic_name = (char*) malloc(published->topic_name_size + 1);
-    void *ret_val;
     memcpy(topic_name, published->topic_name, published->topic_name_size);
     topic_name[published->topic_name_size] = '\0';
 
@@ -237,62 +296,54 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     switch(curr_state){
         case 0: // on idle
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                curr_state = 1;
+                flag_update = 1,curr_state = 1;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
-                curr_state = 4;
+                flag_update = 1,curr_state = 4;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
-                curr_state = 5;
+                flag_update = 1,curr_state = 5;
             else if (strcmp(topic_name, "hermes/tts/say") == 0)
-                curr_state = 3;
+                flag_update = 1,curr_state = 3;
             else if (strcmp(topic_name, "hermes/feedback/led/toggleOff") == 0)
-                curr_state = 8;
+                flag_update = 1,curr_state = 8;
             break;
         case 1: // on listen
             if (strcmp(topic_name, "hermes/nlu/intentParsed") == 0)
-                curr_state = 6;
+                flag_update = 1,curr_state = 6;
             else if (strcmp(topic_name, "hermes/nlu/intentNotRecognized") == 0)
-                curr_state = 7;
+                flag_update = 1,curr_state = 7;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                curr_state = 0;
+                flag_update = 1,curr_state = 0;
             break;
         case 2: // on think -> too fast to perform
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                curr_state = 0;
+                flag_update = 1,curr_state = 0;
             break;
         case 3: // on speak
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                curr_state = 0;
+                flag_update = 1,curr_state = 0;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                curr_state = 0;
+                flag_update = 1,curr_state = 0;
             break;
         case 4: // to mute
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                curr_state = 1;
+                flag_update = 1,curr_state = 1;
             break;
         case 5:// to unmute
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                curr_state = 1;
+                flag_update = 1,curr_state = 1;
             break;
         case 6: // on success
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                curr_state = 0;
+                flag_update = 1,curr_state = 0;
             break;
         case 7: // on error
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                curr_state = 0;
+                flag_update = 1,curr_state = 0;
             break;
         case 8: // on off
             if (strcmp(topic_name, "hermes/feedback/led/toggleOn") == 0)
-                curr_state = 0;
+                flag_update = 1,curr_state = 0;
             break;
-    }
-
-    
-    if (last_state != curr_state && if_config_true(status_s[curr_state], configList, NULL) == 1){
-        printf("[Debug] State is changed to %d\n", curr_state);
-        pthread_join(curr_thread,&ret_val);
-        printf("[Debug] Previous thread %s terminated with success\n",(char*)ret_val);
-        pthread_create(&curr_thread, NULL, status[curr_state], NULL);
     }
 
     free(topic_name);
@@ -307,13 +358,13 @@ void* client_refresher(void* client){
     return NULL;
 }
 
-char *generate_client_id(){
-    int i ,flag;
+char *generate_client_id(void){
+    int i ,seed;
     static char id[CLIENT_ID_LEN + 1] = {0};
     srand(time(NULL));
     for (i = 0; i < CLIENT_ID_LEN; i++){
-        flag = rand()%3;
-        switch(flag){
+        seed = rand()%3;
+        switch(seed){
             case 0:
                 id[i] = rand()%26 + 'a';
                 break;
@@ -346,5 +397,9 @@ void close_all(int status, pthread_t *client_daemon){
     if (client_daemon != NULL) pthread_cancel(*client_daemon);
     pthread_cancel(curr_thread);
     exit(status);
+}
+
+static void int_handler(int sig){
+    flag_terminate = 1;
 }
 

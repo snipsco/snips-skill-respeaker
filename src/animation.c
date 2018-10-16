@@ -3,6 +3,7 @@
 extern APA102       leds;
 extern short        curr_state;
 extern short        last_state;
+extern short        flag_update;
 extern pthread_t    curr_thread;
 
 extern numLEDs;
@@ -14,6 +15,7 @@ void *on_idle(){
     int curr_bri = 0;
     uint8_t led, step;
     printf("[Thread] ------>  on_idle started\n");
+    flag_update = 0;
     clear();
     srand((unsigned int)time(NULL));
 
@@ -66,6 +68,7 @@ void *on_idle(){
 void *on_listen(){
     uint8_t i,j,g,group;
     printf("[Thread] ------>  on_listen started\n");
+    flag_update = 0;
     clear();
     group = leds.numLEDs/3;
     while(curr_state == 1){
@@ -129,6 +132,7 @@ void *on_speak(){
     uint8_t step;
     int curr_bri = 0;
     printf("[Thread] ------>  on_speak started\n");
+    flag_update = 0;
     clear();
     
     step = leds.brightness / STEP_COUNT;
@@ -179,6 +183,7 @@ void *to_mute(){
     uint8_t step;
     int curr_bri = 0;
     printf("[Thread] ------>  to_mute started\n");
+    flag_update = 0;
     clear();
     
     step = leds.brightness / STEP_COUNT;
@@ -224,6 +229,7 @@ void *to_unmute(){
     uint8_t step;
     int curr_bri = 0;
     printf("[Thread] ------>  to_mute started\n");
+    flag_update = 0;
     clear();
     
     step = leds.brightness / STEP_COUNT;
@@ -267,6 +273,7 @@ void *to_unmute(){
 void *on_success(){
     uint8_t i,g,group;
     printf("[Thread] ------>  on_success started\n");
+    flag_update = 0;
     clear();
     group = leds.numLEDs/3;
     while(curr_state == 6){
@@ -296,6 +303,7 @@ void *on_success(){
 void *on_error(){
     uint8_t i,g,group;
     printf("[Thread] ------>  on_error started\n");
+    flag_update = 0;
     clear();
     group = leds.numLEDs/3;
     while(curr_state == 7){
@@ -325,6 +333,7 @@ void *on_error(){
 void *on_off(){
     uint8_t j;
     printf("[Thread] ------>  on_off started\n");
+    flag_update = 0;
     while(curr_state == 8){
         clear();
         for (int j = 0; j < 10; j++){
