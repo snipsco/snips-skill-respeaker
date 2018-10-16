@@ -59,7 +59,7 @@ void *on_idle(){
     }
     TERMINATE_THREAD:
     clear();
-    return((void *)0);
+    return((void *)"ON_IDLE");
 }
 
 // 1
@@ -91,7 +91,7 @@ void *on_listen(){
     }
     TERMINATE_THREAD:
     clear();
-    return((void *)1);   
+    return((void *)"ON_LISTEN");   
 }
 
 // 2 ignore - > too fast to perform
@@ -120,7 +120,7 @@ void *on_think(){
     // }
     // TERMINATE_THREAD:
     // clear();
-    // return((void *)2);
+    // return((void *)"ON_THINK");
 }
 
 // 3
@@ -170,7 +170,7 @@ void *on_speak(){
     }
     TERMINATE_THREAD:
     clear();
-    return((void *)0);
+    return((void *)"ON_SPEAK");
 }
 
 // 4
@@ -215,7 +215,7 @@ void *to_mute(){
     pthread_create(&curr_thread, NULL, on_idle, NULL);
     TERMINATE_THREAD:
     clear();
-    return((void *)0);
+    return((void *)"TO_MUTE");
 }
 
 // 5
@@ -260,7 +260,7 @@ void *to_unmute(){
     pthread_create(&curr_thread, NULL, on_idle, NULL);
     TERMINATE_THREAD:
     clear();
-    return((void *)0);
+    return((void *)"TO_UNMUTE");
 }
 
 // 6
@@ -289,7 +289,7 @@ void *on_success(){
     }
     TERMINATE_THREAD:
     clear();
-    return((void *)2);
+    return((void *)"ON_SUCCESS");
 }
 
 // 7
@@ -318,7 +318,7 @@ void *on_error(){
     }
     TERMINATE_THREAD:
     clear();
-    return((void *)2);
+    return((void *)"ON_ERROR");
 }
 
 // 8
@@ -335,5 +335,5 @@ void *on_off(){
     }
     TERMINATE_THREAD:
     clear();
-    return((void *)0);
+    return((void *)"ON_OFF");
 }

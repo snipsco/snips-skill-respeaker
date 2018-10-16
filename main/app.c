@@ -226,6 +226,7 @@ void apa102_spi_setup(){
 void publish_callback(void** unused, struct mqtt_response_publish *published) {
     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
     char* topic_name = (char*) malloc(published->topic_name_size + 1);
+    void *ret_val;
     memcpy(topic_name, published->topic_name, published->topic_name_size);
     topic_name[published->topic_name_size] = '\0';
 
@@ -288,7 +289,9 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
 
     
     if (last_state != curr_state && if_config_true(status_s[curr_state], configList, NULL) == 1){
-        printf("[Info] State is changed to %d\n", curr_state);
+        printf("[Debug] State is changed to %d\n", curr_state);
+        pthread_join(curr_thread,&ret_val);
+        printf("[Debug] Previous thread %s terminated with success\n",(char*)ret_val);
         pthread_create(&curr_thread, NULL, status[curr_state], NULL);
     }
 
