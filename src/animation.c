@@ -28,7 +28,7 @@ void *on_idle(){
             show();
             for (int j = 0; j < 10; j++){
                 // each 0.01s check
-                if(curr_state != 0) {clear();return((void *)0);}
+                if(curr_state != 0) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -38,7 +38,7 @@ void *on_idle(){
             show();
             for (int j = 0; j < 10; j++){
                 // each 0.01s check
-                if(curr_state != 0) {clear();return((void *)0);}
+                if(curr_state != 0) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -48,10 +48,11 @@ void *on_idle(){
         // every 5 seconds
         for (int j = 0; j < 500; j++){
             // each 0.05s check
-            if(curr_state != 0) {clear();return((void *)0);}
+            if(curr_state != 0) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
+    TERMINATE_THREAD:
     clear();
     return((void *)0);
 }
@@ -63,26 +64,27 @@ void *on_listen(){
     clear();
     group = leds.numLEDs/3;
     while(curr_state == 1){
-        if(curr_state != 1) {clear();return((void *)0);}
+        if(curr_state != 1) goto TERMINATE_THREAD;
         for(i=0; i<3; i++){
-            if(curr_state != 1) {clear();return((void *)0);}
+            if(curr_state != 1) goto TERMINATE_THREAD;
             for (g=0; g < group; g++)
                 set_index_rgb(g*3+i, leds.brightness, 0, 0);
-            if(curr_state != 1) {clear();return((void *)0);}
+            if(curr_state != 1) goto TERMINATE_THREAD;
             show();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 1) {clear();return((void *)0);}
+                if(curr_state != 1) goto TERMINATE_THREAD;
                 usleep(10000);
             }
             clear();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 1) {clear();return((void *)0);}
+                if(curr_state != 1) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
     }
+    TERMINATE_THREAD:
     clear();
     return((void *)1);   
 }
@@ -100,17 +102,18 @@ void *on_think(){
     //         show();
     //         for (int j = 0; j < 10; j++){
     //             // each 0.01s check
-    //             if(curr_state != 2) {clear();return((void *)0);}
+    //             if(curr_state != 2) goto TERMINATE_THREAD;
     //             usleep(10000);
     //         }
     //         clear();
     //         for (int j = 0; j < 10; j++){
     //             // each 0.01s check
-    //             if(curr_state != 2) {clear();return((void *)0);}
+    //             if(curr_state != 2) goto TERMINATE_THREAD;
     //             usleep(10000);
     //         }
     //     }
     // }
+    // TERMINATE_THREAD:
     // clear();
     // return((void *)2);
 }
@@ -133,7 +136,7 @@ void *on_speak(){
             show();
             for (int j = 0; j < 2; j++){
                 // each 0.01s check
-                if(curr_state != 3) {clear();return((void *)0);}
+                if(curr_state != 3) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -145,21 +148,22 @@ void *on_speak(){
             show();
             for (int j = 0; j < 2; j++){
                 // each 0.01s check
-                if(curr_state != 3) {clear();return((void *)0);}
+                if(curr_state != 3) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
-        if(curr_state != 3) {clear();return((void *)0);}
+        if(curr_state != 3) goto TERMINATE_THREAD;
         for (j = 0; j < leds.numLEDs; j++)
             set_index_rgb(j, 0, 0, 0);
         show();
 
         for (int j = 0; j < 20; j++){
             // each 0.01s check
-            if(curr_state != 3) {clear();return((void *)0);}
+            if(curr_state != 3) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
+    TERMINATE_THREAD:
     clear();
     return((void *)0);
 }
@@ -180,7 +184,7 @@ void *to_mute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 4) {clear();return((void *)0);}
+            if(curr_state != 4) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -192,7 +196,7 @@ void *to_mute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 4) {clear();return((void *)0);}
+            if(curr_state != 4) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -200,10 +204,11 @@ void *to_mute(){
     for (j = 0; j < leds.numLEDs; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state != 4) {clear();return((void *)0);}
+    if(curr_state != 4) goto TERMINATE_THREAD;
     last_state = curr_state;
     curr_state = 0;
     pthread_create(&curr_thread, NULL, on_idle, NULL);
+    TERMINATE_THREAD:
     clear();
     return((void *)0);
 }
@@ -224,7 +229,7 @@ void *to_unmute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 5) {clear();return((void *)0);}
+            if(curr_state != 5) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -236,7 +241,7 @@ void *to_unmute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 5) {clear();return((void *)0);}
+            if(curr_state != 5) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -244,10 +249,11 @@ void *to_unmute(){
     for (j = 0; j < leds.numLEDs; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state != 5) {clear();return((void *)0);}
+    if(curr_state != 5) goto TERMINATE_THREAD;
     last_state = curr_state;
     curr_state = 0;
     pthread_create(&curr_thread, NULL, on_idle, NULL);
+    TERMINATE_THREAD:
     clear();
     return((void *)0);
 }
@@ -265,17 +271,18 @@ void *on_success(){
             show();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 6) {clear();return((void *)0);}
+                if(curr_state != 6) goto TERMINATE_THREAD;
                 usleep(10000);
             }
             clear();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 6) {clear();return((void *)0);}
+                if(curr_state != 6) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
     }
+    TERMINATE_THREAD:
     clear();
     return((void *)2);
 }
@@ -293,17 +300,18 @@ void *on_error(){
             show();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 7) {clear();return((void *)0);}
+                if(curr_state != 7) goto TERMINATE_THREAD;
                 usleep(10000);
             }
             clear();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 7) {clear();return((void *)0);}
+                if(curr_state != 7) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
     }
+    TERMINATE_THREAD:
     clear();
     return((void *)2);
 }
@@ -316,10 +324,11 @@ void *on_off(){
         clear();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 8) {clear();return((void *)0);}
+            if(curr_state != 8) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
+    TERMINATE_THREAD:
     clear();
     return((void *)0);
 }
