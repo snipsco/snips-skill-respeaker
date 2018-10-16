@@ -19,7 +19,13 @@ void *on_idle(){
 
     step = leds.brightness / STEP_COUNT;
     while(curr_state == 0){
-        
+        // wait 2 seconds
+        for (int j = 0; j < 200; j++){
+            // each 0.01s check
+            if(curr_state != 0) goto TERMINATE_THREAD;
+            usleep(10000);
+        }
+
         clear();
         led = rand()%leds.numLEDs;
 
@@ -42,12 +48,11 @@ void *on_idle(){
                 usleep(10000);
             }
         }
-
         set_index_rgb(led, 0, 0, 0);
         show();
-        // every 5 seconds
-        for (int j = 0; j < 500; j++){
-            // each 0.05s check
+        // wait 3 seconds
+        for (int j = 0; j < 300; j++){
+            // each 0.01s check
             if(curr_state != 0) goto TERMINATE_THREAD;
             usleep(10000);
         }
