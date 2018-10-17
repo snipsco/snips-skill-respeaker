@@ -318,8 +318,8 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
         case 3: // on speak
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
                 flag_update = 1,curr_state = 0;
-            //else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-            //    flag_update = 1,curr_state = 0;
+            else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
+               flag_update = 1,curr_state = 0;
             break;
         case 4: // to mute
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
