@@ -27,4 +27,5 @@ void publish_callback(void** unused, struct mqtt_response_publish *published);
 void *client_refresher(void* client);
 char *generate_client_id(void);
 void close_all(int status, pthread_t *client_daemon);
+static void get_site_id(char *msg);
 static void int_handler(int sig);

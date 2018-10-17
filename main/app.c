@@ -18,6 +18,8 @@ uint8_t     sleep_hour,
             weak_hour,
             weak_minute;
 
+char        rcv_site_id[255]= "";
+
 const char	*addr;
 const char	*port;
 
@@ -53,7 +55,8 @@ snipsSkillConfig configList[]={
     {"nightmode", 0},   //13
     {"go_sleep", 0},    //14
     {"go_weak", 0},     //15
-    {"on_off", "1"}     //16
+    {"on_off", "1"},    //16
+    {"site_id", 0}      //17
 };
 
 const char* status_s[]={
@@ -273,23 +276,22 @@ void apa102_spi_setup(void){
         printf("[Error] Failed to start SPI!\n"); 
         close_all(EXIT_FAILURE, NULL);
     }
-    // START_THREAD:
-    // if((temp = pthread_create(&curr_thread, NULL, on_idle, NULL)) != 0){
-    //     printf("[Error] Failed to create 1st thread!\n"); 
-    // 	close_all(EXIT_FAILURE, NULL);
-    // }
 }
 
 void publish_callback(void** unused, struct mqtt_response_publish *published) {
     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
-    char buf[512] = "";
-
     memcpy(topic_name, published->topic_name, published->topic_name_size);
-    strcpy(buf, published->application_message);
+    topic_name[published->topic_name_size] = '\0';
+    printf("[Received] %s \n", topic_name);
+    
+    get_site_id(published->application_message);
 
-    printf("[Received] %s with site id: %s\n", topic_name, buf);
+    if (strcmp(configList[17].value, rcv_site_id) != 0)
+        return;
 
+    printf("[Site ID] %s\n", rcv_site_id);
+    
     switch(curr_state){
         case 0: // on idle
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
@@ -394,6 +396,21 @@ void close_all(int status, pthread_t *client_daemon){
     if (client_daemon != NULL) pthread_cancel(*client_daemon);
     pthread_cancel(curr_thread);
     exit(status);
+}
+
+static void get_site_id(char *msg){
+    char *start;
+    int count = 0;
+    start = strstr(msg, "\"siteId\":\""); // len = 10
+    if (start == NULL )
+        return;
+    start += 10;
+    while(*start != '\"'){
+        rcv_site_id[count] = *start;
+        start += 1;
+        count += 1;
+    }
+    rcv_site_id[count] = '\0';
 }
 
 static void int_handler(int sig){
