@@ -137,7 +137,6 @@ void *on_speak(){
     step = leds.brightness / STEP_COUNT;
     while(curr_state == 3){
         for (curr_bri = 0; curr_bri < leds.brightness; curr_bri += step){
-            printf("current brightness is %d\n", curr_bri);
             for (j = 0; j < leds.numLEDs; j++)
                 set_index_rgb(j, curr_bri, 0, curr_bri);
 
