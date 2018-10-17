@@ -291,10 +291,10 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
         return;
 
     printf("[Site ID] %s\n", rcv_site_id);
-    
+
     switch(curr_state){
         case 0: // on idle
-            if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
+            if (strcmp(topic_name, "hermes/asr/startListening") == 0)
                 flag_update = 1,curr_state = 1;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
                 flag_update = 1,curr_state = 4;
@@ -306,10 +306,8 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
                 flag_update = 1,curr_state = 8;
             break;
         case 1: // on listen
-            if (strcmp(topic_name, "hermes/nlu/intentParsed") == 0)
-                flag_update = 1,curr_state = 6;
-            else if (strcmp(topic_name, "hermes/nlu/intentNotRecognized") == 0)
-                flag_update = 1,curr_state = 7;
+            if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
+                flag_update = 1,curr_state = 0;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
                 flag_update = 1,curr_state = 0;
             break;
@@ -320,8 +318,8 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
         case 3: // on speak
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
                 flag_update = 1,curr_state = 0;
-            else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = 0;
+            //else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
+            //    flag_update = 1,curr_state = 0;
             break;
         case 4: // to mute
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
