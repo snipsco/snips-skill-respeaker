@@ -283,15 +283,12 @@ void apa102_spi_setup(void){
 void publish_callback(void** unused, struct mqtt_response_publish *published) {
     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
-    char *site_id_msg = (char*) malloc(published->application_message + 1);
+    char buf[512] = "";
 
     memcpy(topic_name, published->topic_name, published->topic_name_size);
-    memcpy(topic_name, published->application_message, published->application_message_size);
+    strcpy(buf, published->application_message);
 
-    topic_name[published->topic_name_size] = '\0';
-    site_id_msg[published->application_message_size] = '\0';
-
-    printf("[Received] %s with site id: \n", topic_name, site_id_msg);
+    printf("[Received] %s with site id: %s\n", topic_name, buf);
 
     switch(curr_state){
         case 0: // on idle
