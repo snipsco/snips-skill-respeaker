@@ -283,14 +283,11 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
     memcpy(topic_name, published->topic_name, published->topic_name_size);
     topic_name[published->topic_name_size] = '\0';
-    printf("[Received] %s \n", topic_name);
-    
     get_site_id(published->application_message);
-
     if (strcmp(configList[17].value, rcv_site_id) != 0)
         return;
 
-    printf("[Site ID] %s\n", rcv_site_id);
+    printf("[Received] %s on Site: %s\n", topic_name, rcv_site_id);
 
     switch(curr_state){
         case 0: // on idle
@@ -318,8 +315,10 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
         case 3: // on speak
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
                 flag_update = 1,curr_state = 0;
+            else if (strcmp(topic_name, "hermes/asr/startListening") == 0)
+                flag_update = 1,curr_state = 1;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-               flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = 0;
             break;
         case 4: // to mute
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
