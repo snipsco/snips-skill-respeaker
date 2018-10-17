@@ -46,7 +46,7 @@ These configuration options are written in `config.ini` file. Please refer to yo
 
 ### Hardware Info
 
-| Config | Description | Value |
+| Config | Description | Value | 
 | --- | --- | --- |
 | `model` | Current hardware platform | `rpi_*` , `rsp_corev2` |
 | `spi_dev` | SPI bus number and device number | Refering to the actual bus | 
