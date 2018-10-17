@@ -47,28 +47,34 @@ These configuration options are written in `config.ini` file. Please refer to yo
 ### Hardware Info
 
 | Config | Description | Value |
-| ------ | --- | --- |
+| --- | --- | --- |
 | `model` | Current hardware platform | `rpi_*` , `rsp_corev2` |
 | `spi_dev` | SPI bus number and device number | Refering to the actual bus | 
 | `led_num` | Number of LEDs | `0`:`255` |
 
-### Brightness
+### Device Info
 
 | Config | Description | Value |
-| ------ | --- | --- |
-| `led_bri` | Max brightness of LEDs | `0`:`255` |
+| --- | --- | --- |
+| `site_id` | Snips device ID | Refering to the actual `snips.toml` |
 
 ### MQTT
 
 | Config | Description | Value |
-| ------ | --- | --- |
-| `mqtt_host` | MQTT host name | Refering to the actual IP/hostname |
+| --- | --- | --- |
+| `mqtt_host` | MQTT host name | `<ip address>`/`<hostname>` |
 | `mqtt_port` | MQTT port number | `1883` |
+
+### Brightness
+
+| Config | Description | Value |
+| --- | --- | --- |
+| `led_bri` | Max brightness of LEDs | `0`:`255` |
 
 ### Animation 
 
 | Config | Description | Value |
-| ------ | --- | --- |
+| --- | --- | --- |
 | `on_idle` | Random led breathe in green | `0` , `1` |
 | `on_listen` | All leds start to blink in blue | `0` , `1` |
 | `on_speak` | All leds start to breathe in purple | `0` , `1` |
