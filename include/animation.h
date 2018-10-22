@@ -17,3 +17,4 @@ void *to_unmute(void);
 void *on_error(void);
 void *on_success(void);
 void *on_disabled(void);
+void delay_on_state(int ms, int state);
