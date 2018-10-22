@@ -1,17 +1,17 @@
 #ifndef __SNIPS_LED_H__
-    #include <snips_led.h>
+	#include <snips_led.h>
 #endif
 
 #ifndef __TYPEDEF_H__
-    #include <typedef.h>
+	#include <typedef.h>
 #endif
 
 #ifndef __MQTT_H__
 	#include <mqtt.h>
 #endif
 
-#define CLIENT_ID_LEN 	10
-#define NUM_TOPIC 		12
+#define CLIENT_ID_LEN		10
+#define NUM_TOPIC			12
 
 void update_state_machine(void);
 void check_nightmode(void);
