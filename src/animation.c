@@ -20,78 +20,52 @@ void *on_idle(){
 
     step = leds.brightness / STEP_COUNT;
     while(curr_state == ON_IDLE){
-        // wait 2 seconds
-        for (int j = 0; j < 200; j++){
-            // each 0.01s check
-            if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
-
+        delay_on_state(2000, ON_IDLE);
         clear();
         led = rand()%leds.numLEDs;
 
-        for (curr_bri = 0; curr_bri < leds.brightness; curr_bri += step){
+        for (curr_bri = 0; 
+            curr_bri < leds.brightness && 
+            curr_state == ON_IDLE; 
+            curr_bri += step){
             set_index_rgb(led, 0, curr_bri, 0);
             show();
-            for (int j = 0; j < 10; j++){
-                // each 0.01s check
-                if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(100, ON_IDLE);
         }
         curr_bri = leds.brightness;
-        for (curr_bri = leds.brightness; curr_bri > 0; curr_bri -= step){
+        for (curr_bri = leds.brightness;
+            curr_bri > 0 && 
+            curr_state == ON_IDLE;
+            curr_bri -= step){
             set_index_rgb(led, 0, curr_bri, 0);
             show();
-            for (int j = 0; j < 10; j++){
-                // each 0.01s check
-                if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(100, ON_IDLE);
         }
         set_index_rgb(led, 0, 0, 0);
         show();
-        // wait 3 seconds
-        for (int j = 0; j < 300; j++){
-            // each 0.01s check
-            if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
+        delay_on_state(3000, ON_IDLE);
     }
-    TERMINATE_THREAD:
     clear();
     return((void *)"ON_IDLE");
 }
 
 // 1
 void *on_listen(){
-    uint8_t i,j,g,group;
+    uint8_t i,g,group;
     printf("[Thread] ------>  on_listen started\n");
     flag_update = 0;
     clear();
     group = leds.numLEDs/3;
     while(curr_state == ON_LISTEN){
-        if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
-        for(i=0; i<3; i++){
-            if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
-            for (g=0; g < group; g++)
+        for(i=0;i<3 && curr_state == ON_LISTEN; i++){
+            for (g=0; g < group && curr_state == ON_LISTEN; g++)
                 set_index_rgb(g*3+i, leds.brightness, 0, 0);
-            if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
             show();
-            for (int j = 0; j < 8; j++){
-                // each 0.01s check
-                if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(80, ON_LISTEN);
             clear();
-            for (int j = 0; j < 8; j++){
-                // each 0.01s check
-                if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(80, ON_LISTEN);
         }
     }
-    TERMINATE_THREAD:
     clear();
     return((void *)"ON_LISTEN");   
 }
@@ -136,41 +110,30 @@ void *on_speak(){
     
     step = leds.brightness / STEP_COUNT;
     while(curr_state == ON_SPEAK){
-        for (curr_bri = 0; curr_bri < leds.brightness; curr_bri += step){
-            for (j = 0; j < leds.numLEDs; j++)
+        for (curr_bri = 0;
+            curr_bri < leds.brightness &&
+            curr_state == ON_SPEAK;
+            curr_bri += step){
+            for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
                 set_index_rgb(j, curr_bri, 0, curr_bri);
-
             show();
-            for (int j = 0; j < 2; j++){
-                // each 0.01s check
-                if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(20, ON_SPEAK);
         }
         curr_bri = leds.brightness;
-        for (curr_bri = leds.brightness; curr_bri > 0; curr_bri -= step){
-            for (j = 0; j < leds.numLEDs; j++)
+        for (curr_bri = leds.brightness;
+            curr_bri > 0 &&
+            curr_state == ON_SPEAK;
+            curr_bri -= step){
+            for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
                 set_index_rgb(j, curr_bri, 0, curr_bri);
-
             show();
-            for (int j = 0; j < 2; j++){
-                // each 0.01s check
-                if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(20, ON_SPEAK);
         }
-        if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
-        for (j = 0; j < leds.numLEDs; j++)
+        for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
             set_index_rgb(j, 0, 0, 0);
         show();
-
-        for (int j = 0; j < 20; j++){
-            // each 0.01s check
-            if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
+        delay_on_state(200, ON_SPEAK);
     }
-    TERMINATE_THREAD:
     clear();
     return((void *)"ON_SPEAK");
 }
@@ -185,37 +148,26 @@ void *to_mute(){
     clear();
     
     step = leds.brightness / STEP_COUNT;
-    for (curr_bri = 0; curr_bri < leds.brightness; curr_bri += step){
-        for (j = 0; j < leds.numLEDs; j++)
+    for (curr_bri = 0; curr_bri < leds.brightness && curr_state == TO_MUTE; curr_bri += step){
+        for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
             set_index_rgb(j, 0, 0, curr_bri);
-
         show();
-        for (int j = 0; j < 10; j++){
-            // each 0.01s check
-            if(curr_state != TO_MUTE) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
+        delay_on_state(100, TO_MUTE);
     }
     curr_bri = leds.brightness;
-    for (curr_bri = leds.brightness; curr_bri > 0; curr_bri -= step){
-        for (j = 0; j < leds.numLEDs; j++)
+    for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_MUTE; curr_bri -= step){
+        for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
             set_index_rgb(j, 0, 0, curr_bri);
-
         show();
-        for (int j = 0; j < 10; j++){
-            // each 0.01s check
-            if(curr_state != TO_MUTE) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
+        delay_on_state(100, TO_MUTE);
     }
-
-    for (j = 0; j < leds.numLEDs; j++)
+    for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state != TO_MUTE) goto TERMINATE_THREAD;
-    curr_state = ON_IDLE;
-    flag_update = 0;
-    TERMINATE_THREAD:
+    if(curr_state == TO_MUTE){
+        curr_state = ON_IDLE;
+        flag_update = 0;
+    }
     clear();
     return((void *)"TO_MUTE");
 }
@@ -225,42 +177,31 @@ void *to_unmute(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    printf("[Thread] ------>  to_mute started\n");
+    printf("[Thread] ------>  to_unmute started\n");
     flag_update = 0;
     clear();
     
     step = leds.brightness / STEP_COUNT;
-    for (curr_bri = 0; curr_bri < leds.brightness; curr_bri += step){
-        for (j = 0; j < leds.numLEDs; j++)
+    for (curr_bri = 0;curr_bri < leds.brightness && curr_state == TO_UNMUTE; curr_bri += step){
+        for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
             set_index_rgb(j, curr_bri, 0, 0);
-
         show();
-        for (int j = 0; j < 10; j++){
-            // each 0.01s check
-            if(curr_state != TO_UNMUTE) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
+        delay_on_state(100, TO_UNMUTE);
     }
     curr_bri = leds.brightness;
-    for (curr_bri = leds.brightness; curr_bri > 0; curr_bri -= step){
-        for (j = 0; j < leds.numLEDs; j++)
+    for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_UNMUTE; curr_bri -= step){
+        for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
             set_index_rgb(j, curr_bri, 0, 0);
-
         show();
-        for (int j = 0; j < 10; j++){
-            // each 0.01s check
-            if(curr_state != TO_UNMUTE) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
+        delay_on_state(100, TO_UNMUTE);
     }
-
-    for (j = 0; j < leds.numLEDs; j++)
+    for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state != TO_UNMUTE) goto TERMINATE_THREAD;
-    curr_state = ON_IDLE;
-    flag_update = 0;
-    TERMINATE_THREAD:
+    if(curr_state == TO_UNMUTE){
+        curr_state = ON_IDLE;
+        flag_update = 0;
+    }
     clear();
     return((void *)"TO_UNMUTE");
 }
@@ -303,24 +244,15 @@ void *on_error(){
     clear();
     group = leds.numLEDs/3;
     while(curr_state == ON_ERROR){
-        for(i=3; i>0; i--){
-            for (g=0; g < group; g++)
+        for(i=3; i>0 && curr_state == ON_ERROR; i--){
+            for (g=0; g < group && curr_state == ON_ERROR; g++)
                 set_index_rgb(g*3+i-1, 0, 0, leds.brightness);
             show();
-            for (int j = 0; j < 8; j++){
-                // each 0.01s check
-                if(curr_state != ON_ERROR) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(80, ON_ERROR);
             clear();
-            for (int j = 0; j < 8; j++){
-                // each 0.01s check
-                if(curr_state != ON_ERROR) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
+            delay_on_state(80, ON_ERROR);
         }
     }
-    TERMINATE_THREAD:
     clear();
     return((void *)"ON_ERROR");
 }
@@ -332,13 +264,13 @@ void *on_disabled(){
     flag_update = 0;
     while(curr_state == ON_DISABLED){
         clear();
-        for (int j = 0; j < 10; j++){
-            // each 0.01s check
-            if(curr_state != ON_DISABLED) goto TERMINATE_THREAD;
-            usleep(10000);
-        }
+        delay_on_state(100, ON_DISABLED);
     }
-    TERMINATE_THREAD:
     clear();
     return((void *)"ON_DISABLED");
+}
+
+void delay_on_state(int ms, int state){
+    for (int j = 0; j < ms && curr_state == state; j++)
+        usleep(1000);
 }
