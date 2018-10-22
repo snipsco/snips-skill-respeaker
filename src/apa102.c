@@ -1,4 +1,7 @@
 #include "apa102.h"
+#include <sys/mman.h>
+#include <sys/ioctl.h>
+#include <linux/spi/spidev.h>
 
 extern APA102 leds;
 

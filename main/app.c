@@ -1,22 +1,24 @@
 #include "app.h"
+#include "apa102.h"
+#include "get_config.h"
+#include "animation.h"
+#include <pthread.h>
+#include <signal.h>
+#include <posix_sockets.h>
 
-/* global flags */
 volatile sig_atomic_t   flag_terminate = 0;
-short                   flag_update = 1,
-                        flag_sleepmode = 0;
-
+short                   flag_update = 1;
+short                   flag_sleepmode = 0;
 
 APA102      leds = {0, -1, NULL, 127};
 short       curr_state = 0;
 
-// self use
-// devices number
 int         fd_sock = -1;
 pthread_t   curr_thread;
-uint8_t     sleep_hour,
-            sleep_minute,
-            weak_hour,
-            weak_minute;
+uint8_t     sleep_hour;
+uint8_t     sleep_minute;
+uint8_t     weak_hour;
+uint8_t     weak_minute;
 
 char        rcv_site_id[255]= "";
 

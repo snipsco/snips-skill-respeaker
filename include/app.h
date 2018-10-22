@@ -1,21 +1,14 @@
-#include <snips_led.h>
-
-#ifndef __TYPEDEF__H__
-	#include <typedef.h>
+#ifndef __SNIPS_LED_H__
+    #include <snips_led.h>
 #endif
 
-#include <pthread.h>
-#include <unistd.h>
-#include <signal.h>
+#ifndef __TYPEDEF_H__
+    #include <typedef.h>
+#endif
 
-#include <mqtt.h>
-#include <posix_sockets.h>
-
-#include <apa102.h>
-#include <get_config.h>
-#include <animation.h>
-
-
+#ifndef __MQTT_H__
+	#include <mqtt.h>
+#endif
 
 #define CLIENT_ID_LEN 	10
 #define NUM_TOPIC 		12

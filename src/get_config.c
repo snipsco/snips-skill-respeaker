@@ -4,15 +4,14 @@ int strkv(char *src, char *key, char *value)
 {
     char *p,*q;
  
-    if(*src == '#') return 0; // # ignore commento
-    p = strchr(src, '=');   // p find =
-    q = strchr(src, '\n');   // q find \n
+    if(*src == '#') return 0;
+    p = strchr(src, '=');
+    q = strchr(src, '\n');
  
-    // if both p & q
     if (p != NULL && q != NULL){
-        *q = '\0'; // set \n as end of string
-        strncpy(key, src, p - src); // give the value before = to key
-        strcpy(value, p+1); // give the value after = to key
+        *q = '\0';
+        strncpy(key, src, p - src);
+        strcpy(value, p+1);
         return 1;
     }else{
         return 0;

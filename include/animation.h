@@ -1,7 +1,8 @@
-#include "snips_led.h"
-#include "apa102.h"
+#ifndef __SNIPS_LED_H__
+    #include <snips_led.h>
+#endif
 
-#ifndef __TYPEDEF__H__
+#ifndef __TYPEDEF_H__
 	#include <typedef.h>
 #endif
 

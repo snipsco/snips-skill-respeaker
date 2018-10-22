@@ -1,4 +1,5 @@
 #include "animation.h"
+#include "apa102.h"
 
 extern APA102       leds;
 extern short        curr_state;
