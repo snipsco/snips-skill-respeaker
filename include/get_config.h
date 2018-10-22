@@ -6,7 +6,7 @@
     #include <typedef.h>
 #endif
 
-#define 	CONFIG_NUM 		18
+#define CONFIG_NUM 18
 
 int strkv(char *src, char *key, char *value);
 void config(snipsSkillConfig *configVar, int configNum);

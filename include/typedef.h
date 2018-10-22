@@ -9,7 +9,7 @@ typedef struct{
 }APA102;
 
 typedef struct{
-    char key[20];
-    char value[50];
+	char key[20];
+	char value[50];
 }snipsSkillConfig;
 #endif
