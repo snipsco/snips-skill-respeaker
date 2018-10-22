@@ -8,3 +8,9 @@ then
 else
     echo "compile failed"
 fi
+
+if [ ! -e "./config.ini" ]
+then
+    cp config.ini.default config.ini
+fi
+
