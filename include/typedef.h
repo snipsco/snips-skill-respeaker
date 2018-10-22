@@ -12,4 +12,16 @@ typedef struct{
 	char key[20];
 	char value[50];
 }snipsSkillConfig;
+
+enum {
+	ON_IDLE = 0,
+	ON_LISTEN,
+	ON_THINK,
+	ON_SPEAK,
+	TO_MUTE,
+	TO_UNMUTE,
+	ON_SUCCESS,
+	ON_ERROR,
+	ON_DISABLED
+}curr_state;
 #endif

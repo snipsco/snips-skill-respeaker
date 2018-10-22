@@ -11,7 +11,6 @@ short                   flag_update = 1;
 short                   flag_sleepmode = 0;
 
 APA102      leds = {0, -1, NULL, 127};
-short       curr_state = 0;
 
 int         fd_sock = -1;
 pthread_t   curr_thread;
@@ -57,7 +56,7 @@ snipsSkillConfig configList[]={
     {"nightmode", 0},   //13
     {"go_sleep", 0},    //14
     {"go_weak", 0},     //15
-    {"on_off", "1"},    //16
+    {"on_disabled", "1"},    //16
     {"site_id", 0}      //17
 };
 
@@ -70,7 +69,7 @@ const char* status_s[]={
     "to_unmute",    //5
     "on_success",   //6
     "on_error",     //7
-    "on_off"        //8
+    "on_disabled"        //8
 };
 
 void (*status[9])(const char *)={ 
@@ -82,7 +81,7 @@ void (*status[9])(const char *)={
     to_unmute, 
     on_success, 
     on_error, 
-    on_off
+    on_disabled
 };
 
 int main(int argc, char const *argv[])
@@ -197,15 +196,15 @@ void check_nightmode(void){
 
     if(read_time->tm_hour == sleep_hour && 
         read_time->tm_min == sleep_minute &&
-        curr_state != 8){
-        curr_state = 8;
+        curr_state != ON_DISABLED){
+        curr_state = ON_DISABLED;
         flag_update = 1;
         printf("[Info] ------>  Nightmode started\n");
     }
     if(read_time->tm_hour == weak_hour && 
         read_time->tm_min == weak_minute &&
-        curr_state == 8){
-        curr_state = 0;
+        curr_state == ON_DISABLED){
+        curr_state = ON_IDLE;
         flag_update = 1;
         printf("[Info] ------>  Nightmode terminated\n");
     }
@@ -294,53 +293,53 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     switch(curr_state){
         case 0: // on idle
             if (strcmp(topic_name, "hermes/asr/startListening") == 0)
-                flag_update = 1,curr_state = 1;
+                flag_update = 1,curr_state = ON_LISTEN;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
-                flag_update = 1,curr_state = 4;
+                flag_update = 1,curr_state = TO_MUTE;
             else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
-                flag_update = 1,curr_state = 5;
+                flag_update = 1,curr_state = TO_UNMUTE;
             else if (strcmp(topic_name, "hermes/tts/say") == 0)
-                flag_update = 1,curr_state = 3;
+                flag_update = 1,curr_state = ON_SPEAK;
             else if (strcmp(topic_name, "hermes/feedback/led/toggleOff") == 0)
-                flag_update = 1,curr_state = 8;
+                flag_update = 1,curr_state = ON_DISABLED;
             break;
         case 1: // on listen
             if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             break;
         case 2: // on think -> too fast to perform
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             break;
         case 3: // on speak
             if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             else if (strcmp(topic_name, "hermes/asr/startListening") == 0)
-                flag_update = 1,curr_state = 1;
+                flag_update = 1,curr_state = ON_LISTEN;
             else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             break;
         case 4: // to mute
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                flag_update = 1,curr_state = 1;
+                flag_update = 1,curr_state = ON_LISTEN;
             break;
         case 5:// to unmute
             if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                flag_update = 1,curr_state = 1;
+                flag_update = 1,curr_state = ON_LISTEN;
             break;
         case 6: // on success
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             break;
         case 7: // on error
             if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             break;
-        case 8: // on off
+        case 8: // on disabled
             if (strcmp(topic_name, "hermes/feedback/led/toggleOn") == 0)
-                flag_update = 1,curr_state = 0;
+                flag_update = 1,curr_state = ON_IDLE;
             break;
     }
 

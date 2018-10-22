@@ -8,7 +8,6 @@
 
 #define STEP_COUNT 20
 
-void *on_off(void);
 void *on_idle(void);
 void *on_listen(void);
 void *on_think(void);
@@ -17,3 +16,4 @@ void *to_mute(void);
 void *to_unmute(void);
 void *on_error(void);
 void *on_success(void);
+void *on_disabled(void);

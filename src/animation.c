@@ -2,7 +2,6 @@
 #include "apa102.h"
 
 extern APA102       leds;
-extern short        curr_state;
 extern short        flag_update;
 extern pthread_t    curr_thread;
 
@@ -20,11 +19,11 @@ void *on_idle(){
     srand((unsigned int)time(NULL));
 
     step = leds.brightness / STEP_COUNT;
-    while(curr_state == 0){
+    while(curr_state == ON_IDLE){
         // wait 2 seconds
         for (int j = 0; j < 200; j++){
             // each 0.01s check
-            if(curr_state != 0) goto TERMINATE_THREAD;
+            if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
             usleep(10000);
         }
 
@@ -36,7 +35,7 @@ void *on_idle(){
             show();
             for (int j = 0; j < 10; j++){
                 // each 0.01s check
-                if(curr_state != 0) goto TERMINATE_THREAD;
+                if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -46,7 +45,7 @@ void *on_idle(){
             show();
             for (int j = 0; j < 10; j++){
                 // each 0.01s check
-                if(curr_state != 0) goto TERMINATE_THREAD;
+                if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -55,7 +54,7 @@ void *on_idle(){
         // wait 3 seconds
         for (int j = 0; j < 300; j++){
             // each 0.01s check
-            if(curr_state != 0) goto TERMINATE_THREAD;
+            if(curr_state != ON_IDLE) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -71,23 +70,23 @@ void *on_listen(){
     flag_update = 0;
     clear();
     group = leds.numLEDs/3;
-    while(curr_state == 1){
-        if(curr_state != 1) goto TERMINATE_THREAD;
+    while(curr_state == ON_LISTEN){
+        if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
         for(i=0; i<3; i++){
-            if(curr_state != 1) goto TERMINATE_THREAD;
+            if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
             for (g=0; g < group; g++)
                 set_index_rgb(g*3+i, leds.brightness, 0, 0);
-            if(curr_state != 1) goto TERMINATE_THREAD;
+            if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
             show();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 1) goto TERMINATE_THREAD;
+                if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
                 usleep(10000);
             }
             clear();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 1) goto TERMINATE_THREAD;
+                if(curr_state != ON_LISTEN) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -136,7 +135,7 @@ void *on_speak(){
     clear();
     
     step = leds.brightness / STEP_COUNT;
-    while(curr_state == 3){
+    while(curr_state == ON_SPEAK){
         for (curr_bri = 0; curr_bri < leds.brightness; curr_bri += step){
             for (j = 0; j < leds.numLEDs; j++)
                 set_index_rgb(j, curr_bri, 0, curr_bri);
@@ -144,7 +143,7 @@ void *on_speak(){
             show();
             for (int j = 0; j < 2; j++){
                 // each 0.01s check
-                if(curr_state != 3) goto TERMINATE_THREAD;
+                if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -156,18 +155,18 @@ void *on_speak(){
             show();
             for (int j = 0; j < 2; j++){
                 // each 0.01s check
-                if(curr_state != 3) goto TERMINATE_THREAD;
+                if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
-        if(curr_state != 3) goto TERMINATE_THREAD;
+        if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
         for (j = 0; j < leds.numLEDs; j++)
             set_index_rgb(j, 0, 0, 0);
         show();
 
         for (int j = 0; j < 20; j++){
             // each 0.01s check
-            if(curr_state != 3) goto TERMINATE_THREAD;
+            if(curr_state != ON_SPEAK) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -193,7 +192,7 @@ void *to_mute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 4) goto TERMINATE_THREAD;
+            if(curr_state != TO_MUTE) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -205,7 +204,7 @@ void *to_mute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 4) goto TERMINATE_THREAD;
+            if(curr_state != TO_MUTE) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -213,8 +212,8 @@ void *to_mute(){
     for (j = 0; j < leds.numLEDs; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state != 4) goto TERMINATE_THREAD;
-    curr_state = 0;
+    if(curr_state != TO_MUTE) goto TERMINATE_THREAD;
+    curr_state = ON_IDLE;
     flag_update = 0;
     TERMINATE_THREAD:
     clear();
@@ -238,7 +237,7 @@ void *to_unmute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 5) goto TERMINATE_THREAD;
+            if(curr_state != TO_UNMUTE) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -250,7 +249,7 @@ void *to_unmute(){
         show();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 5) goto TERMINATE_THREAD;
+            if(curr_state != TO_UNMUTE) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
@@ -258,8 +257,8 @@ void *to_unmute(){
     for (j = 0; j < leds.numLEDs; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state != 5) goto TERMINATE_THREAD;
-    curr_state = 0;
+    if(curr_state != TO_UNMUTE) goto TERMINATE_THREAD;
+    curr_state = ON_IDLE;
     flag_update = 0;
     TERMINATE_THREAD:
     clear();
@@ -273,20 +272,20 @@ void *on_success(){
     flag_update = 0;
     clear();
     group = leds.numLEDs/3;
-    while(curr_state == 6){
+    while(curr_state == ON_SUCCESS){
         for(i=3; i>0; i--){
             for (g=0; g < group; g++)
                 set_index_rgb(g*3+i-1, 0, leds.brightness, 0);
             show();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 6) goto TERMINATE_THREAD;
+                if(curr_state != ON_SUCCESS) goto TERMINATE_THREAD;
                 usleep(10000);
             }
             clear();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 6) goto TERMINATE_THREAD;
+                if(curr_state != ON_SUCCESS) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -303,20 +302,20 @@ void *on_error(){
     flag_update = 0;
     clear();
     group = leds.numLEDs/3;
-    while(curr_state == 7){
+    while(curr_state == ON_ERROR){
         for(i=3; i>0; i--){
             for (g=0; g < group; g++)
                 set_index_rgb(g*3+i-1, 0, 0, leds.brightness);
             show();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 7) goto TERMINATE_THREAD;
+                if(curr_state != ON_ERROR) goto TERMINATE_THREAD;
                 usleep(10000);
             }
             clear();
             for (int j = 0; j < 8; j++){
                 // each 0.01s check
-                if(curr_state != 7) goto TERMINATE_THREAD;
+                if(curr_state != ON_ERROR) goto TERMINATE_THREAD;
                 usleep(10000);
             }
         }
@@ -327,19 +326,19 @@ void *on_error(){
 }
 
 // 8
-void *on_off(){
+void *on_disabled(){
     uint8_t j;
-    printf("[Thread] ------>  on_off started\n");
+    printf("[Thread] ------>  on_disabled started\n");
     flag_update = 0;
-    while(curr_state == 8){
+    while(curr_state == ON_DISABLED){
         clear();
         for (int j = 0; j < 10; j++){
             // each 0.01s check
-            if(curr_state != 8) goto TERMINATE_THREAD;
+            if(curr_state != ON_DISABLED) goto TERMINATE_THREAD;
             usleep(10000);
         }
     }
     TERMINATE_THREAD:
     clear();
-    return((void *)"ON_OFF");
+    return((void *)"ON_DISABLED");
 }
