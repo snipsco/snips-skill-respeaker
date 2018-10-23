@@ -13,7 +13,7 @@ typedef struct{
 	char value[50];
 }snipsSkillConfig;
 
-enum {
+typedef enum {
 	ON_IDLE = 0,
 	ON_LISTEN,
 	ON_SPEAK,
@@ -22,5 +22,5 @@ enum {
 	ON_SUCCESS,
 	ON_ERROR,
 	ON_DISABLED
-}curr_state;
+}STATE;
 #endif

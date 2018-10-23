@@ -2,6 +2,7 @@
 #include "apa102.h"
 
 extern APA102       leds;
+extern STATE        curr_state;
 extern short        flag_update;
 extern pthread_t    curr_thread;
 

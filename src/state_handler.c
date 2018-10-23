@@ -1,7 +1,7 @@
 #include "state_handler.h"
 
-extern short        flag_update;
-extern pthread_t    curr_thread;
+extern short flag_update;
+extern STATE curr_state;
 
 void (*state_handlers[6])(const char *)={ 
     on_idle_handler, 	//0

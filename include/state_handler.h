@@ -9,4 +9,10 @@
 #define LED_ON  "hermes/feedback/led/toggleOn"
 #define LED_OFF "hermes/feedback/led/toggleOff"
 
-#define NUM_TOPIC     10
+#define NUM_TOPIC 10
+
+#ifndef __TYPEDEF_H__
+	#include <typedef.h>
+#endif
+
+void state_handler(void);

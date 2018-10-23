@@ -12,6 +12,7 @@ short                   flag_update = 1;
 short                   flag_sleepmode = 0;
 
 APA102      leds = {0, -1, NULL, 127};
+STATE       curr_state = ON_IDLE;
 
 int         fd_sock = -1;
 pthread_t   curr_thread;
@@ -288,6 +289,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
         return;
 
     printf("[Received] %s on Site: %s\n", topic_name, rcv_site_id);
+
 
     switch(curr_state){
         case ON_IDLE:
