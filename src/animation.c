@@ -9,6 +9,7 @@ extern numLEDs;
 extern fd_spi;
 extern *pixels;
 
+// 0
 void *on_idle(){
     uint8_t i,j;
     int curr_bri = 0;
@@ -150,23 +151,23 @@ void *to_mute(){
     step = leds.brightness / STEP_COUNT;
     for (curr_bri = 0; curr_bri < leds.brightness && curr_state == TO_MUTE; curr_bri += step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_rgb(j, 0, 0, curr_bri);
+            set_index_rgb(j, 0, curr_bri, curr_bri);
         show();
-        delay_on_state(100, TO_MUTE);
+        delay_on_state(50, TO_MUTE);
     }
     curr_bri = leds.brightness;
     for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_MUTE; curr_bri -= step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_rgb(j, 0, 0, curr_bri);
+            set_index_rgb(j, 0, curr_bri, curr_bri);
         show();
-        delay_on_state(100, TO_MUTE);
+        delay_on_state(50, TO_MUTE);
     }
     for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
     if(curr_state == TO_MUTE){
         curr_state = ON_IDLE;
-        flag_update = 0;
+        flag_update = 1;
     }
     clear();
     return((void *)"TO_MUTE");
@@ -184,23 +185,23 @@ void *to_unmute(){
     step = leds.brightness / STEP_COUNT;
     for (curr_bri = 0;curr_bri < leds.brightness && curr_state == TO_UNMUTE; curr_bri += step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
-            set_index_rgb(j, curr_bri, 0, 0);
+            set_index_rgb(j, 0, curr_bri, 0);
         show();
-        delay_on_state(100, TO_UNMUTE);
+        delay_on_state(50, TO_UNMUTE);
     }
     curr_bri = leds.brightness;
     for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_UNMUTE; curr_bri -= step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
-            set_index_rgb(j, curr_bri, 0, 0);
+            set_index_rgb(j, 0, curr_bri, 0);
         show();
-        delay_on_state(100, TO_UNMUTE);
+        delay_on_state(50, TO_UNMUTE);
     }
     for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
     if(curr_state == TO_UNMUTE){
         curr_state = ON_IDLE;
-        flag_update = 0;
+        flag_update = 1;
     }
     clear();
     return((void *)"TO_UNMUTE");
@@ -243,15 +244,18 @@ void *on_error(){
     flag_update = 0;
     clear();
     group = leds.numLEDs/3;
-    while(curr_state == ON_ERROR){
-        for(i=3; i>0 && curr_state == ON_ERROR; i--){
-            for (g=0; g < group && curr_state == ON_ERROR; g++)
-                set_index_rgb(g*3+i-1, 0, 0, leds.brightness);
-            show();
-            delay_on_state(80, ON_ERROR);
-            clear();
-            delay_on_state(80, ON_ERROR);
-        }
+
+    for(i=3; i>0 && curr_state == ON_ERROR; i--){
+        for (g=0; g < group && curr_state == ON_ERROR; g++)
+            set_index_rgb(g*3+i-1, 0, 0, leds.brightness);
+        show();
+        delay_on_state(20, ON_ERROR);
+        clear();
+        delay_on_state(20, ON_ERROR);
+    }
+    if (curr_state == ON_ERROR){
+        curr_state = ON_IDLE;
+        flag_update = 1;
     }
     clear();
     return((void *)"ON_ERROR");
