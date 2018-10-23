@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h>
 #include <fcntl.h>
+#include <pthread.h>
 
 #define HOT_ON  "hermes/hotword/toggleOn"
 #define HOT_OFF "hermes/hotword/toggleOff"
@@ -32,6 +33,8 @@
 #define STATE_NUM 6
 
 #define CONFIG_NUM 18
+
+#define CLIENT_ID_LEN 10
 
 typedef struct{
 	uint8_t numLEDs;
