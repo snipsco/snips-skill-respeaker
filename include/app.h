@@ -1,9 +1,5 @@
-#ifndef __SNIPS_LED_H__
-	#include <snips_led.h>
-#endif
-
-#ifndef __TYPEDEF_H__
-	#include <typedef.h>
+#ifndef __COMMON_H__
+	#include <common.h>
 #endif
 
 #ifndef __MQTT_H__
@@ -12,7 +8,6 @@
 
 #define CLIENT_ID_LEN 10
 
-void update_state_machine(void);
 void check_nightmode(void);
 void apa102_spi_setup(void);
 void publish_callback(void** unused, struct mqtt_response_publish *published);

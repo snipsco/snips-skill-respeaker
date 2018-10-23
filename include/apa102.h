@@ -1,9 +1,5 @@
-#ifndef __SNIPS_LED_H__
-	#include <snips_led.h>
-#endif
-
-#ifndef __TYPEDEF_H__
-	#include <typedef.h>
+#ifndef __COMMON_H__
+	#include <common.h>
 #endif
 
 #define ROFFSET 1
