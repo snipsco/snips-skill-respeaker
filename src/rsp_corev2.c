@@ -1,4 +1,5 @@
 #include "rsp_corev2.h"
+#include "get_config.h"
 
 void switch_on_power(void){
     int fd_gpio;
@@ -6,9 +7,9 @@ void switch_on_power(void){
     char direction[] = {'o','u','t'};
     char value[] = {'0'};
 
-    if(if_config_true("model", configList, "rsp_corev2")){
+    if(if_config_true(C_MODEL_STR, configList, "rsp_corev2")){
         // export gpio
-        if(fd_gpio = open("/sys/class/gpio/export", O_RDWR)<0){
+        if((fd_gpio = open("/sys/class/gpio/export", O_RDWR))<0){
             printf("[Error] Can't open gpio export, please manually echo '66' to this file\n");
             return;
         }
@@ -23,7 +24,7 @@ void switch_on_power(void){
             return;
         }
         // set direction
-        if(fd_gpio = open("/sys/class/gpio/gpio66/direction", O_RDWR)<0){
+        if((fd_gpio = open("/sys/class/gpio/gpio66/direction", O_RDWR))<0){
             printf("[Error] Can't open gpio export/gpio66/direction, please manually echo 'out' to this file\n");
             return;
         }
@@ -38,7 +39,7 @@ void switch_on_power(void){
             return;
         }
         // enable by set to 0
-        if(fd_gpio = open("/sys/class/gpio/gpio66/value", O_RDWR)<0){
+        if((fd_gpio = open("/sys/class/gpio/gpio66/value", O_RDWR))<0){
             printf("[Error] Can't open gpio export/gpio66/value, please manually echo '0' to this file\n");
             return;
         }
