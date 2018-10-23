@@ -3,6 +3,7 @@
 #include "get_config.h"
 #include "animation.h"
 #include "state_handler.h"
+
 #include <pthread.h>
 #include <signal.h>
 #include <posix_sockets.h>
@@ -40,24 +41,24 @@ const char* topics[]={
 };
 
 snipsSkillConfig configList[]={
-    {"model", 0},       //0
-    {"spi_dev", 0},     //1
-    {"led_num", 0},     //2
-    {"led_bri", 0},     //3
-    {"mqtt_host", 0},   //4
-    {"mqtt_port", 0},   //5
-    {"on_idle", 0},     //6
-    {"on_listen", 0},   //7
-    {"on_speak", 0},    //8
-    {"to_mute", 0},     //9
-    {"to_unmute", 0},   //10
-    {"on_success", 0},  //11
-    {"on_error", 0},    //12
-    {"nightmode", 0},   //13
-    {"go_sleep", 0},    //14
-    {"go_weak", 0},     //15
-    {"on_disabled", "1"},    //16
-    {"site_id", 0}      //17
+    {"model", 0},           //0
+    {"spi_dev", 0},         //1
+    {"led_num", 0},         //2
+    {"led_bri", 0},         //3
+    {"mqtt_host", 0},       //4
+    {"mqtt_port", 0},       //5
+    {"on_idle", 0},         //6
+    {"on_listen", 0},       //7
+    {"on_speak", 0},        //8
+    {"to_mute", 0},         //9
+    {"to_unmute", 0},       //10
+    {"on_success", 0},      //11
+    {"on_error", 0},        //12
+    {"nightmode", 0},       //13
+    {"go_sleep", 0},        //14
+    {"go_weak", 0},         //15
+    {"on_disabled", "1"},   //16
+    {"site_id", 0}          //17
 };
 
 const char* status_s[]={
@@ -290,91 +291,10 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
 
     printf("[Received] %s on Site: %s\n", topic_name, rcv_site_id);
 
-
-    switch(curr_state){
-        case ON_IDLE:
-            if (!strcmp(topic_name, "hermes/asr/startListening")){
-                flag_update = 1;
-                curr_state = ON_LISTEN;
-            }
-            else if (!strcmp(topic_name, "hermes/feedback/sound/toggleOff")){
-                flag_update = 1;
-                curr_state = TO_MUTE;
-            }
-            else if (!strcmp(topic_name, "hermes/feedback/sound/toggleOn")){
-                flag_update = 1;
-                curr_state = TO_UNMUTE;
-            }
-            else if (!strcmp(topic_name, "hermes/tts/say")){
-                flag_update = 1;
-                curr_state = ON_SPEAK;
-            }
-            else if (!strcmp(topic_name, "hermes/feedback/led/toggleOff")){
-                flag_update = 1;
-                curr_state = ON_DISABLED;
-            }
-            break;
-        case ON_LISTEN:
-            if (!strcmp(topic_name, "hermes/asr/stopListening")){
-                flag_update = 1;
-                curr_state = ON_IDLE;
-            }
-            else if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
-                flag_update = 1;
-                curr_state = ON_IDLE;
-            }
-            break;
-        case ON_SPEAK:
-            if (!strcmp(topic_name, "hermes/tts/sayFinished")){
-                flag_update = 1;
-                curr_state = ON_IDLE;
-            }
-            else if (!strcmp(topic_name, "hermes/asr/startListening")){
-                flag_update = 1;
-                curr_state = ON_LISTEN;
-            }
-            else if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
-                flag_update = 1;
-                curr_state = ON_IDLE;
-            }
-            break;
-        case TO_MUTE:
-            if (!strcmp(topic_name, "hermes/hotword/toggleOff")){
-                flag_update = 1;
-                curr_state = ON_LISTEN;
-            }
-            break;
-        case TO_UNMUTE:
-            if (!strcmp(topic_name, "hermes/hotword/toggleOff")){
-                flag_update = 1;
-                curr_state = ON_LISTEN;
-            }
-            break;
-        case ON_SUCCESS:
-            if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
-                flag_update = 1;
-                curr_state = ON_IDLE;
-            }
-            break;
-        case ON_ERROR:
-            if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
-                flag_update = 1;
-                curr_state = ON_IDLE;
-            }
-            break;
-        case ON_DISABLED:
-            if (!strcmp(topic_name, "hermes/feedback/led/toggleOn")){
-                flag_update = 1;
-                curr_state = ON_IDLE;
-            }
-            break;
-    }
+    state_handler_main(topic_name);
 
     free(topic_name);
 }
-
-
-
 
 void* client_refresher(void* client){
     while(1) 
