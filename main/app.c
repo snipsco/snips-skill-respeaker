@@ -8,8 +8,8 @@
 #include <signal.h>
 #include <posix_sockets.h>
 
-static void get_site_id(char *msg);
-static void int_handler(int sig);
+static void get_site_id(const char *msg);
+static void interrupt_handler(int sig);
 
 volatile sig_atomic_t   flag_terminate = 0;
 short                   flag_update = 1;
@@ -43,25 +43,24 @@ const char* topics[]={
     LED_OFF
 };
 
-snipsSkillConfig configList[CONFIG_NUM]={
-    {"model", 0},           //0
-    {"spi_dev", 0},         //1
-    {"led_num", 0},         //2
-    {"led_bri", 0},         //3
-    {"mqtt_host", 0},       //4
-    {"mqtt_port", 0},       //5
-    {"on_idle", 0},         //6
-    {"on_listen", 0},       //7
-    {"on_speak", 0},        //8
-    {"to_mute", 0},         //9
-    {"to_unmute", 0},       //10
-    {"on_success", 0},      //11
-    {"on_error", 0},        //12
-    {"nightmode", 0},       //13
-    {"go_sleep", 0},        //14
-    {"go_weak", 0},         //15
-    {"on_disabled", "1"},   //16
-    {"site_id", 0}          //17
+snipsSkillConfig configList[CONFIG_NUM]=
+{
+    {{C_MODEL_STR}, {0}},
+    {{C_SPI_DEV_STR}, {0}},
+    {{C_LED_NUM_STR}, {0}},
+    {{C_LED_BRI_STR}, {0}},
+    {{C_MQTT_HOST_STR}, {0}},
+    {{C_MQTT_PORT_STR}, {0}},
+    {{C_ON_IDLE_STR}, {0}},
+    {{C_ON_LISTEN_STR}, {0}},
+    {{C_ON_SPEAK_STR}, {0}},
+    {{C_TO_MUTE_STR}, {0}},
+    {{C_TO_UNMUTE_STR}, {0}},
+    {{C_NIGHTMODE_STR}, {0}},
+    {{C_GO_SLEEP_STR}, {0}},
+    {{C_GO_WEAK_STR}, {0}},
+    {{C_ON_DISABLED_STR}, {"1"}},
+    {{C_SITE_ID_STR}, {0}}
 };
 
 int main(int argc, char const *argv[])
@@ -70,24 +69,24 @@ int main(int argc, char const *argv[])
     char *client_id;
     // generate a random id as client id
     client_id = generate_client_id();
-    signal(SIGINT, int_handler);
+    signal(SIGINT, interrupt_handler);
     // get config.ini
     config(configList, CONFIG_NUM);
 
     switch_on_power();
     // get input parameters
-    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[2].value);
-    addr = (argc > 2)? argv[2] : configList[4].value; // mqtt_host
-    port = (argc > 3)? argv[3] : configList[5].value; // mqtt_port
+    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
+    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
+    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
 
     // get brightness
-    leds.brightness = (strlen(configList[3].value) != 0) ? atoi(configList[3].value) : 127;
+    leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
 
     // if sleep mode is enabled
     if (if_config_true("nightmode", configList, NULL) == 1){
         flag_sleepmode = 1;
-        parse_hour_minute(configList[14].value, &sleep_hour, &sleep_minute);
-        parse_hour_minute(configList[15].value, &weak_hour, &weak_minute);
+        parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
+        parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
     }
     
     /* open the non-blocking TCP socket (connecting to the broker) */
@@ -119,15 +118,18 @@ int main(int argc, char const *argv[])
         printf("[Info] Subscribed to '%s'.\n", topics[i]);
     }
     for(i=0;i<CONFIG_NUM;i++){
-        printf("[Conf] %s - '%s'\n", configList[i].key, configList[i].value);
+        printf("[Conf] %s - <%s>\n", configList[i].key, configList[i].value);
     }
-    apa102_spi_setup();
+
+    if(!apa102_spi_setup())
+        close_all(EXIT_FAILURE, NULL);
+
     /* start publishing the time */
     printf("[Info] Initilisation looks good.....\n");
     printf("[Info] Client id : %s\n", client_id);
     printf("[Info] Program : %s\n", argv[0]);
     printf("[Info] LED number : %d with max brightness: %d\n", leds.numLEDs, leds.brightness);
-    printf("[Info] Device : %s\n", configList[0].value);
+    printf("[Info] Device : %s\n", configList[C_MODEL].value);
     printf("[Info] Listening to MQTT bus: %s:%s \n",addr, port);
     printf("[Info] Press CTRL-C to exit.\n\n");
 
@@ -175,20 +177,6 @@ void check_nightmode(void){
     }
 }
 
-void apa102_spi_setup(void){
-    int temp,i;
-    leds.pixels = (uint8_t *)malloc(leds.numLEDs * 4);
-    if (begin()){
-        for (i = 0; i < 3; i++){
-            printf("[Error] Failed to start SPI! Retrying..%d\n",i+1); 
-            sleep(30);
-            if (begin() == 0) return;
-        }
-        printf("[Error] Failed to start SPI!\n"); 
-        close_all(EXIT_FAILURE, NULL);
-    }
-}
-
 void publish_callback(void** unused, struct mqtt_response_publish *published) {
     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
@@ -197,7 +185,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
 
     topic_name[published->topic_name_size] = '\0';
     get_site_id(published->application_message);
-    if (strcmp(configList[17].value, rcv_site_id) != 0)
+    if (strcmp(configList[C_SITE_ID].value, rcv_site_id) != 0)
         return;
 
     printf("[Received] %s on Site: %s\n", topic_name, rcv_site_id);
@@ -257,7 +245,7 @@ void close_all(int status, pthread_t *client_daemon){
     exit(status);
 }
 
-static void get_site_id(char *msg){
+static void get_site_id(const char *msg){
     char *start;
     int count = 0;
     start = strstr(msg, "\"siteId\":\""); // len = 10
@@ -272,7 +260,7 @@ static void get_site_id(char *msg){
     rcv_site_id[count] = '\0';
 }
 
-static void int_handler(int sig){
+static void interrupt_handler(int sig){
     flag_terminate = 1;
 }
 

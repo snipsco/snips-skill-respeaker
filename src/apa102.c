@@ -5,6 +5,22 @@
 
 extern APA102 leds;
 
+int apa102_spi_setup(void){
+    int i,res;
+    leds.pixels = (uint8_t *)malloc(leds.numLEDs * 4);
+    i = 0;
+    do{
+        res = begin();
+        if (!res)
+            return 1;
+        i++;
+        if(i > 4)
+            break;
+    }while(res);
+    printf("[Error] Failed to start SPI!\n");
+    return 0;
+}
+
 int begin(void){
     if((leds.fd_spi = open("/dev/spidev0.0", O_RDWR)) < 0) {
         printf("[Error] Can't open /dev/spidev0.0 (try 'sudo')");
