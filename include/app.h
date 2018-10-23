@@ -11,7 +11,6 @@
 #endif
 
 #define CLIENT_ID_LEN 10
-#define NUM_TOPIC     12
 
 void update_state_machine(void);
 void check_nightmode(void);
