@@ -71,7 +71,7 @@ void *on_listen(){
     return((void *)"ON_LISTEN");   
 }
 
-// 3
+// 2
 void *on_speak(){
     uint8_t j;
     uint8_t step;
@@ -110,7 +110,7 @@ void *on_speak(){
     return((void *)"ON_SPEAK");
 }
 
-// 4
+// 3
 void *to_mute(){
     uint8_t j;
     uint8_t step;
@@ -144,7 +144,7 @@ void *to_mute(){
     return((void *)"TO_MUTE");
 }
 
-// 5
+// 4
 void *to_unmute(){
     uint8_t j;
     uint8_t step;
@@ -178,7 +178,7 @@ void *to_unmute(){
     return((void *)"TO_UNMUTE");
 }
 
-// 6
+// 5
 void *on_success(){
     uint8_t i,g,group;
     printf("[Thread] ------>  on_success started\n");
@@ -208,7 +208,7 @@ void *on_success(){
     return((void *)"ON_SUCCESS");
 }
 
-// 7
+// 6
 void *on_error(){
     uint8_t i,g,group;
     printf("[Thread] ------>  on_error started\n");
@@ -232,7 +232,7 @@ void *on_error(){
     return((void *)"ON_ERROR");
 }
 
-// 8
+// 7
 void *on_disabled(){
     uint8_t j;
     printf("[Thread] ------>  on_disabled started\n");

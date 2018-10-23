@@ -63,13 +63,12 @@ snipsSkillConfig configList[]={
 const char* status_s[]={
     "on_idle",      //0
     "on_listen",    //1
-    "on_think",     //2
-    "on_speak",     //3
-    "to_mute",      //4
-    "to_unmute",    //5
-    "on_success",   //6
-    "on_error",     //7
-    "on_disabled"        //8
+    "on_speak",     //2
+    "to_mute",      //3
+    "to_unmute",    //4
+    "on_success",   //5
+    "on_error",     //6
+    "on_disabled"   //7
 };
 
 void (*status[9])(const char *)={ 
