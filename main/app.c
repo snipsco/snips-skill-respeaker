@@ -73,8 +73,7 @@ const char* status_s[]={
 
 void (*status[9])(const char *)={ 
     on_idle, 
-    on_listen, 
-    on_think, 
+    on_listen,
     on_speak, 
     to_mute, 
     to_unmute, 
