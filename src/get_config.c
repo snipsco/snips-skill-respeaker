@@ -77,7 +77,7 @@ int if_config_true(const char *key, snipsSkillConfig *configVar, char *value){
     return -1;
 }
 
-void parse_hour_minute(char *raw_value, uint8_t *hour, uint8_t *minute){
+int parse_hour_minute(char *raw_value, uint8_t *hour, uint8_t *minute){
     char *p;
     char h[3]="";
     char m[3]="";

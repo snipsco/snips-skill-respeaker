@@ -3,4 +3,4 @@
 #endif
 
 void state_machine_update(void);
-void state_hanlder_main(void);
+void state_handler_main(const char *topic);

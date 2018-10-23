@@ -14,7 +14,7 @@ static void to_mute_handler(const char *topic);
 static void to_unmute_handler(const char *topic);
 static void on_disabled_handler(const char *topic);
 
-const void (*state_functions[9])(const char *)={ 
+const void (*state_functions[STATE_NUM])(void)={ 
     on_idle, 
     on_listen,
     on_speak, 
@@ -23,7 +23,7 @@ const void (*state_functions[9])(const char *)={
     on_disabled
 };
 
-const void (*state_handlers[6])(const char *)={ 
+const void (*state_handlers[STATE_NUM])(const char *)={ 
     on_idle_handler, 	//0
     on_listen_handler,	//1
     on_speak_handler,	//2
@@ -32,7 +32,7 @@ const void (*state_handlers[6])(const char *)={
     on_disabled_handler	//5
 };
 
-const char* state_strings[]={
+const char* state_strings[STATE_NUM]={
     ON_IDLE_STR,      //0
     ON_LISTEN_STR,    //1
     ON_SPEAK_STR,     //2

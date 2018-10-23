@@ -6,13 +6,8 @@ extern STATE        curr_state;
 extern short        flag_update;
 extern pthread_t    curr_thread;
 
-extern numLEDs;
-extern fd_spi;
-extern *pixels;
-
 // 0
 void *on_idle(){
-    uint8_t i,j;
     int curr_bri = 0;
     uint8_t led, step;
     printf("[Thread] ------>  on_idle started\n");
@@ -181,7 +176,6 @@ void *to_unmute(){
 
 // 5
 void *on_disabled(){
-    uint8_t j;
     printf("[Thread] ------>  on_disabled started\n");
     flag_update = 0;
     while(curr_state == ON_DISABLED){
