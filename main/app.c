@@ -2,6 +2,7 @@
 #include "apa102.h"
 #include "get_config.h"
 #include "animation.h"
+#include "state_handler.h"
 #include <pthread.h>
 #include <signal.h>
 #include <posix_sockets.h>
@@ -24,19 +25,17 @@ char        rcv_site_id[255]= "";
 const char	*addr;
 const char	*port;
 
-const char* topic[NUM_TOPIC]={
-    "hermes/hotword/toggleOff",
-    "hermes/asr/startListening",
-    "hermes/asr/stopListening",
-    "hermes/tts/say",
-    "hermes/tts/sayFinished",
-    "hermes/hotword/toggleOn",
-    "hermes/feedback/sound/toggleOn",
-    "hermes/feedback/sound/toggleOff",
-    "hermes/nlu/intentNotRecognized",
-    "hermes/nlu/intentParsed",
-    "hermes/feedback/led/toggleOn",
-    "hermes/feedback/led/toggleOff",
+const char* topics[]={
+    HOT_OFF,
+    STA_LIS,
+    END_LIS,
+    STA_SAY,
+    END_SAY,
+    HOT_ON,
+    SUD_ON,
+    SUD_OFF,
+    LED_ON,
+    LED_OFF
 };
 
 snipsSkillConfig configList[]={
@@ -134,8 +133,8 @@ int main(int argc, char const *argv[])
     }
     /* subscribe */
     for(i=0;i<NUM_TOPIC;i++){
-        mqtt_subscribe(&client, topic[i], 0);
-        printf("[Info] Subscribed to '%s'.\n", topic[i]);
+        mqtt_subscribe(&client, topics[i], 0);
+        printf("[Info] Subscribed to '%s'.\n", topics[i]);
     }
     for(i=0;i<CONFIG_NUM;i++){
         printf("[Conf] %s - '%s'\n", configList[i].key, configList[i].value);
@@ -280,7 +279,9 @@ void apa102_spi_setup(void){
 void publish_callback(void** unused, struct mqtt_response_publish *published) {
     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
+
     memcpy(topic_name, published->topic_name, published->topic_name_size);
+
     topic_name[published->topic_name_size] = '\0';
     get_site_id(published->application_message);
     if (strcmp(configList[17].value, rcv_site_id) != 0)
@@ -289,60 +290,89 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     printf("[Received] %s on Site: %s\n", topic_name, rcv_site_id);
 
     switch(curr_state){
-        case 0: // on idle
-            if (strcmp(topic_name, "hermes/asr/startListening") == 0)
-                flag_update = 1,curr_state = ON_LISTEN;
-            else if (strcmp(topic_name, "hermes/feedback/sound/toggleOff") == 0)
-                flag_update = 1,curr_state = TO_MUTE;
-            else if (strcmp(topic_name, "hermes/feedback/sound/toggleOn") == 0)
-                flag_update = 1,curr_state = TO_UNMUTE;
-            else if (strcmp(topic_name, "hermes/tts/say") == 0)
-                flag_update = 1,curr_state = ON_SPEAK;
-            else if (strcmp(topic_name, "hermes/feedback/led/toggleOff") == 0)
-                flag_update = 1,curr_state = ON_DISABLED;
+        case ON_IDLE:
+            if (!strcmp(topic_name, "hermes/asr/startListening")){
+                flag_update = 1;
+                curr_state = ON_LISTEN;
+            }
+            else if (!strcmp(topic_name, "hermes/feedback/sound/toggleOff")){
+                flag_update = 1;
+                curr_state = TO_MUTE;
+            }
+            else if (!strcmp(topic_name, "hermes/feedback/sound/toggleOn")){
+                flag_update = 1;
+                curr_state = TO_UNMUTE;
+            }
+            else if (!strcmp(topic_name, "hermes/tts/say")){
+                flag_update = 1;
+                curr_state = ON_SPEAK;
+            }
+            else if (!strcmp(topic_name, "hermes/feedback/led/toggleOff")){
+                flag_update = 1;
+                curr_state = ON_DISABLED;
+            }
             break;
-        case 1: // on listen
-            if (strcmp(topic_name, "hermes/asr/stopListening") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
-            else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
+        case ON_LISTEN:
+            if (!strcmp(topic_name, "hermes/asr/stopListening")){
+                flag_update = 1;
+                curr_state = ON_IDLE;
+            }
+            else if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
+                flag_update = 1;
+                curr_state = ON_IDLE;
+            }
             break;
-        case 2: // on think -> too fast to perform
-            if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
+        case ON_SPEAK:
+            if (!strcmp(topic_name, "hermes/tts/sayFinished")){
+                flag_update = 1;
+                curr_state = ON_IDLE;
+            }
+            else if (!strcmp(topic_name, "hermes/asr/startListening")){
+                flag_update = 1;
+                curr_state = ON_LISTEN;
+            }
+            else if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
+                flag_update = 1;
+                curr_state = ON_IDLE;
+            }
             break;
-        case 3: // on speak
-            if (strcmp(topic_name, "hermes/tts/sayFinished") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
-            else if (strcmp(topic_name, "hermes/asr/startListening") == 0)
-                flag_update = 1,curr_state = ON_LISTEN;
-            else if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
+        case TO_MUTE:
+            if (!strcmp(topic_name, "hermes/hotword/toggleOff")){
+                flag_update = 1;
+                curr_state = ON_LISTEN;
+            }
             break;
-        case 4: // to mute
-            if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                flag_update = 1,curr_state = ON_LISTEN;
+        case TO_UNMUTE:
+            if (!strcmp(topic_name, "hermes/hotword/toggleOff")){
+                flag_update = 1;
+                curr_state = ON_LISTEN;
+            }
             break;
-        case 5:// to unmute
-            if (strcmp(topic_name, "hermes/hotword/toggleOff") == 0)
-                flag_update = 1,curr_state = ON_LISTEN;
+        case ON_SUCCESS:
+            if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
+                flag_update = 1;
+                curr_state = ON_IDLE;
+            }
             break;
-        case 6: // on success
-            if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
+        case ON_ERROR:
+            if (!strcmp(topic_name, "hermes/hotword/toggleOn")){
+                flag_update = 1;
+                curr_state = ON_IDLE;
+            }
             break;
-        case 7: // on error
-            if (strcmp(topic_name, "hermes/hotword/toggleOn") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
-            break;
-        case 8: // on disabled
-            if (strcmp(topic_name, "hermes/feedback/led/toggleOn") == 0)
-                flag_update = 1,curr_state = ON_IDLE;
+        case ON_DISABLED:
+            if (!strcmp(topic_name, "hermes/feedback/led/toggleOn")){
+                flag_update = 1;
+                curr_state = ON_IDLE;
+            }
             break;
     }
 
     free(topic_name);
 }
+
+
+
 
 void* client_refresher(void* client){
     while(1) 
