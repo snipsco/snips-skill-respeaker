@@ -16,7 +16,6 @@ typedef struct{
 enum {
 	ON_IDLE = 0,
 	ON_LISTEN,
-	ON_THINK,
 	ON_SPEAK,
 	TO_MUTE,
 	TO_UNMUTE,
