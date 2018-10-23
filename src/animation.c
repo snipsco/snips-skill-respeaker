@@ -71,35 +71,6 @@ void *on_listen(){
     return((void *)"ON_LISTEN");   
 }
 
-// 2 ignore - > too fast to perform
-void *on_think(){
-    // uint8_t i,g,group;
-    // printf("[Thread] ------>  on_think started\n");
-    // clear();
-    // group = leds.numLEDs/3;
-    // while(curr_state == 2){
-    //     for(i=3; i>0; i--){
-    //         for (g=0; g < group; g++)
-    //             set_index_rgb(g*3+i-1, 0, 255, 255);
-    //         show();
-    //         for (int j = 0; j < 10; j++){
-    //             // each 0.01s check
-    //             if(curr_state != 2) goto TERMINATE_THREAD;
-    //             usleep(10000);
-    //         }
-    //         clear();
-    //         for (int j = 0; j < 10; j++){
-    //             // each 0.01s check
-    //             if(curr_state != 2) goto TERMINATE_THREAD;
-    //             usleep(10000);
-    //         }
-    //     }
-    // }
-    // TERMINATE_THREAD:
-    // clear();
-    // return((void *)"ON_THINK");
-}
-
 // 3
 void *on_speak(){
     uint8_t j;
