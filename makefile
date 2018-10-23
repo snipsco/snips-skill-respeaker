@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = 	-Ofast -std=gnu99 -w\
+CFLAGS = 	-Ofast -std=gnu99 -Wall\
 		 	-Iinclude\
 			-fomit-frame-pointer \
 			-I/opt/vc/include\
