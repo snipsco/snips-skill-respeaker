@@ -180,60 +180,6 @@ void *to_unmute(){
 }
 
 // 5
-void *on_success(){
-    uint8_t i,g,group;
-    printf("[Thread] ------>  on_success started\n");
-    flag_update = 0;
-    clear();
-    group = leds.numLEDs/3;
-    while(curr_state == ON_SUCCESS){
-        for(i=3; i>0; i--){
-            for (g=0; g < group; g++)
-                set_index_rgb(g*3+i-1, 0, leds.brightness, 0);
-            show();
-            for (int j = 0; j < 8; j++){
-                // each 0.01s check
-                if(curr_state != ON_SUCCESS) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
-            clear();
-            for (int j = 0; j < 8; j++){
-                // each 0.01s check
-                if(curr_state != ON_SUCCESS) goto TERMINATE_THREAD;
-                usleep(10000);
-            }
-        }
-    }
-    TERMINATE_THREAD:
-    clear();
-    return((void *)"ON_SUCCESS");
-}
-
-// 6
-void *on_error(){
-    uint8_t i,g,group;
-    printf("[Thread] ------>  on_error started\n");
-    flag_update = 0;
-    clear();
-    group = leds.numLEDs/3;
-
-    for(i=3; i>0 && curr_state == ON_ERROR; i--){
-        for (g=0; g < group && curr_state == ON_ERROR; g++)
-            set_index_rgb(g*3+i-1, 0, 0, leds.brightness);
-        show();
-        delay_on_state(20, ON_ERROR);
-        clear();
-        delay_on_state(20, ON_ERROR);
-    }
-    if (curr_state == ON_ERROR){
-        curr_state = ON_IDLE;
-        flag_update = 1;
-    }
-    clear();
-    return((void *)"ON_ERROR");
-}
-
-// 7
 void *on_disabled(){
     uint8_t j;
     printf("[Thread] ------>  on_disabled started\n");

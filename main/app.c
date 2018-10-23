@@ -1,7 +1,6 @@
 #include "app.h"
 #include "apa102.h"
 #include "get_config.h"
-#include "animation.h"
 #include "state_handler.h"
 
 #include <pthread.h>
@@ -40,7 +39,7 @@ const char* topics[]={
     LED_OFF
 };
 
-snipsSkillConfig configList[]={
+snipsSkillConfig configList[CONFIG_NUM]={
     {"model", 0},           //0
     {"spi_dev", 0},         //1
     {"led_num", 0},         //2
@@ -61,33 +60,10 @@ snipsSkillConfig configList[]={
     {"site_id", 0}          //17
 };
 
-const char* status_s[]={
-    "on_idle",      //0
-    "on_listen",    //1
-    "on_speak",     //2
-    "to_mute",      //3
-    "to_unmute",    //4
-    "on_success",   //5
-    "on_error",     //6
-    "on_disabled"   //7
-};
-
-void (*status[9])(const char *)={ 
-    on_idle, 
-    on_listen,
-    on_speak, 
-    to_mute, 
-    to_unmute, 
-    on_success, 
-    on_error, 
-    on_disabled
-};
-
 int main(int argc, char const *argv[])
 {	
     int i;
     char *client_id;
-
     // generate a random id as client id
     client_id = generate_client_id();
     signal(SIGINT, int_handler);
@@ -155,9 +131,9 @@ int main(int argc, char const *argv[])
     while(1){
         if(flag_sleepmode)
             check_nightmode();
-
+        
         if (flag_update) 
-            update_state_machine();
+            state_machine_update();
 
         if (flag_terminate) break;
 
@@ -170,20 +146,6 @@ int main(int argc, char const *argv[])
     // clean
     close_all(EXIT_SUCCESS, &client_daemon);
     return 0;
-}
-
-void update_state_machine(void){
-    void *ret_val="NONE";
-
-    if (if_config_true(status_s[curr_state], configList, NULL) == 1){
-        printf("[Debug] State is changed to %d\n", curr_state);
-        // block until the previous terminate
-        pthread_join(curr_thread,&ret_val);
-        printf("[Debug] Previous thread %s terminated with success\n",(char*)ret_val);
-        pthread_create(&curr_thread, NULL, status[curr_state], NULL);
-    }else{
-        flag_update = 0;
-    }
 }
 
 void check_nightmode(void){

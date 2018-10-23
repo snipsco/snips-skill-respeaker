@@ -52,14 +52,12 @@ void config(snipsSkillConfig *configVar, int configNum)
     fclose(fd);
 }
 
-char *get_config_value(char *key, snipsSkillConfig *configVar){
-    char *target_key = key;
+char *get_config_value(const char *key, snipsSkillConfig *configVar){
     int i;
     static char res_value[50]="";
     for(i=0; i<CONFIG_NUM; i++)
-    {
-        if (strcmp(configVar[i].key, target_key) == 0){
-
+    {   
+        if (strcmp(configVar[i].key, key) == 0){
             strcpy(res_value, configVar[i].value);
             return res_value;
         }
@@ -67,7 +65,7 @@ char *get_config_value(char *key, snipsSkillConfig *configVar){
     return res_value;
 }
 
-int if_config_true(char *key, snipsSkillConfig *configVar, char *value){
+int if_config_true(const char *key, snipsSkillConfig *configVar, char *value){
     char *res_value;
     res_value = get_config_value(key, configVar);
     if (value != NULL){
