@@ -71,7 +71,7 @@ int main(int argc, char const *argv[])
     client_id = generate_client_id();
     signal(SIGINT, interrupt_handler);
     // get config.ini
-    config(configList, CONFIG_NUM);
+    read_config_file(configList, CONFIG_NUM);
 
     switch_on_power();
     // get input parameters

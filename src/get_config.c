@@ -18,7 +18,7 @@ int strkv(char *src, char *key, char *value)
     }
 }
 
-void config(snipsSkillConfig *configVar, int configNum)
+void read_config_file(snipsSkillConfig *configVar, int configNum)
 {
     int i;
     FILE *fd;
