@@ -16,9 +16,9 @@ This skill controls the RGB LED on the respeakr mic hat.
 
 :loudspeaker: ***```On speak: all leds start to breathe in purple```***
 
-:speak_no_evil: ***```To mute: all leds breathe once in red```***
+:speak_no_evil: ***```To mute: all leds breathe once in orange```***
 
-:smile_cat: ***```To unmute: all leds breathe once in blue```***
+:smile_cat: ***```To unmute: all leds breathe once in green```***
 
 :zzz: ***```On off: all leds turn off```***
 
