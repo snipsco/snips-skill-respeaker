@@ -15,16 +15,14 @@ mqtt_host=localhost
 mqtt_port=1883
 
 # Animation
-on_idle=1
-on_listen=1
-on_speak=1
-to_mute=1
-to_unmute=1
-on_success=0
-on_error=0
+on_idle=true
+on_listen=true
+on_speak=true
+to_mute=true
+to_unmute=true
 
 # Nightmode (24h)
-nightmode=1
+nightmode=true
 go_sleep=22:15
 go_weak=8:35
 
