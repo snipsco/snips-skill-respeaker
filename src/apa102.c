@@ -17,13 +17,13 @@ int apa102_spi_setup(void){
         if(i > 4)
             break;
     }while(res);
-    printf("[Error] Failed to start SPI!\n");
+    fprintf(stderr, "[Error] Failed to start SPI!\n");
     return 0;
 }
 
 int begin(void){
     if((leds.fd_spi = open("/dev/spidev0.0", O_RDWR)) < 0) {
-        printf("[Error] Can't open /dev/spidev0.0 (try 'sudo')");
+        fprintf(stderr, "[Error] Can't open /dev/spidev0.0 (try 'sudo')");
         return -1;
     }
     ioctl(leds.fd_spi, SPI_IOC_WR_MODE, SPI_MODE_0 | SPI_NO_CS);

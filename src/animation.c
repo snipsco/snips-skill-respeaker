@@ -10,7 +10,7 @@ extern pthread_t    curr_thread;
 void *on_idle(){
     int curr_bri = 0;
     uint8_t led, step;
-    printf("[Thread] ------>  on_idle started\n");
+    fprintf(stdout, "[Thread] ------>  on_idle started\n");
     flag_update = 0;
     clear();
     srand((unsigned int)time(NULL));
@@ -49,7 +49,7 @@ void *on_idle(){
 // 1
 void *on_listen(){
     uint8_t i,g,group;
-    printf("[Thread] ------>  on_listen started\n");
+    fprintf(stdout, "[Thread] ------>  on_listen started\n");
     flag_update = 0;
     clear();
     group = leds.numLEDs/3;
@@ -72,7 +72,7 @@ void *on_speak(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    printf("[Thread] ------>  on_speak started\n");
+    fprintf(stdout, "[Thread] ------>  on_speak started\n");
     flag_update = 0;
     clear();
     
@@ -111,7 +111,7 @@ void *to_mute(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    printf("[Thread] ------>  to_mute started\n");
+    fprintf(stdout, "[Thread] ------>  to_mute started\n");
     flag_update = 0;
     clear();
     
@@ -145,7 +145,7 @@ void *to_unmute(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    printf("[Thread] ------>  to_unmute started\n");
+    fprintf(stdout, "[Thread] ------>  to_unmute started\n");
     flag_update = 0;
     clear();
     
@@ -176,7 +176,7 @@ void *to_unmute(){
 
 // 5
 void *on_disabled(){
-    printf("[Thread] ------>  on_disabled started\n");
+    fprintf(stdout, "[Thread] ------>  on_disabled started\n");
     flag_update = 0;
     while(curr_state == ON_DISABLED){
         clear();

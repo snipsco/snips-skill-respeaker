@@ -45,10 +45,10 @@ void state_machine_update(void){
     void *ret_val="NONE";
 
     if (if_config_true(state_strings[curr_state], configList, NULL) == 1){
-        printf("[Debug] State is changed to %d\n", curr_state);
+        fprintf(stdout, "[Debug] State is changed to %d\n", curr_state);
         // block until the previous terminate
         pthread_join(curr_thread,&ret_val);
-        printf("[Debug] Previous thread %s terminated with success\n",(char*)ret_val);
+        fprintf(stdout, "[Debug] Previous thread %s terminated with success\n",(char*)ret_val);
         pthread_create(&curr_thread, NULL, state_functions[curr_state], NULL);
     }else{
         flag_update = 0;

@@ -103,35 +103,35 @@ int main(int argc, char const *argv[])
     mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
     /* check that we don't have any errors */
     if (client.error != MQTT_OK) {
-        fprintf(stderr, "error: %s\n", mqtt_error_str(client.error));
+        fprintf(stderr, "[Error] %s\n", mqtt_error_str(client.error));
         close_all(EXIT_FAILURE, NULL);
     }
     /* start a thread to refresh the client (handle egress and ingree client traffic) */
     pthread_t client_daemon;
     if(pthread_create(&client_daemon, NULL, client_refresher, &client)) {
-        fprintf(stderr, "Failed to start client daemon.\n");
+        fprintf(stderr, "[Error] Failed to start client daemon.\n");
         close_all(EXIT_FAILURE, NULL);
     }
     /* subscribe */
     for(i=0;i<NUM_TOPIC;i++){
         mqtt_subscribe(&client, topics[i], 0);
-        printf("[Info] Subscribed to '%s'.\n", topics[i]);
+        fprintf(stdout, "[Info] Subscribed to '%s'.\n", topics[i]);
     }
     for(i=0;i<CONFIG_NUM;i++){
-        printf("[Conf] %s - <%s>\n", configList[i].key, configList[i].value);
+        fprintf(stdout, "[Conf] %s - <%s>\n", configList[i].key, configList[i].value);
     }
 
     if(!apa102_spi_setup())
         close_all(EXIT_FAILURE, NULL);
 
     /* start publishing the time */
-    printf("[Info] Initilisation looks good.....\n");
-    printf("[Info] Client id : %s\n", client_id);
-    printf("[Info] Program : %s\n", argv[0]);
-    printf("[Info] LED number : %d with max brightness: %d\n", leds.numLEDs, leds.brightness);
-    printf("[Info] Device : %s\n", configList[C_MODEL].value);
-    printf("[Info] Listening to MQTT bus: %s:%s \n",addr, port);
-    printf("[Info] Press CTRL-C to exit.\n\n");
+    fprintf(stdout, "[Info] Initilisation looks good.....\n");
+    fprintf(stdout, "[Info] Client id : %s\n", client_id);
+    fprintf(stdout, "[Info] Program : %s\n", argv[0]);
+    fprintf(stdout, "[Info] LED number : %d with max brightness: %d\n", leds.numLEDs, leds.brightness);
+    fprintf(stdout, "[Info] Device : %s\n", configList[C_MODEL].value);
+    fprintf(stdout, "[Info] Listening to MQTT bus: %s:%s \n",addr, port);
+    fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
 
     /* block */
     while(1){
@@ -146,7 +146,7 @@ int main(int argc, char const *argv[])
         usleep(10000);
     }
     // disconnect
-    printf("[Info] %s disconnecting from %s\n", argv[0], addr);
+    fprintf(stdout, "[Info] %s disconnecting from %s\n", argv[0], addr);
     sleep(1);
 
     // clean
@@ -166,14 +166,14 @@ void check_nightmode(void){
         curr_state != ON_DISABLED){
         curr_state = ON_DISABLED;
         flag_update = 1;
-        printf("[Info] ------>  Nightmode started\n");
+        fprintf(stdout, "[Info] ------>  Nightmode started\n");
     }
     if(read_time->tm_hour == weak_hour && 
         read_time->tm_min == weak_minute &&
         curr_state == ON_DISABLED){
         curr_state = ON_IDLE;
         flag_update = 1;
-        printf("[Info] ------>  Nightmode terminated\n");
+        fprintf(stdout, "[Info] ------>  Nightmode terminated\n");
     }
 }
 
@@ -188,7 +188,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
     if (strcmp(configList[C_SITE_ID].value, rcv_site_id) != 0)
         return;
 
-    printf("[Received] %s on Site: %s\n", topic_name, rcv_site_id);
+    fprintf(stdout, "[Received] %s on Site: %s\n", topic_name, rcv_site_id);
 
     state_handler_main(topic_name);
 
@@ -233,7 +233,7 @@ void close_all(int status, pthread_t *client_daemon){
     if(if_config_true("model", configList, "rsp_corev2")){
         fd_gpio = open("/sys/class/gpio/unexport", O_RDWR);
         if(write(fd_gpio, gpio_66, sizeof(gpio_66))){
-            printf("[Info] Closed GPIO66..\n");
+            fprintf(stdout, "[Info] Closed GPIO66..\n");
             close(fd_gpio);
         }  
     }

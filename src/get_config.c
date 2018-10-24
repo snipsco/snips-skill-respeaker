@@ -23,9 +23,9 @@ void read_config_file(snipsSkillConfig *configVar, int configNum){
     char key[50]="";
     char value[50]=""; 
  
-    fd = fopen("config.ini" , "r");
+    fd = fopen(CONFIG_FILE, "r");
     if (fd == NULL){
-        printf("can not open config file");
+        fprintf(stderr, "[Error] Can not open config file");
         exit(-1);
     }
 
@@ -58,8 +58,8 @@ int if_config_true(const char *key, snipsSkillConfig *configVar, char *value){
     if (value != NULL){
         return (!strcmp(value, res_value)) ? 1: 0;
     }else if (value == NULL){
-        if (!strcmp("true", res_value)) return 1;
-        if (!strcmp("false", res_value)) return 0;
+        if (!strcmp(TRUE_S, res_value)) return 1;
+        if (!strcmp(FALSE_S, res_value)) return 0;
     }
     return -1;
 }

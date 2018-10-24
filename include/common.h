@@ -76,6 +76,11 @@ enum CONFIG_ENTITY{
 	C_SITE_ID
 };
 
+#define TRUE_S		"true"
+#define FALSE_S		"false"
+
+#define CONFIG_FILE "config.ini"
+
 typedef struct{
 	char key[20];
 	char value[50];
@@ -89,4 +94,5 @@ typedef struct{
 	uint8_t *pixels;
 	uint8_t brightness;
 }APA102;
+
 #endif
