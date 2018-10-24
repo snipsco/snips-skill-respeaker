@@ -12,5 +12,5 @@ APP = action-app_respeaker
 
 all: $(APP)
 
-$(APP): main/app.c $(SOURCES)
+$(APP): src/main.c $(SOURCES)
 	$(CC) $(CFLAGS) $^ -lpthread -o $@
