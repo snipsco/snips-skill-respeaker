@@ -1,4 +1,4 @@
-#include "app.h"
+#include "main.h"
 #include "apa102.h"
 #include "get_config.h"
 #include "state_handler.h"
