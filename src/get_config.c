@@ -55,12 +55,10 @@ char *get_config_value(const char *key, snipsSkillConfig *configVar){
 int if_config_true(const char *key, snipsSkillConfig *configVar, char *value){
     char *res_value;
     res_value = get_config_value(key, configVar);
-    if (value != NULL){
+    if (value)
         return (!strcmp(value, res_value)) ? 1: 0;
-    }else if (value == NULL){
-        if (!strcmp(TRUE_S, res_value)) return 1;
-        if (!strcmp(FALSE_S, res_value)) return 0;
-    }
+    if (!strcmp(TRUE_S, res_value)) return 1;
+    if (!strcmp(FALSE_S, res_value)) return 0;
     return -1;
 }
 
