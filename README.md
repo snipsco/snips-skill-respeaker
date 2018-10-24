@@ -91,8 +91,8 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | `on_idle` | Random led breathe in green | `true` , `false` | `true` |
 | `on_listen` | All leds start to blink in blue | `true` , `false` | `true` |
 | `on_speak` | All leds start to breathe in purple | `true` , `false` | `true` |
-| `to_mute` | All leds breathe once in red | `true` , `false` | `true` |
-| `to_unmute` | All leds breathe once in blue | `true` , `false` | `true` |
+| `to_mute` | All leds breathe once in orange | `true` , `false` | `true` |
+| `to_unmute` | All leds breathe once in green | `true` , `false` | `true` |
 
 ### Nightmode
 
