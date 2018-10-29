@@ -20,7 +20,7 @@ This skill controls the RGB LED on the respeakr mic hat.
 
 :smile_cat: ***```To unmute: all leds breathe once in green```***
 
-:zzz: ***```On off: all leds turn off```***
+:zzz: ***```On disabled: all leds turn off```***
 
 ## Installation
 
@@ -106,11 +106,11 @@ These configuration options are written in `config.ini` file. Please refer to yo
 > 
 > ***Timezone setting: `sudo raspi-config` -> `Localisation Options` -> `Change Timezone`***
 
-## On/Off mode
+## LED feedback Enable/Disable mode
 
 Mode change follows hermes procotol.
 
-#### Turn on
+#### Enable
 ```
 hermes/feedback/led/toggleOn
 ```
@@ -119,7 +119,7 @@ hermes/feedback/led/toggleOn
 | --- | --- |
 | siteId | String - Site where feedback led will be toggled On | 
 
-#### Turn off
+#### Disable
 ```
 hermes/feedback/led/toggleOff
 ```
