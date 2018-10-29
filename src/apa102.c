@@ -10,12 +10,13 @@ int apa102_spi_setup(void){
     leds.pixels = (uint8_t *)malloc(leds.numLEDs * 4);
     i = 0;
     do{
-        res = begin();
+	res = begin();
         if (!res)
             return 1;
         i++;
-        if(i > 4)
+        if(i > 5)
             break;
+	sleep(10);
     }while(res);
     fprintf(stderr, "[Error] Failed to start SPI!\n");
     return 0;
