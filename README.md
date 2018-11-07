@@ -1,6 +1,6 @@
 # snips-skill-respeaker
 
-This skill controls the RGB LED on the respeakr mic hat.
+This skill controls the RGB LED on the respeaker mic hat.
 
 ## Support
 
