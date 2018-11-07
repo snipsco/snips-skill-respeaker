@@ -27,15 +27,15 @@ This skill controls the RGB LED on the respeaker mic hat.
 #### By using `sam`:
 
 ```bash
-sam install actions -g https://github.com/snipsco/snips-skill-respeaker-c.git
+sam install actions -g https://github.com/snipsco/snips-skill-respeaker.git
 ```
 
 #### Manually:
 
 ```bash
-git clone  https://github.com/snipsco/snips-skill-respeaker-c.git
-cp -r snips-skill-respeaker-c /var/lib/snips/skills/
-cd /var/lib/snips/skills/snips-skill-respeaker-c
+git clone  https://github.com/snipsco/snips-skill-respeaker.git
+cp -r snips-skill-respeaker /var/lib/snips/skills/
+cd /var/lib/snips/skills/snips-skill-respeaker
 ./setup.sh
 ```
 
