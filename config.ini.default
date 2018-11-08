@@ -13,6 +13,8 @@ led_bri=128
 # MQTT
 mqtt_host=localhost
 mqtt_port=1883
+#mqtt_username=null
+#mqtt_password=null
 
 # Animation
 on_idle=true
