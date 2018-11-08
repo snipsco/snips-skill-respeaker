@@ -39,13 +39,15 @@ typedef enum {
 	ON_DISABLED
 }STATE;
 
-#define CONFIG_NUM 			16
+#define CONFIG_NUM 			18
 #define C_MODEL_STR 		"model"
 #define C_SPI_DEV_STR 		"spi_dev"
 #define C_LED_NUM_STR 		"led_num"
 #define C_LED_BRI_STR 		"led_bri"
 #define C_MQTT_HOST_STR 	"mqtt_host"
 #define C_MQTT_PORT_STR 	"mqtt_port"
+#define C_MQTT_USER_STR 	"mqtt_username"
+#define C_MQTT_PASS_STR 	"mqtt_password"
 #define C_ON_IDLE_STR 		"on_idle"
 #define C_ON_LISTEN_STR 	"on_listen"
 #define C_ON_SPEAK_STR 		"on_speak"
@@ -64,6 +66,8 @@ enum CONFIG_ENTITY{
 	C_LED_BRI,
 	C_MQTT_HOST,
 	C_MQTT_PORT,
+	C_MQTT_USER,
+	C_MQTT_PASS,
 	C_ON_IDLE,
 	C_ON_LISTEN,
 	C_ON_SPEAK,
