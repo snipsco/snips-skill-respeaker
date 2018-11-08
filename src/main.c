@@ -133,13 +133,14 @@ int main(int argc, char const *argv[])
         close_all(EXIT_FAILURE, NULL);
 
     /* start publishing the time */
-    fprintf(stdout, "[Info] Initilisation looks good.....\n");
-    fprintf(stdout, "[Info] Client id : %s\n", client_id);
-    fprintf(stdout, "[Info] Program : %s\n", argv[0]);
-    fprintf(stdout, "[Info] LED number : %d with max brightness: %d\n", leds.numLEDs, leds.brightness);
-    fprintf(stdout, "[Info] Device : %s\n", configList[C_MODEL].value);
-    fprintf(stdout, "[Info] Nightmode : %s\n", flag_sleepmode ? "Enabled": "Disabled");
-    fprintf(stdout, "[Info] Listening to MQTT bus: %s:%s \n",addr, port);
+    fprintf(stdout, "[Info] Initilisation Done! \n");
+    fprintf(stdout, "[Info] Client Id ........... %s\n", client_id);
+    fprintf(stdout, "[Info] Program ............. %s\n", argv[0]);
+    fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
+    fprintf(stdout, "[Info] Brightness .......... %d\n", leds.brightness);
+    fprintf(stdout, "[Info] Device .............. %s\n", configList[C_MODEL].value);
+    fprintf(stdout, "[Info] Nightmode ........... %s\n", flag_sleepmode ? "Enabled": "Disabled");
+    fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", addr, port);
     fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
 
     /* block */
