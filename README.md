@@ -59,7 +59,7 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | --- | --- | --- | --- |
 | `model` | Current hardware platform | `rpi_*` , `rsp_corev2` | `rpi_*` |
 | `spi_dev` | SPI bus number and device number | Refering to the actual bus | `0:0` | 
-| `led_num` | Number of LEDs | `0`:`255` | `128` |
+| `led_num` | Number of LEDs | `0`:`255` | `3` |
 
 ### Device Info
 
