@@ -61,7 +61,7 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | --- | --- | --- | --- |
 | `model` | Current hardware platform | `rpi_*` , `rsp_corev2` | `rpi_*` |
 | `spi_dev` | SPI bus number and device number | Refering to the actual bus | `0:0` |
-| `led_num` | Number of LEDs | `0`:`255` | `128` |
+| `led_num` | Number of LEDs | `0`:`255` | `3` |
 
 ### Device Info
 
@@ -113,22 +113,28 @@ These configuration options are written in `config.ini` file. Please refer to yo
 Mode change follows hermes procotol.
 
 #### Enable
-```
-hermes/feedback/led/toggleOn
-```
 
-| Key | Value |
-| --- | --- |
-| siteId | String - Site where feedback led will be toggled On |
+Topic:
+
+`hermes/feedback/led/toggleOn`
+
+Payload:
+
+| Key | Type | Value |
+| --- | --- | --- |
+| siteId | String | Site where feedback led will be toggled On |
 
 #### Disable
-```
-hermes/feedback/led/toggleOff
-```
 
-| Key | Value |
-| --- | --- |
-| siteId | String - Site where feedback led will be toggled Off |  
+Topic:
+
+`hermes/feedback/led/toggleOff`
+
+Payload:
+
+| Key | Type | Value |
+| --- | --- | --- |
+| siteId | String | Site where feedback led will be toggled Off |
 
 ## Contributing
 
