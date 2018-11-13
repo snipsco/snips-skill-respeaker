@@ -1,6 +1,6 @@
 # snips-skill-respeaker
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/snipsco/snips-skill-respeaker/master/LICENSE.txt)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 
 This skill controls the RGB LED on the respeaker mic hat.
 
@@ -138,8 +138,8 @@ Payload:
 
 ## Contributing
 
-Please see the [Contribution Guidelines](https://raw.githubusercontent.com/snipsco/snips-skill-respeaker/master/CONTRIBUTING.md).
+Please see the [Contribution Guidelines](https://github.com/snipsco/snips-skill-respeaker/blob/master/CONTRIBUTING.md).
 
 ## Copyright
 
-This library is provided by [Snips](https://www.snips.ai) as Open Source software. See [LICENSE.txt](https://raw.githubusercontent.com/snipsco/snips-skill-respeaker/master/LICENSE) for more information.
+This library is provided by [Snips](https://www.snips.ai) as Open Source software. See [LICENSE](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE) for more information.
