@@ -1,5 +1,7 @@
 # snips-skill-respeaker
 
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
+
 This skill controls the RGB LED on the respeaker mic hat.
 
 ## Support
@@ -58,8 +60,8 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
 | `model` | Current hardware platform | `rpi_*` , `rsp_corev2` | `rpi_*` |
-| `spi_dev` | SPI bus number and device number | Refering to the actual bus | `0:0` | 
-| `led_num` | Number of LEDs | `0`:`255` | `128` |
+| `spi_dev` | SPI bus number and device number | Refering to the actual bus | `0:0` |
+| `led_num` | Number of LEDs | `0`:`255` | `3` |
 
 ### Device Info
 
@@ -86,7 +88,7 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | --- | --- | --- | --- |
 | `led_bri` | Max brightness of LEDs | `0`:`255` | `128` |
 
-### Animation 
+### Animation
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
@@ -101,11 +103,11 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
 | `nightmode` | If enable night mode | `true` , `false` | `true` |
-| `go_sleep` | The time when it sleep | `HH:MM` (24h) | `22:15` | 
+| `go_sleep` | The time when it sleep | `HH:MM` (24h) | `22:15` |
 | `go_weak` | The time when it weak up | `HH:MM` (24h) | `8:35` |
 
 > ***To be able to use this function, please properly set your timezone***
-> 
+>
 > ***Timezone setting: `sudo raspi-config` -> `Localisation Options` -> `Change Timezone`***
 
 ## LED feedback Enable/Disable mode
@@ -113,23 +115,33 @@ These configuration options are written in `config.ini` file. Please refer to yo
 Mode change follows hermes procotol.
 
 #### Enable
-```
-hermes/feedback/led/toggleOn
-```
 
-| Key | Value | 
-| --- | --- |
-| siteId | String - Site where feedback led will be toggled On | 
+Topic:
+
+`hermes/feedback/led/toggleOn`
+
+Payload:
+
+| Key | Type | Value |
+| --- | --- | --- |
+| siteId | String | Site where feedback led will be toggled On |
 
 #### Disable
-```
-hermes/feedback/led/toggleOff
-```
 
-| Key | Value | 
-| --- | --- |
-| siteId | String - Site where feedback led will be toggled Off |  
+Topic:
 
-## License
+`hermes/feedback/led/toggleOff`
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/snipsco/snips-skill-owm/master/LICENSE.txt)
+Payload:
+
+| Key | Type | Value |
+| --- | --- | --- |
+| siteId | String | Site where feedback led will be toggled Off |
+
+## Contributing
+
+Please see the [Contribution Guidelines](https://github.com/snipsco/snips-skill-respeaker/blob/master/CONTRIBUTING.md).
+
+## Copyright
+
+This library is provided by [Snips](https://www.snips.ai) as Open Source software. See [LICENSE](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE) for more information.
