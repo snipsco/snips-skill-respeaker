@@ -14,3 +14,6 @@ all: $(APP)
 
 $(APP): src/main.c $(SOURCES)
 	$(CC) $(CFLAGS) $^ -lpthread -o $@
+
+clean:
+	rm $(APP)
