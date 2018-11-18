@@ -1,6 +1,7 @@
-#ifndef __COMMON_H__
-	#include <common.h>
-#endif
+#ifndef __APA102_H__
+#define __APA102_H__
+
+#include <common.h>
 
 #define ROFFSET 1
 #define GOFFSET 2
@@ -14,3 +15,4 @@ void set_index_rgb(uint8_t index, uint8_t r, uint8_t g, uint8_t b);
 void set_index_4byte(uint8_t index, uint32_t color);
 void show(void);
 void clear(void);
+#endif
