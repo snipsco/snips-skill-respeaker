@@ -2,9 +2,9 @@
 #include "animation.h"
 #include "get_config.h"
 
-extern short 			flag_update;
-extern STATE 			curr_state;
-extern pthread_t 		curr_thread;
+extern short 			      flag_update;
+extern STATE 			      curr_state;
+extern pthread_t 		    curr_thread;
 extern snipsSkillConfig configList[CONFIG_NUM];
 
 static void on_idle_handler(const char *topic);
@@ -14,20 +14,20 @@ static void to_mute_handler(const char *topic);
 static void to_unmute_handler(const char *topic);
 static void on_disabled_handler(const char *topic);
 
-static void* (*state_functions[STATE_NUM])()={ 
-    on_idle, 
+static void* (*state_functions[STATE_NUM])()={
+    on_idle,
     on_listen,
-    on_speak, 
-    to_mute, 
+    on_speak,
+    to_mute,
     to_unmute,
     on_disabled
 };
 
-static void (*state_handlers[STATE_NUM])(const char *)={ 
-    on_idle_handler, 	//0
+static void (*state_handlers[STATE_NUM])(const char *)={
+    on_idle_handler, 	  //0
     on_listen_handler,	//1
-    on_speak_handler,	//2
-    to_mute_handler, 	//3
+    on_speak_handler,	  //2
+    to_mute_handler, 	  //3
     to_unmute_handler,	//4
     on_disabled_handler	//5
 };
@@ -56,14 +56,14 @@ void state_machine_update(void){
 }
 
 void state_handler_main(const char *topic){
-	STATE last_state = curr_state;
-	state_handlers[curr_state](topic);
-	if (curr_state != last_state)
-		flag_update = 1;
+  STATE last_state = curr_state;
+  state_handlers[curr_state](topic);
+  if (curr_state != last_state)
+    flag_update = 1;
 }
 
 static void on_idle_handler(const char *topic){
-	if (!strcmp(topic, STA_LIS))        
+  if (!strcmp(topic, STA_LIS))
         curr_state = ON_LISTEN;
     else if (!strcmp(topic, SUD_OFF))
         curr_state = TO_MUTE;
@@ -76,14 +76,14 @@ static void on_idle_handler(const char *topic){
 }
 
 static void on_listen_handler(const char *topic){
-	if (!strcmp(topic, END_LIS))
+  if (!strcmp(topic, END_LIS))
         curr_state = ON_IDLE;
     else if (!strcmp(topic, HOT_ON))
         curr_state = ON_IDLE;
 }
 
 static void on_speak_handler(const char *topic){
-	if (!strcmp(topic, END_SAY))
+  if (!strcmp(topic, END_SAY))
         curr_state = ON_IDLE;
     else if (!strcmp(topic, STA_LIS))
         curr_state = ON_LISTEN;
@@ -92,16 +92,16 @@ static void on_speak_handler(const char *topic){
 }
 
 static void to_mute_handler(const char *topic){
-	if (!strcmp(topic, HOT_ON))
+  if (!strcmp(topic, HOT_ON))
         curr_state = ON_LISTEN;
 }
 
 static void to_unmute_handler(const char *topic){
-	if (!strcmp(topic, HOT_ON))
+  if (!strcmp(topic, HOT_ON))
         curr_state = ON_LISTEN;
 }
 
 static void on_disabled_handler(const char *topic){
-	if (!strcmp(topic, LED_ON))
+  if (!strcmp(topic, LED_ON))
         curr_state = ON_IDLE;
 }

@@ -31,12 +31,12 @@
 #define ON_DISABLED_STR "on_disabled"
 
 typedef enum {
-	ON_IDLE = 0,
-	ON_LISTEN,
-	ON_SPEAK,
-	TO_MUTE,
-	TO_UNMUTE,
-	ON_DISABLED
+  ON_IDLE = 0,
+  ON_LISTEN,
+  ON_SPEAK,
+  TO_MUTE,
+  TO_UNMUTE,
+  ON_DISABLED
 }STATE;
 
 #define CONFIG_NUM          18
@@ -86,17 +86,17 @@ enum CONFIG_ENTITY{
 #define CONFIG_FILE "config.ini"
 
 typedef struct{
-	char key[20];
-	char value[50];
+  char key[20];
+  char value[50];
 }snipsSkillConfig;
 
 #define CLIENT_ID_LEN 10
 
 typedef struct{
-	uint8_t numLEDs;
-	int     fd_spi;
-	uint8_t *pixels;
-	uint8_t brightness;
+  uint8_t numLEDs;
+  int     fd_spi;
+  uint8_t *pixels;
+  uint8_t brightness;
 }APA102;
 
 #endif

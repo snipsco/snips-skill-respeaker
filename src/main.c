@@ -1,15 +1,24 @@
-#include "main.h"
 #include "apa102.h"
 #include "get_config.h"
 #include "state_handler.h"
 #include "rsp_corev2.h"
 
+#include <common.h>
+#include <mqtt.h>
 #include <pthread.h>
 #include <signal.h>
 #include <posix_sockets.h>
 
+#define CLIENT_ID_LEN 10
+
 static void get_site_id(const char *msg);
 static void interrupt_handler(int sig);
+
+void check_nightmode(void);
+void publish_callback(void** unused, struct mqtt_response_publish *published);
+void *client_refresher(void* client);
+char *generate_client_id(void);
+void close_all(int status, pthread_t *client_daemon);
 
 volatile sig_atomic_t   flag_terminate = 0;
 short                   flag_update = 1;
@@ -68,7 +77,7 @@ snipsSkillConfig configList[CONFIG_NUM]=
 };
 
 int main(int argc, char const *argv[])
-{	
+{
     int i;
     char *client_id;
     // generate a random id as client id
@@ -93,7 +102,7 @@ int main(int argc, char const *argv[])
         parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
         parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
     }
-    
+
     /* open the non-blocking TCP socket (connecting to the broker) */
     int sockfd = open_nb_socket(addr, port);
     if (sockfd == -1) {
@@ -148,7 +157,7 @@ int main(int argc, char const *argv[])
         if(flag_sleepmode)
             check_nightmode();
 
-        if (flag_update) 
+        if (flag_update)
             state_machine_update();
 
         if (flag_terminate) break;
@@ -171,14 +180,14 @@ void check_nightmode(void){
     curr_time = time(NULL);
     read_time = localtime(&curr_time);
 
-    if(read_time->tm_hour == sleep_hour && 
+    if(read_time->tm_hour == sleep_hour &&
         read_time->tm_min == sleep_minute &&
         curr_state != ON_DISABLED){
         curr_state = ON_DISABLED;
         flag_update = 1;
         fprintf(stdout, "[Info] ------>  Nightmode started\n");
     }
-    if(read_time->tm_hour == weak_hour && 
+    if(read_time->tm_hour == weak_hour &&
         read_time->tm_min == weak_minute &&
         curr_state == ON_DISABLED){
         curr_state = ON_IDLE;
@@ -206,7 +215,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published) {
 }
 
 void* client_refresher(void* client){
-    while(1) 
+    while(1)
     {
         mqtt_sync((struct mqtt_client*) client);
         usleep(100000U);
@@ -245,7 +254,7 @@ void close_all(int status, pthread_t *client_daemon){
         if(write(fd_gpio, gpio_66, sizeof(gpio_66))){
             fprintf(stdout, "[Info] Closed GPIO66..\n");
             close(fd_gpio);
-        }  
+        }
     }
     if (fd_sock != -1) close(fd_sock);
     if (leds.fd_spi != -1) close(leds.fd_spi);
@@ -273,4 +282,3 @@ static void get_site_id(const char *msg){
 static void interrupt_handler(int sig){
     flag_terminate = 1;
 }
-
