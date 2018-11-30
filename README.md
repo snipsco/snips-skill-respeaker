@@ -77,6 +77,8 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | --- | --- | --- | --- |
 | `mqtt_host` | MQTT host name | `<ip address>`/`<hostname>` | `localhost` |
 | `mqtt_port` | MQTT port number | `<mqtt port>` | `1883` |
+| `mqtt_username` | MQTT username | `<mqtt username>` | `null` |
+| `mqtt_password` | MQTT password | `<mqtt password>` | `null` |
 
 > ***To make satellite work correctly, please change here***
 

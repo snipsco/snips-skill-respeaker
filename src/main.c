@@ -38,6 +38,8 @@ char        rcv_site_id[255]= "";
 
 const char	*addr;
 const char	*port;
+const char  *username;
+const char  *password;
 
 const char* topics[]={
     HOT_OFF,
@@ -60,6 +62,8 @@ snipsSkillConfig configList[CONFIG_NUM]=
     {{C_LED_BRI_STR}, {0}},
     {{C_MQTT_HOST_STR}, {0}},
     {{C_MQTT_PORT_STR}, {0}},
+    {{C_MQTT_USER_STR}, {0}},
+    {{C_MQTT_PASS_STR}, {0}},
     {{C_ON_IDLE_STR}, {0}},
     {{C_ON_LISTEN_STR}, {0}},
     {{C_ON_SPEAK_STR}, {0}},
@@ -87,7 +91,8 @@ int main(int argc, char const *argv[])
     leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
     addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
     port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
-
+    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
+    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
     // get brightness
     leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
 
@@ -109,7 +114,12 @@ int main(int argc, char const *argv[])
     uint8_t sendbuf[2048]; /* sendbuf should be large enough to hold multiple whole mqtt messages */
     uint8_t recvbuf[1024]; /* recvbuf should be large enough any whole mqtt message expected to be received */
     mqtt_init(&client, sockfd, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback);
-    mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
+    
+    if (*username && *password)
+        mqtt_connect(&client, client_id, NULL, NULL, 0, username, password, 0, 400);
+    else
+        mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
+    
     /* check that we don't have any errors */
     if (client.error != MQTT_OK) {
         fprintf(stderr, "[Error] %s\n", mqtt_error_str(client.error));
@@ -122,24 +132,24 @@ int main(int argc, char const *argv[])
         close_all(EXIT_FAILURE, NULL);
     }
     /* subscribe */
-    for(i=0;i<NUM_TOPIC;i++){
+    for(i=0;i<NUM_TOPIC;i++)
         mqtt_subscribe(&client, topics[i], 0);
-        fprintf(stdout, "[Info] Subscribed to '%s'.\n", topics[i]);
-    }
-    for(i=0;i<CONFIG_NUM;i++){
-        fprintf(stdout, "[Conf] %s - <%s>\n", configList[i].key, configList[i].value);
-    }
+
+    // for(i=0;i<CONFIG_NUM;i++)
+    //     fprintf(stdout, "[Conf] %s - <%s>\n", configList[i].key, configList[i].value);
 
     if(!apa102_spi_setup())
         close_all(EXIT_FAILURE, NULL);
 
     /* start publishing the time */
-    fprintf(stdout, "[Info] Initilisation looks good.....\n");
-    fprintf(stdout, "[Info] Client id : %s\n", client_id);
-    fprintf(stdout, "[Info] Program : %s\n", argv[0]);
-    fprintf(stdout, "[Info] LED number : %d with max brightness: %d\n", leds.numLEDs, leds.brightness);
-    fprintf(stdout, "[Info] Device : %s\n", configList[C_MODEL].value);
-    fprintf(stdout, "[Info] Listening to MQTT bus: %s:%s \n",addr, port);
+    fprintf(stdout, "[Info] Initilisation Done! \n");
+    fprintf(stdout, "[Info] Client Id ........... %s\n", client_id);
+    fprintf(stdout, "[Info] Program ............. %s\n", argv[0]);
+    fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
+    fprintf(stdout, "[Info] Brightness .......... %d\n", leds.brightness);
+    fprintf(stdout, "[Info] Device .............. %s\n", configList[C_MODEL].value);
+    fprintf(stdout, "[Info] Nightmode ........... %s\n", flag_sleepmode ? "Enabled": "Disabled");
+    fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", addr, port);
     fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
 
     /* block */

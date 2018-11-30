@@ -4,16 +4,6 @@ model=rpi_*
 spi_dev=0:0
 led_num=3
 
-# Device Info
-site_id=default
-
-# Brightness Range 0,255
-led_bri=64
-
-# MQTT
-mqtt_host=localhost
-mqtt_port=1883
-
 # Animation
 on_idle=true
 on_listen=true
@@ -25,5 +15,18 @@ to_unmute=true
 nightmode=true
 go_sleep=22:15
 go_weak=8:35
+
+[secret]
+# MQTT
+mqtt_host=localhost
+mqtt_port=1883
+#mqtt_username=
+#mqtt_password=
+
+# Device Info
+site_id=default
+
+# Brightness Range 0,255
+led_bri=64
 
 #END OF CONFIG
