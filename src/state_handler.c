@@ -2,10 +2,10 @@
 #include "animation.h"
 #include "get_config.h"
 
-extern short 			      flag_update;
-extern STATE 			      curr_state;
+extern short 			    flag_update;
+extern STATE 			    curr_state;
 extern pthread_t 		    curr_thread;
-extern snipsSkillConfig configList[CONFIG_NUM];
+extern snipsSkillConfig     configList[CONFIG_NUM];
 
 static void on_idle_handler(const char *topic);
 static void on_listen_handler(const char *topic);
@@ -24,12 +24,12 @@ static void* (*state_functions[STATE_NUM])()={
 };
 
 static void (*state_handlers[STATE_NUM])(const char *)={
-    on_idle_handler, 	  //0
-    on_listen_handler,	//1
-    on_speak_handler,	  //2
-    to_mute_handler, 	  //3
-    to_unmute_handler,	//4
-    on_disabled_handler	//5
+    on_idle_handler,      //0
+    on_listen_handler,    //1
+    on_speak_handler,     //2
+    to_mute_handler,      //3
+    to_unmute_handler,    //4
+    on_disabled_handler   //5
 };
 
 const char* state_strings[STATE_NUM]={
