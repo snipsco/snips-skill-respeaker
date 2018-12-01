@@ -56,7 +56,7 @@ void *on_listen(){
     while(curr_state == ON_LISTEN){
         for(i=0;i<3 && curr_state == ON_LISTEN; i++){
             for (g=0; g < group && curr_state == ON_LISTEN; g++)
-                set_index_rgb(g*3+i, leds.brightness, 0, 0);
+                set_index_rgb(g*3+i, 0, 0, leds.brightness);
             show();
             delay_on_state(80, ON_LISTEN);
             clear();
@@ -83,7 +83,7 @@ void *on_speak(){
             curr_state == ON_SPEAK;
             curr_bri += step){
             for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
-                set_index_rgb(j, curr_bri, 0, curr_bri);
+                set_index_rgb(j, curr_bri, curr_bri/2, 0);
             show();
             delay_on_state(20, ON_SPEAK);
         }
@@ -93,7 +93,7 @@ void *on_speak(){
             curr_state == ON_SPEAK;
             curr_bri -= step){
             for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
-                set_index_rgb(j, curr_bri, 0, curr_bri);
+                set_index_rgb(j, curr_bri, curr_bri/2, 0);
             show();
             delay_on_state(20, ON_SPEAK);
         }
@@ -118,14 +118,14 @@ void *to_mute(){
     step = leds.brightness / STEP_COUNT;
     for (curr_bri = 0; curr_bri < leds.brightness && curr_state == TO_MUTE; curr_bri += step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_rgb(j, 0, curr_bri, curr_bri);
+            set_index_rgb(j, curr_bri, 0, curr_bri);
         show();
         delay_on_state(50, TO_MUTE);
     }
     curr_bri = leds.brightness;
     for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_MUTE; curr_bri -= step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_rgb(j, 0, curr_bri, curr_bri);
+            set_index_rgb(j, curr_bri, 0, curr_bri);
         show();
         delay_on_state(50, TO_MUTE);
     }
