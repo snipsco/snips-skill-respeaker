@@ -92,11 +92,11 @@ These configuration options are written in `config.ini` file. Please refer to yo
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
-| `idle_colour` | Colour while idle | `red` , `green` , `blue` , `yellow` , `purple` , `teal` | `green` |
-| `listen_colour` | Colour while listening | `red` , `green` , `blue` , `yellow` , `purple` , `teal` | `blue` |
-| `speak_colour` | Colour while speaking | `red` , `green` , `blue` , `yellow` , `purple` , `teal` | `purple` |
-| `mute_colour` | Colour while muting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` | `yellow` |
-| `unmute_colour` | Colour while unmuting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` | `green` |
+| `idle_colour` | Colour while idle | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
+| `listen_colour` | Colour while listening | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `blue` |
+| `speak_colour` | Colour while speaking | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `purple` |
+| `mute_colour` | Colour while muting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `yellow` |
+| `unmute_colour` | Colour while unmuting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
 
 ### Animation
 

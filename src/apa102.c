@@ -41,8 +41,6 @@ void set_index_rgb(uint8_t index, uint8_t r, uint8_t g, uint8_t b){
     }
 }
 
-//TODO: When colours are FF the brightness transformation is OK
-//But when they are not the transformation should scale accordingly
 void set_index_4byte(uint8_t index, uint32_t color){
 	uint8_t  r, g, b, br;
     r = color >> 24;
@@ -52,9 +50,9 @@ void set_index_4byte(uint8_t index, uint32_t color){
 
     if(index < leds.numLEDs && index >= 0) {
         uint8_t *ptr = &leds.pixels[index * 4];
-        ptr[ROFFSET] = r & br;
-        ptr[GOFFSET] = g & br;
-        ptr[BOFFSET] = b & br;
+        ptr[ROFFSET] = (uint8_t)(r * br / 255);
+        ptr[GOFFSET] = (uint8_t)(g * br / 255);
+        ptr[BOFFSET] = (uint8_t)(b * br / 255);
     }
 }
 
