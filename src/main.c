@@ -69,6 +69,11 @@ snipsSkillConfig configList[CONFIG_NUM]=
     {{C_ON_SPEAK_STR}, {0}},
     {{C_TO_MUTE_STR}, {0}},
     {{C_TO_UNMUTE_STR}, {0}},
+    {{C_IDLE_COLOUR_STR}, {0}},
+    {{C_LISTEN_COLOUR_STR}, {0}},
+    {{C_SPEAK_COLOUR_STR}, {0}},
+    {{C_MUTE_COLOUR_STR}, {0}},
+    {{C_UNMUTE_COLOUR_STR}, {0}},
     {{C_NIGHTMODE_STR}, {0}},
     {{C_GO_SLEEP_STR}, {0}},
     {{C_GO_WEAK_STR}, {0}},
@@ -87,21 +92,8 @@ int main(int argc, char const *argv[])
     read_config_file(configList, CONFIG_NUM);
 
     switch_on_power();
-    // get input parameters
-    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
-    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
-    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
-    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
-    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
-    // get brightness
-    leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
 
-    // if sleep mode is enabled
-    if (if_config_true("nightmode", configList, NULL) == 1){
-        flag_sleepmode = 1;
-        parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
-        parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
-    }
+    get_input_parameters();
 
     /* open the non-blocking TCP socket (connecting to the broker) */
     int sockfd = open_nb_socket(addr, port);
@@ -171,6 +163,24 @@ int main(int argc, char const *argv[])
     // clean
     close_all(EXIT_SUCCESS, &client_daemon);
     return 0;
+}
+
+void get_input_parameters() {
+    // get input parameters
+    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
+    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
+    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
+    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
+    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
+    // get brightness
+    leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
+
+    // if sleep mode is enabled
+    if (if_config_true("nightmode", configList, NULL) == 1){
+        flag_sleepmode = 1;
+        parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
+        parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
+    }
 }
 
 void check_nightmode(void){
