@@ -41,6 +41,8 @@ void set_index_rgb(uint8_t index, uint8_t r, uint8_t g, uint8_t b){
     }
 }
 
+//TODO: When colours are FF the brightness transformation is OK
+//But when they are not the transformation should scale accordingly
 void set_index_4byte(uint8_t index, uint32_t color){
 	uint8_t  r, g, b, br;
     r = color >> 24;
