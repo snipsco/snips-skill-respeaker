@@ -19,6 +19,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published);
 void *client_refresher(void* client);
 char *generate_client_id(void);
 void close_all(int status, pthread_t *client_daemon);
+void get_action_colours();
 
 volatile sig_atomic_t   flag_terminate = 0;
 short                   flag_update = 1;
@@ -26,6 +27,7 @@ short                   flag_sleepmode = 0;
 
 APA102      leds = {0, -1, NULL, 127};
 STATE       curr_state = ON_IDLE;
+COLOURS     action_colours = {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C};
 
 int         fd_sock = -1;
 pthread_t   curr_thread;
@@ -92,8 +94,22 @@ int main(int argc, char const *argv[])
     read_config_file(configList, CONFIG_NUM);
 
     switch_on_power();
+    // get input parameters
+    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
+    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
+    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
+    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
+    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
+    // get brightness
+    leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
+    get_action_colours();
 
-    get_input_parameters();
+    // if sleep mode is enabled
+    if (if_config_true("nightmode", configList, NULL) == 1){
+        flag_sleepmode = 1;
+        parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
+        parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
+    }
 
     /* open the non-blocking TCP socket (connecting to the broker) */
     int sockfd = open_nb_socket(addr, port);
@@ -165,22 +181,43 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-void get_input_parameters() {
-    // get input parameters
-    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
-    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
-    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
-    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
-    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
-    // get brightness
-    leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
-
-    // if sleep mode is enabled
-    if (if_config_true("nightmode", configList, NULL) == 1){
-        flag_sleepmode = 1;
-        parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
-        parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
+uint32_t text_to_colour(const char* cTxt) {
+    if (strlen(cTxt) != 0) {
+        if (strcmp(cTxt, "red") == 0) {
+            return RED_C;
+        } else if (strcmp(cTxt, "green") == 0) {
+            return GREEN_C;
+        } else if (strcmp(cTxt, "blue") == 0) {
+            return BLUE_C;
+        } else if (strcmp(cTxt, "yellow") == 0) {
+            return YELLOW_C;
+        } else if (strcmp(cTxt, "purple") == 0) {
+            return PURPLE_C;
+        } else if (strcmp(cTxt, "teal") == 0) {
+            return TEAL_C;
+        } else if (strcmp(cTxt, "orange") == 0) {
+            return ORANGE_C;
+        }
     }
+    return 0;
+}
+
+void get_action_colours() {
+    uint32_t idle_c = text_to_colour(configList[C_IDLE_COLOUR].value);
+    if (idle_c != 0) 
+        action_colours.idle = idle_c;
+    uint32_t listen_c = text_to_colour(configList[C_LISTEN_COLOUR].value);
+    if (listen_c != 0) 
+        action_colours.listen = listen_c;
+    uint32_t speak_c = text_to_colour(configList[C_SPEAK_COLOUR].value);
+    if (speak_c != 0) 
+        action_colours.speak = speak_c;
+    uint32_t mute_c = text_to_colour(configList[C_MUTE_COLOUR].value);
+    if (mute_c != 0) 
+        action_colours.mute = mute_c;
+    uint32_t unmute_c = text_to_colour(configList[C_UNMUTE_COLOUR].value);
+    if (unmute_c != 0) 
+        action_colours.unmute = unmute_c;
 }
 
 void check_nightmode(void){

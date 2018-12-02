@@ -109,13 +109,13 @@ typedef struct{
     uint8_t brightness;
 }APA102;
 
-#define RED 0xFF000000;
-#define GREEN 0x00FF0000;
-#define BLUE 0x0000FF00;
-#define YELLOW 0xFFFF0000;
-#define PURPLE 0xFF00FF00;
-#define TEAL 0x00FFFF00;
-#define ORANGE 0xFF800000;
+#define RED_C    0xFF000000
+#define GREEN_C  0x00FF0000
+#define BLUE_C   0x0000FF00
+#define YELLOW_C 0xFFFF0000
+#define PURPLE_C 0xFF00FF00
+#define TEAL_C   0x00FFFF00
+#define ORANGE_C 0xFF800000
 
 typedef struct{
     uint32_t idle;

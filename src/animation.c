@@ -2,6 +2,7 @@
 #include "apa102.h"
 
 extern APA102       leds;
+extern COLOURS      action_colours;
 extern STATE        curr_state;
 extern short        flag_update;
 extern pthread_t    curr_thread;
@@ -25,7 +26,7 @@ void *on_idle(){
             curr_bri < leds.brightness && 
             curr_state == ON_IDLE; 
             curr_bri += step){
-            set_index_rgb(led, 0, curr_bri, 0);
+            set_index_4byte(led, action_colours.idle | curr_bri);
             show();
             delay_on_state(100, ON_IDLE);
         }
@@ -34,7 +35,7 @@ void *on_idle(){
             curr_bri > 0 && 
             curr_state == ON_IDLE;
             curr_bri -= step){
-            set_index_rgb(led, 0, curr_bri, 0);
+            set_index_4byte(led, action_colours.idle | curr_bri);
             show();
             delay_on_state(100, ON_IDLE);
         }
@@ -56,7 +57,7 @@ void *on_listen(){
     while(curr_state == ON_LISTEN){
         for(i=0;i<3 && curr_state == ON_LISTEN; i++){
             for (g=0; g < group && curr_state == ON_LISTEN; g++)
-                set_index_rgb(g*3+i, 0, 0, leds.brightness);
+                set_index_4byte(g*3+i, action_colours.listen | leds.brightness);
             show();
             delay_on_state(80, ON_LISTEN);
             clear();
@@ -83,7 +84,7 @@ void *on_speak(){
             curr_state == ON_SPEAK;
             curr_bri += step){
             for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
-                set_index_rgb(j, curr_bri, curr_bri/2, 0);
+                set_index_4byte(j, action_colours.speak | curr_bri);
             show();
             delay_on_state(20, ON_SPEAK);
         }
@@ -93,7 +94,7 @@ void *on_speak(){
             curr_state == ON_SPEAK;
             curr_bri -= step){
             for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
-                set_index_rgb(j, curr_bri, curr_bri/2, 0);
+                set_index_4byte(j, action_colours.speak | curr_bri);
             show();
             delay_on_state(20, ON_SPEAK);
         }
@@ -118,14 +119,14 @@ void *to_mute(){
     step = leds.brightness / STEP_COUNT;
     for (curr_bri = 0; curr_bri < leds.brightness && curr_state == TO_MUTE; curr_bri += step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_rgb(j, curr_bri, 0, curr_bri);
+            set_index_4byte(j, action_colours.mute | curr_bri);
         show();
         delay_on_state(50, TO_MUTE);
     }
     curr_bri = leds.brightness;
     for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_MUTE; curr_bri -= step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_rgb(j, curr_bri, 0, curr_bri);
+            set_index_4byte(j, action_colours.mute | curr_bri);
         show();
         delay_on_state(50, TO_MUTE);
     }
@@ -152,14 +153,14 @@ void *to_unmute(){
     step = leds.brightness / STEP_COUNT;
     for (curr_bri = 0;curr_bri < leds.brightness && curr_state == TO_UNMUTE; curr_bri += step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
-            set_index_rgb(j, 0, curr_bri, 0);
+            set_index_4byte(j, action_colours.unmute | curr_bri);
         show();
         delay_on_state(50, TO_UNMUTE);
     }
     curr_bri = leds.brightness;
     for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_UNMUTE; curr_bri -= step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
-            set_index_rgb(j, 0, curr_bri, 0);
+            set_index_4byte(j, action_colours.unmute | curr_bri);
         show();
         delay_on_state(50, TO_UNMUTE);
     }
