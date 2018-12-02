@@ -86,7 +86,7 @@ These configuration options are written in `config.ini` file. Please refer to yo
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
-| `led_bri` | Max brightness of LEDs | `0`:`255` | `128` |
+| `led_bri` | Max brightness of LEDs | `0`:`255` | `64` |
 
 ### Animation
 

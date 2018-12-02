@@ -42,16 +42,17 @@ void set_index_rgb(uint8_t index, uint8_t r, uint8_t g, uint8_t b){
 }
 
 void set_index_4byte(uint8_t index, uint32_t color){
-	uint8_t  r, g, b;
-    r = color >> 16;
-    g = color >>  8;
-    b = color;
+	uint8_t  r, g, b, br;
+    r = color >> 24;
+    g = color >>  16;
+    b = color >> 8;
+    br = color;
 
     if(index < leds.numLEDs && index >= 0) {
         uint8_t *ptr = &leds.pixels[index * 4];
-        ptr[ROFFSET] = r;
-        ptr[GOFFSET] = g;
-        ptr[BOFFSET] = b;
+        ptr[ROFFSET] = r & br;
+        ptr[GOFFSET] = g & br;
+        ptr[BOFFSET] = b & br;
     }
 }
 
