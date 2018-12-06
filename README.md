@@ -18,7 +18,7 @@ This skill controls the RGB LED on the respeaker mic hat.
 
 :loudspeaker: ***```On speak: all leds start to breathe in purple```***
 
-:speak_no_evil: ***```To mute: all leds breathe once in orange```***
+:speak_no_evil: ***```To mute: all leds breathe once in yellow```***
 
 :smile_cat: ***```To unmute: all leds breathe once in green```***
 
@@ -86,7 +86,17 @@ These configuration options are written in `config.ini` file. Please refer to yo
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
-| `led_bri` | Max brightness of LEDs | `0`:`255` | `128` |
+| `led_bri` | Max brightness of LEDs | `0`:`255` | `64` |
+
+### Colour
+
+| Config | Description | Value | Default |
+| --- | --- | --- | --- |
+| `idle_colour` | Colour while idle | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
+| `listen_colour` | Colour while listening | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `blue` |
+| `speak_colour` | Colour while speaking | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `purple` |
+| `mute_colour` | Colour while muting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `yellow` |
+| `unmute_colour` | Colour while unmuting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
 
 ### Animation
 

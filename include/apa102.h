@@ -3,9 +3,9 @@
 
 #include <common.h>
 
-#define ROFFSET 1
+#define BOFFSET 1
 #define GOFFSET 2
-#define BOFFSET 3
+#define ROFFSET 3
 
 #define BITRATE 32000000
 
