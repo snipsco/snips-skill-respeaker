@@ -93,7 +93,8 @@ enum CONFIG_ENTITY{
 #define TRUE_S    "true"
 #define FALSE_S   "false"
 
-#define CONFIG_FILE "config.ini"
+#define CONFIG_FILE    "config.ini"
+#define HW_CONFIG_FILE "hw_spec.json"
 
 typedef struct{
     char key[20];
