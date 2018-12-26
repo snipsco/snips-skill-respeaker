@@ -2,23 +2,20 @@
 #include "get_config.h"
 #include "state_handler.h"
 #include "rsp_corev2.h"
+#include "mqtt_client.h"
 
-#include <common.h>
 #include <mqtt.h>
+#include <common.h>
 #include <pthread.h>
 #include <signal.h>
-#include <posix_sockets.h>
 
 #define CLIENT_ID_LEN 10
 
-static void get_site_id(const char *msg);
 static void interrupt_handler(int sig);
 
 void check_nightmode(void);
-void publish_callback(void** unused, struct mqtt_response_publish *published);
-void *client_refresher(void* client);
 char *generate_client_id(void);
-void close_all(int status, pthread_t *client_daemon);
+void close_all(int status);
 void get_action_colours();
 
 volatile sig_atomic_t   flag_terminate = 0;
@@ -29,32 +26,16 @@ APA102      leds = {0, -1, NULL, 127};
 STATE       curr_state = ON_IDLE;
 COLOURS     action_colours = {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C};
 
-int         fd_sock = -1;
 pthread_t   curr_thread;
 uint8_t     sleep_hour;
 uint8_t     sleep_minute;
 uint8_t     weak_hour;
 uint8_t     weak_minute;
 
-char        rcv_site_id[255]= "";
-
 const char	*addr;
 const char	*port;
 const char  *username;
 const char  *password;
-
-const char* topics[]={
-    HOT_OFF,
-    STA_LIS,
-    END_LIS,
-    STA_SAY,
-    END_SAY,
-    HOT_ON,
-    SUD_ON,
-    SUD_OFF,
-    LED_ON,
-    LED_OFF
-};
 
 snipsSkillConfig configList[CONFIG_NUM]=
 {
@@ -85,7 +66,6 @@ snipsSkillConfig configList[CONFIG_NUM]=
 
 int main(int argc, char const *argv[])
 {
-    int i;
     char *client_id;
     // generate a random id as client id
     client_id = generate_client_id();
@@ -111,43 +91,12 @@ int main(int argc, char const *argv[])
         parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
     }
 
-    /* open the non-blocking TCP socket (connecting to the broker) */
-    int sockfd = open_nb_socket(addr, port);
-    if (sockfd == -1) {
-        perror("Failed to open socket: ");
-        close_all(EXIT_FAILURE, NULL);
-    }
-    /* setup a client */
-    struct mqtt_client client;
-    uint8_t sendbuf[2048]; /* sendbuf should be large enough to hold multiple whole mqtt messages */
-    uint8_t recvbuf[1024]; /* recvbuf should be large enough any whole mqtt message expected to be received */
-    mqtt_init(&client, sockfd, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback);
-    
-    if (*username && *password)
-        mqtt_connect(&client, client_id, NULL, NULL, 0, username, password, 0, 400);
-    else
-        mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
-    
-    /* check that we don't have any errors */
-    if (client.error != MQTT_OK) {
-        fprintf(stderr, "[Error] %s\n", mqtt_error_str(client.error));
-        close_all(EXIT_FAILURE, NULL);
-    }
-    /* start a thread to refresh the client (handle egress and ingree client traffic) */
-    pthread_t client_daemon;
-    if(pthread_create(&client_daemon, NULL, client_refresher, &client)) {
-        fprintf(stderr, "[Error] Failed to start client daemon.\n");
-        close_all(EXIT_FAILURE, NULL);
-    }
-    /* subscribe */
-    for(i=0;i<NUM_TOPIC;i++)
-        mqtt_subscribe(&client, topics[i], 0);
-
-    // for(i=0;i<CONFIG_NUM;i++)
-    //     fprintf(stdout, "[Conf] %s - <%s>\n", configList[i].key, configList[i].value);
+    printf("starting mqtt\n");
+    if (!start_mqtt_client(client_id, addr, port, username, password))
+        close_all(EXIT_FAILURE);
 
     if(!apa102_spi_setup())
-        close_all(EXIT_FAILURE, NULL);
+        close_all(EXIT_FAILURE);
 
     /* start publishing the time */
     fprintf(stdout, "[Info] Initilisation Done! \n");
@@ -172,12 +121,9 @@ int main(int argc, char const *argv[])
 
         usleep(10000);
     }
-    // disconnect
-    fprintf(stdout, "[Info] %s disconnecting from %s\n", argv[0], addr);
-    sleep(1);
 
     // clean
-    close_all(EXIT_SUCCESS, &client_daemon);
+    close_all(EXIT_SUCCESS);
     return 0;
 }
 
@@ -204,19 +150,19 @@ uint32_t text_to_colour(const char* cTxt) {
 
 void get_action_colours() {
     uint32_t idle_c = text_to_colour(configList[C_IDLE_COLOUR].value);
-    if (idle_c != 0) 
+    if (idle_c != 0)
         action_colours.idle = idle_c;
     uint32_t listen_c = text_to_colour(configList[C_LISTEN_COLOUR].value);
-    if (listen_c != 0) 
+    if (listen_c != 0)
         action_colours.listen = listen_c;
     uint32_t speak_c = text_to_colour(configList[C_SPEAK_COLOUR].value);
-    if (speak_c != 0) 
+    if (speak_c != 0)
         action_colours.speak = speak_c;
     uint32_t mute_c = text_to_colour(configList[C_MUTE_COLOUR].value);
-    if (mute_c != 0) 
+    if (mute_c != 0)
         action_colours.mute = mute_c;
     uint32_t unmute_c = text_to_colour(configList[C_UNMUTE_COLOUR].value);
-    if (unmute_c != 0) 
+    if (unmute_c != 0)
         action_colours.unmute = unmute_c;
 }
 
@@ -243,33 +189,6 @@ void check_nightmode(void){
     }
 }
 
-void publish_callback(void** unused, struct mqtt_response_publish *published) {
-    /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
-    char *topic_name = (char*) malloc(published->topic_name_size + 1);
-
-    memcpy(topic_name, published->topic_name, published->topic_name_size);
-
-    topic_name[published->topic_name_size] = '\0';
-    get_site_id(published->application_message);
-    if (strcmp(configList[C_SITE_ID].value, rcv_site_id) != 0)
-        return;
-
-    fprintf(stdout, "[Received] %s on Site: %s\n", topic_name, rcv_site_id);
-
-    state_handler_main(topic_name);
-
-    free(topic_name);
-}
-
-void* client_refresher(void* client){
-    while(1)
-    {
-        mqtt_sync((struct mqtt_client*) client);
-        usleep(100000U);
-    }
-    return NULL;
-}
-
 char *generate_client_id(void){
     int i ,seed;
     static char id[CLIENT_ID_LEN + 1] = {0};
@@ -291,7 +210,7 @@ char *generate_client_id(void){
     return id;
 }
 
-void close_all(int status, pthread_t *client_daemon){
+void close_all(int status){
     int fd_gpio;
     char gpio_66[]={'6','6'};
 
@@ -303,27 +222,12 @@ void close_all(int status, pthread_t *client_daemon){
             close(fd_gpio);
         }
     }
-    if (fd_sock != -1) close(fd_sock);
+
+    terminate_mqtt_client();
     if (leds.fd_spi != -1) close(leds.fd_spi);
     if (leds.pixels) free(leds.pixels);
-    if (client_daemon != NULL) pthread_cancel(*client_daemon);
     pthread_cancel(curr_thread);
     exit(status);
-}
-
-static void get_site_id(const char *msg){
-    char *start;
-    int count = 0;
-    start = strstr(msg, "\"siteId\":\""); // len = 10
-    if (start == NULL )
-        return;
-    start += 10;
-    while(*start != '\"'){
-        rcv_site_id[count] = *start;
-        start += 1;
-        count += 1;
-    }
-    rcv_site_id[count] = '\0';
 }
 
 static void interrupt_handler(int sig){

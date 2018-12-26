@@ -6,7 +6,7 @@ CFLAGS = 	-Ofast -std=gnu99 -Wall\
 			-I/opt/vc/include\
 			-L/opt/vc/lib
 
-SOURCES = src/mqtt.c src/mqtt_pal.c src/animation.c src/apa102.c src/get_config.c src/state_handler.c src/rsp_corev2.c
+SOURCES = src/mqtt.c src/mqtt_pal.c src/animation.c src/apa102.c src/get_config.c src/state_handler.c src/rsp_corev2.c src/mqtt_client.c
 
 APP = action-app_respeaker
 
