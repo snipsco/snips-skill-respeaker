@@ -91,14 +91,12 @@ int main(int argc, char const *argv[])
         parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
     }
 
-    printf("starting mqtt\n");
     if (!start_mqtt_client(client_id, addr, port, username, password))
         close_all(EXIT_FAILURE);
 
     if(!apa102_spi_setup())
         close_all(EXIT_FAILURE);
 
-    /* start publishing the time */
     fprintf(stdout, "[Info] Initilisation Done! \n");
     fprintf(stdout, "[Info] Client Id ........... %s\n", client_id);
     fprintf(stdout, "[Info] Program ............. %s\n", argv[0]);
@@ -109,7 +107,6 @@ int main(int argc, char const *argv[])
     fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", addr, port);
     fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
 
-    /* block */
     while(1){
         if(flag_sleepmode)
             check_nightmode();
@@ -117,7 +114,8 @@ int main(int argc, char const *argv[])
         if (flag_update)
             state_machine_update();
 
-        if (flag_terminate) break;
+        if (flag_terminate)
+            break;
 
         usleep(10000);
     }

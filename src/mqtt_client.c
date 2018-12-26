@@ -5,9 +5,9 @@
 #include <posix_sockets.h>
 #include <pthread.h>
 
-void publish_callback(void** unused, struct mqtt_response_publish *published);
+static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *published);
 static void get_site_id(const char *msg);
-static void* client_refresher(void* mqtt_client);
+static void* mqtt_client_refresher(void* mqtt_client);
 
 struct      mqtt_client mqtt_client;
 pthread_t   mqtt_client_daemon;
@@ -47,7 +47,7 @@ uint8_t start_mqtt_client(const char *mqtt_client_id,
               sizeof(mqtt_sendbuf),
               mqtt_recvbuf,
               sizeof(mqtt_recvbuf),
-              publish_callback);
+              mqtt_callback_handler);
 
     mqtt_connect(&mqtt_client,
                  mqtt_client_id,
@@ -64,7 +64,7 @@ uint8_t start_mqtt_client(const char *mqtt_client_id,
         return 0;
     }
 
-    if(pthread_create(&mqtt_client_daemon, NULL, client_refresher, &mqtt_client)) {
+    if(pthread_create(&mqtt_client_daemon, NULL, mqtt_client_refresher, &mqtt_client)) {
         fprintf(stderr, "[Error] Failed to start client daemon.\n");
         return 0;
     }
@@ -77,15 +77,22 @@ uint8_t start_mqtt_client(const char *mqtt_client_id,
     return 1;
 }
 
-void publish_callback(void** unused, struct mqtt_response_publish *published) {
-    printf("callback is called \n");
-    /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
+void terminate_mqtt_client(void){
+    fprintf(stdout, "[Info] disconnecting mqtt \n");
+    sleep(1);
+    if (fd_mqtt_sock != -1)
+        close(fd_mqtt_sock);
+    if (mqtt_client_daemon)
+        pthread_cancel(mqtt_client_daemon);
+}
+
+static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *published){
+    printf("[Debug] new handler is called\n");
+
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
-
     memcpy(topic_name, published->topic_name, published->topic_name_size);
-
-    printf("received something: %s\n", (const char*)published->application_message);
     topic_name[published->topic_name_size] = '\0';
+
     get_site_id(published->application_message);
     if (strcmp("default", rcv_site_id) != 0)
         return;
@@ -112,21 +119,10 @@ static void get_site_id(const char *msg){
     rcv_site_id[count] = '\0';
 }
 
-static void* client_refresher(void* mqtt_client){
-    printf("client refresher started\n");
+static void* mqtt_client_refresher(void* mqtt_client){
     while(1){
         mqtt_sync((struct mqtt_client*) mqtt_client);
         usleep(100000U);
     }
     return NULL;
-}
-
-void terminate_mqtt_client(void){
-    // disconnect
-    fprintf(stdout, "[Info] disconnecting mqtt \n");
-    sleep(1);
-    if (fd_mqtt_sock != -1)
-        close(fd_mqtt_sock);
-    if (mqtt_client_daemon)
-        pthread_cancel(mqtt_client_daemon);
 }
