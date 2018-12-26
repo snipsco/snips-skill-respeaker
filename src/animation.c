@@ -1,5 +1,6 @@
 #include "animation.h"
 #include "apa102.h"
+#include "log.h"
 
 extern APA102       leds;
 extern COLOURS      action_colours;
@@ -11,7 +12,7 @@ extern pthread_t    curr_thread;
 void *on_idle(){
     int curr_bri = 0;
     uint8_t led, step;
-    fprintf(stdout, "[Thread] ------>  on_idle started\n");
+    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
     flag_update = 0;
     clear();
     srand((unsigned int)time(NULL));
@@ -22,9 +23,9 @@ void *on_idle(){
         clear();
         led = rand()%leds.numLEDs;
 
-        for (curr_bri = 0; 
-            curr_bri < leds.brightness && 
-            curr_state == ON_IDLE; 
+        for (curr_bri = 0;
+            curr_bri < leds.brightness &&
+            curr_state == ON_IDLE;
             curr_bri += step){
             set_index_4byte(led, action_colours.idle | curr_bri);
             show();
@@ -32,7 +33,7 @@ void *on_idle(){
         }
         curr_bri = leds.brightness;
         for (curr_bri = leds.brightness;
-            curr_bri > 0 && 
+            curr_bri > 0 &&
             curr_state == ON_IDLE;
             curr_bri -= step){
             set_index_4byte(led, action_colours.idle | curr_bri);
@@ -50,7 +51,7 @@ void *on_idle(){
 // 1
 void *on_listen(){
     uint8_t i,g,group;
-    fprintf(stdout, "[Thread] ------>  on_listen started\n");
+    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
     flag_update = 0;
     clear();
     group = leds.numLEDs/3;
@@ -65,7 +66,7 @@ void *on_listen(){
         }
     }
     clear();
-    return((void *)"ON_LISTEN");   
+    return((void *)"ON_LISTEN");
 }
 
 // 2
@@ -73,10 +74,10 @@ void *on_speak(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    fprintf(stdout, "[Thread] ------>  on_speak started\n");
+    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
     flag_update = 0;
     clear();
-    
+
     step = leds.brightness / STEP_COUNT;
     while(curr_state == ON_SPEAK){
         for (curr_bri = 0;
@@ -112,10 +113,10 @@ void *to_mute(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    fprintf(stdout, "[Thread] ------>  to_mute started\n");
+    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
     flag_update = 0;
     clear();
-    
+
     step = leds.brightness / STEP_COUNT;
     for (curr_bri = 0; curr_bri < leds.brightness && curr_state == TO_MUTE; curr_bri += step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
@@ -146,10 +147,10 @@ void *to_unmute(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    fprintf(stdout, "[Thread] ------>  to_unmute started\n");
+    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
     flag_update = 0;
     clear();
-    
+
     step = leds.brightness / STEP_COUNT;
     for (curr_bri = 0;curr_bri < leds.brightness && curr_state == TO_UNMUTE; curr_bri += step){
         for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
@@ -177,7 +178,7 @@ void *to_unmute(){
 
 // 5
 void *on_disabled(){
-    fprintf(stdout, "[Thread] ------>  on_disabled started\n");
+    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
     flag_update = 0;
     while(curr_state == ON_DISABLED){
         clear();
