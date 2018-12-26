@@ -7,15 +7,14 @@
 
 void publish_callback(void** unused, struct mqtt_response_publish *published);
 static void get_site_id(const char *msg);
+static void* client_refresher(void* mqtt_client);
 
-pthread_t   client_daemon;
-int         fd_sock = -1;
-
+struct      mqtt_client mqtt_client;
+pthread_t   mqtt_client_daemon;
+int         fd_mqtt_sock = -1;
 char        rcv_site_id[255]= "";
-
-struct mqtt_client client;
-uint8_t sendbuf[2048];
-uint8_t recvbuf[1024];
+uint8_t     mqtt_sendbuf[2048];
+uint8_t     mqtt_recvbuf[1024];
 
 const char *topics[]={
     HOT_OFF,
@@ -30,51 +29,48 @@ const char *topics[]={
     LED_OFF
 };
 
-/**
- * Description: create and start a mqtt client
- * Input:
- *    client_id
- *    addr
- *    port
- *    username
- *    password
- * Return:
- *    0: failded
- *    1: successful
- */
+uint8_t start_mqtt_client(const char *mqtt_client_id,
+                          const char *mqtt_addr,
+                          const char *mqtt_port,
+                          const char *username,
+                          const char *password){
 
-uint8_t start_mqtt_client(const char	*client_id, const char	*addr, const char	*port, const char  *username, const char  *password){
-    /* open the non-blocking TCP socket (connecting to the broker) */
-    fd_sock = open_nb_socket(addr, port);
-    if (fd_sock == -1) {
+    fd_mqtt_sock = open_nb_socket(mqtt_addr, mqtt_port);
+    if (fd_mqtt_sock == -1) {
         perror("[Error] Failed to open socket: ");
         return 0;
     }
-    /* setup a client */
 
-    mqtt_init(&client, fd_sock, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback);
+    mqtt_init(&mqtt_client,
+              fd_mqtt_sock,
+              mqtt_sendbuf,
+              sizeof(mqtt_sendbuf),
+              mqtt_recvbuf,
+              sizeof(mqtt_recvbuf),
+              publish_callback);
 
-    if (*username && *password)
-        mqtt_connect(&client, client_id, NULL, NULL, 0, username, password, 0, 400);
-    else
-        mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
+    mqtt_connect(&mqtt_client,
+                 mqtt_client_id,
+                 NULL,
+                 NULL,
+                 0,
+                 username,
+                 password,
+                 0,
+                 400);
 
-    /* check for errors */
-    if (client.error != MQTT_OK) {
-        fprintf(stderr, "error: %s\n", mqtt_error_str(client.error));
+    if (mqtt_client.error != MQTT_OK) {
+        fprintf(stderr, "error: %s\n", mqtt_error_str(mqtt_client.error));
         return 0;
     }
 
-    /* start a thread to refresh the client (handle egress and ingree client traffic) */
-    if(pthread_create(&client_daemon, NULL, client_refresher, &client)) {
+    if(pthread_create(&mqtt_client_daemon, NULL, client_refresher, &mqtt_client)) {
         fprintf(stderr, "[Error] Failed to start client daemon.\n");
         return 0;
     }
 
-
-    /* subscribe */
     for(int i=0;i<NUM_TOPIC;i++)
-        if( MQTT_OK != mqtt_subscribe(&client, topics[i], 0)){
+        if( MQTT_OK != mqtt_subscribe(&mqtt_client, topics[i], 0)){
             printf("[Error] Subscribe error\n");
             return 0;
         }
@@ -116,21 +112,21 @@ static void get_site_id(const char *msg){
     rcv_site_id[count] = '\0';
 }
 
-void* client_refresher(void* client){
+static void* client_refresher(void* mqtt_client){
     printf("client refresher started\n");
     while(1){
-        mqtt_sync((struct mqtt_client*) client);
+        mqtt_sync((struct mqtt_client*) mqtt_client);
         usleep(100000U);
     }
     return NULL;
 }
 
-void terminate_mqtt_client(){
+void terminate_mqtt_client(void){
     // disconnect
     fprintf(stdout, "[Info] disconnecting mqtt \n");
     sleep(1);
-    if (fd_sock != -1)
-        close(fd_sock);
-    if (client_daemon)
-        pthread_cancel(client_daemon);
+    if (fd_mqtt_sock != -1)
+        close(fd_mqtt_sock);
+    if (mqtt_client_daemon)
+        pthread_cancel(mqtt_client_daemon);
 }
