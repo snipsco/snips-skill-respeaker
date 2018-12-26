@@ -1,13 +1,17 @@
 #include "mqtt_client.h"
 #include "state_handler.h"
+#include "cJSON.h"
+#include "mqtt.h"
+#include "posix_sockets.h"
+#include "log.h"
 
-#include <mqtt.h>
-#include <posix_sockets.h>
 #include <pthread.h>
 
 static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *published);
-static void get_site_id(const char *msg);
+static uint8_t match_site_id(const char *message);
 static void* mqtt_client_refresher(void* mqtt_client);
+
+extern const char *site_id;
 
 struct      mqtt_client mqtt_client;
 pthread_t   mqtt_client_daemon;
@@ -93,30 +97,41 @@ static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *p
     memcpy(topic_name, published->topic_name, published->topic_name_size);
     topic_name[published->topic_name_size] = '\0';
 
-    get_site_id(published->application_message);
-    if (strcmp("default", rcv_site_id) != 0)
+    if (!match_site_id(published->application_message))
         return;
-
-    fprintf(stdout, "[Received] %s on Site: %s\n", topic_name, rcv_site_id);
-
     state_handler_main(topic_name);
-
     free(topic_name);
 }
 
-static void get_site_id(const char *msg){
-    char *start;
-    int count = 0;
-    start = strstr(msg, "\"siteId\":\""); // len = 10
-    if (start == NULL )
-        return;
-    start += 10;
-    while(*start != '\"'){
-        rcv_site_id[count] = *start;
-        start += 1;
-        count += 1;
+/**
+ * @brief: check if the coming message corresponds to specified siteId
+ *
+ * @param[in] mqtt_received_message
+ * @param[in] target_site_id
+ *
+ * @returns \0 not match or \1 match \-1 error
+ */
+static uint8_t match_site_id(const char *message){
+    const cJSON *rev_site_id = NULL;
+
+    cJSON *payload_json = cJSON_Parse(message);
+    if (payload_json == NULL){
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL)
+            fprintf(stderr, "[Error] from parsing message : %s\n", error_ptr);
+        return -1;
     }
-    rcv_site_id[count] = '\0';
+
+    rev_site_id = cJSON_GetObjectItemCaseSensitive(payload_json, "siteId");
+
+    if(!strcmp(site_id, rev_site_id->valuestring)){
+        fprintf(stdout, "[Info] Current site" GREEN " %s " NONE ". Received from site" GREEN " %s " NONE " \n", site_id, rev_site_id->valuestring);
+        return 1;
+    }
+    else{
+        fprintf(stdout, "[Info] Current site" GREEN " %s " NONE ". Received from site" RED " %s " NONE " \n", site_id, rev_site_id->valuestring);
+        return 0;
+    }
 }
 
 static void* mqtt_client_refresher(void* mqtt_client){

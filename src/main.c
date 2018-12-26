@@ -37,6 +37,8 @@ const char	*port;
 const char  *username;
 const char  *password;
 
+const char  *site_id;
+
 snipsSkillConfig configList[CONFIG_NUM]=
 {
     {{C_MODEL_STR}, {0}},
@@ -80,6 +82,7 @@ int main(int argc, char const *argv[])
     port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
     username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
     password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
+    site_id = (argc > 6)? argv[6] : configList[C_SITE_ID].value; // siteId
     // get brightness
     leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
     get_action_colours();
