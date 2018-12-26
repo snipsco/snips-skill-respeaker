@@ -91,12 +91,11 @@ void terminate_mqtt_client(void){
 }
 
 static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *published){
-    printf("[Debug] new handler is called\n");
-
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
     memcpy(topic_name, published->topic_name, published->topic_name_size);
     topic_name[published->topic_name_size] = '\0';
 
+    printf("[Receive] topic "PURPLE" %s "NONE"\n", topic_name);
     if (!match_site_id(published->application_message))
         return;
     state_handler_main(topic_name);
@@ -125,11 +124,11 @@ static uint8_t match_site_id(const char *message){
     rev_site_id = cJSON_GetObjectItemCaseSensitive(payload_json, "siteId");
 
     if(!strcmp(site_id, rev_site_id->valuestring)){
-        fprintf(stdout, "[Info] Current site" GREEN " %s " NONE ". Received from site" GREEN " %s " NONE " \n", site_id, rev_site_id->valuestring);
+        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" GREEN " %s " NONE " \n", site_id, rev_site_id->valuestring);
         return 1;
     }
     else{
-        fprintf(stdout, "[Info] Current site" GREEN " %s " NONE ". Received from site" RED " %s " NONE " \n", site_id, rev_site_id->valuestring);
+        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" RED " %s " NONE " \n", site_id, rev_site_id->valuestring);
         return 0;
     }
 }
