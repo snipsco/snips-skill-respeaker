@@ -1,24 +1,23 @@
 CC = gcc
 
-CFLAGS = 	-std=gnu99\
-					-Wall\
-		 			-Iinclude\
-					-fomit-frame-pointer \
-					-I/opt/vc/include\
-					-L/opt/vc/lib
+CFLAGS =  -std=gnu99\
+          -Wall\
+          -Iinclude\
+          -fomit-frame-pointer \
+          -I/opt/vc/include\
+          -L/opt/vc/lib
 
 SOURCES = src/mqtt.c\
-					src/mqtt_pal.c\
-					src/animation.c\
-					src/apa102.c\
-					src/get_config.c\
-					src/state_handler.c\
-					src/rsp_corev2.c\
-					src/cJSON.o\
-					src/mqtt_client.c
+          src/mqtt_pal.c\
+          src/animation.c\
+          src/apa102.c\
+          src/get_config.c\
+          src/state_handler.c\
+          src/rsp_corev2.c\
+          src/cJSON.c\
+          src/mqtt_client.c
 
 APP = action-app_respeaker
-CJSON = cJSON.o
 
 all: $(APP)
 

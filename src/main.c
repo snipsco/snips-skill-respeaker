@@ -1,7 +1,6 @@
 #include "apa102.h"
 #include "get_config.h"
 #include "state_handler.h"
-#include "rsp_corev2.h"
 #include "mqtt_client.h"
 
 #include <mqtt.h>
@@ -75,7 +74,6 @@ int main(int argc, char const *argv[])
     // get config.ini
     read_config_file(configList, CONFIG_NUM);
 
-    switch_on_power();
     // get input parameters
     leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
     addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
