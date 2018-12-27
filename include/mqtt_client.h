@@ -14,11 +14,11 @@
  *
  * @returns 0 failded or 1 successful
  */
-uint8_t start_mqtt_client(const char	*mqtt_client_id,
-                          const char	*mqtt_addr,
-                          const char	*mqtt_port,
-                          const char  *username,
-                          const char  *password);
+int start_mqtt_client(const char *mqtt_client_id,
+                      const char *mqtt_addr,
+                      const char *mqtt_port,
+                      const char *username,
+                      const char *password);
 
 /**
  * @brief: create and start a mqtt client

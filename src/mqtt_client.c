@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *published);
-static uint8_t match_site_id(const char *message);
+static int match_site_id(const char *message);
 static void* mqtt_client_refresher(void* mqtt_client);
 
 extern const char *site_id;
@@ -33,11 +33,11 @@ const char *topics[]={
     LED_OFF
 };
 
-uint8_t start_mqtt_client(const char *mqtt_client_id,
-                          const char *mqtt_addr,
-                          const char *mqtt_port,
-                          const char *username,
-                          const char *password){
+int start_mqtt_client(const char *mqtt_client_id,
+                      const char *mqtt_addr,
+                      const char *mqtt_port,
+                      const char *username,
+                      const char *password){
 
     fd_mqtt_sock = open_nb_socket(mqtt_addr, mqtt_port);
     if (fd_mqtt_sock == -1) {
@@ -110,7 +110,7 @@ static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *p
  *
  * @returns \0 not match or \1 match \-1 error
  */
-static uint8_t match_site_id(const char *message){
+static int match_site_id(const char *message){
     const cJSON *rev_site_id = NULL;
 
     cJSON *payload_json = cJSON_Parse(message);
