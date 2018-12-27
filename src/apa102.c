@@ -3,28 +3,38 @@
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
 
-extern APA102 leds;
+APA102 leds = {0, 0, 0, -1, NULL, 127};
+
+void set_leds_number(int number){
+    leds.numLEDs = number;
+    leds.pixels = (uint8_t *)malloc(leds.numLEDs * 4);
+}
+
+void set_leds_brightness(uint8_t bri){
+    leds.brightness = bri;
+}
 
 int apa102_spi_setup(void){
     int i,res;
-    leds.pixels = (uint8_t *)malloc(leds.numLEDs * 4);
     i = 0;
     do{
-	res = begin();
-        if (!res)
-            return 1;
-        i++;
-        if(i > 5)
-            break;
-	sleep(10);
+    	res = begin();
+            if (!res)
+                return 1;
+            i++;
+            if(i > 5)
+                break;
+    	sleep(10);
     }while(res);
     fprintf(stderr, "[Error] Failed to start SPI!\n");
     return 0;
 }
 
 int begin(void){
-    if((leds.fd_spi = open("/dev/spidev0.0", O_RDWR)) < 0) {
-        fprintf(stderr, "[Error] Can't open /dev/spidev0.0 (try 'sudo')");
+    char spi_file_buff[50];
+    sprintf(spi_file_buff, "/dev/spidev%d.%d", leds.spi_bus, leds.spi_dev);
+    if((leds.fd_spi = open(spi_file_buff, O_RDWR)) < 0) {
+        fprintf(stderr, "[Error] Can't open %s (try 'sudo')", spi_file_buff);
         return -1;
     }
     ioctl(leds.fd_spi, SPI_IOC_WR_MODE, SPI_MODE_0 | SPI_NO_CS);
@@ -94,4 +104,12 @@ void clear(void){
         ptr[1] = 0x00; ptr[2] = 0x00; ptr[3] = 0x00;
     }
     show();
+}
+
+void terminate_spi(void){
+    clear();
+    if (leds.fd_spi != -1)
+        close(leds.fd_spi);
+    if (leds.pixels)
+        free(leds.pixels);
 }
