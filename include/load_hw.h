@@ -26,20 +26,20 @@ typedef struct{
  *
  * @returns \-1 faild or \0 successful
  */
-uint8_t load_hw_spec_json(const char *hw_model);
+int load_hw_spec_json(const char *hw_model);
 
 /**
  * @brief Set the power pin
  *
  * @returns \-1 error or \0 no power pin \1 successful
  */
-uint8_t set_power_pin(void);
+int set_power_pin(void);
 
 /**
  * @brief Release the power pin
  *
  * @returns \-1 error or \0 no power pin \1 successful
  */
-uint8_t reset_power_pin(void);
+int reset_power_pin(void);
 
 #endif

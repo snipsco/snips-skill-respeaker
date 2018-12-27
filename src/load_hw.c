@@ -5,9 +5,9 @@
 
 static HW_GPIO_SPEC hw_power_gpio = {-1, -1};
 
-static uint8_t load_json_file(const char *_DIR, char *json_file_buffer);
-static uint8_t load_power_pin(cJSON *spec);
-static uint8_t load_led_num(cJSON *spec);
+static int load_json_file(const char *_DIR, char *json_file_buffer);
+static int load_power_pin(cJSON *spec);
+static int load_led_num(cJSON *spec);
 
 /**
  * @brief Load specification to system, including leds_number, power/button pin etc
@@ -16,7 +16,7 @@ static uint8_t load_led_num(cJSON *spec);
  *
  * @returns \-1 faild or \0 successful
  */
-uint8_t load_hw_spec_json(const char *hw_model){
+int load_hw_spec_json(const char *hw_model){
     char buffer[HW_SPEC_FILE_LEN];
     cJSON *hw_spec_model = NULL;
 
@@ -47,7 +47,7 @@ uint8_t load_hw_spec_json(const char *hw_model){
  *
  * @returns \-1 error or number of loaded bytes
  */
-static uint8_t load_json_file(const char *_DIR, char *json_file_buffer){
+static int load_json_file(const char *_DIR, char *json_file_buffer){
     FILE * pFILE;
     char temp;
     int count = 0;
@@ -71,7 +71,7 @@ static uint8_t load_json_file(const char *_DIR, char *json_file_buffer){
     return count;
 }
 
-static uint8_t load_led_num(cJSON *spec){
+static int load_led_num(cJSON *spec){
     const cJSON *led_num = cJSON_GetObjectItemCaseSensitive(spec, HW_LED_NUM);
     if (led_num != NULL && cJSON_IsNumber(led_num)) {
         if ( (led_num->valueint <= 255) && (led_num->valueint > 0) ){
@@ -93,7 +93,7 @@ static uint8_t load_led_num(cJSON *spec){
  *
  * @returns \-1 error or \0 no power pin config \1 successful
  */
-static uint8_t load_power_pin(cJSON *spec){
+static int load_power_pin(cJSON *spec){
     cJSON *pin = NULL;
     cJSON *val = NULL;
 
@@ -131,7 +131,7 @@ static uint8_t load_power_pin(cJSON *spec){
  *
  * @returns \-1 error or \0 no power pin \1 successful
  */
-uint8_t set_power_pin(void){
+int set_power_pin(void){
     if ( hw_power_gpio.val == -1 || hw_power_gpio.val == -1 ){
         fprintf(stdout, "[Set power] Mode has no power pin\n");
         return 0;
@@ -155,7 +155,7 @@ uint8_t set_power_pin(void){
  *
  * @returns \-1 error or \0 no power pin \1 successful
  */
-uint8_t reset_power_pin(void){
+int reset_power_pin(void){
     if ( hw_power_gpio.val == -1 || hw_power_gpio.val == -1 ){
         fprintf(stdout, "[Reset power] Mode has no power pin\n");
         return 0;
