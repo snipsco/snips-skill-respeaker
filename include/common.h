@@ -94,7 +94,6 @@ enum CONFIG_ENTITY{
 #define FALSE_S   "false"
 
 #define CONFIG_FILE    "config.ini"
-#define HW_CONFIG_FILE "hw_spec.json"
 
 typedef struct{
     char key[20];
@@ -102,13 +101,6 @@ typedef struct{
 }snipsSkillConfig;
 
 #define CLIENT_ID_LEN 10
-
-typedef struct{
-    uint8_t numLEDs;
-    int     fd_spi;
-    uint8_t *pixels;
-    uint8_t brightness;
-}APA102;
 
 #define RED_C    0xFF000000
 #define GREEN_C  0x00FF0000
