@@ -1,4 +1,9 @@
 #include "parse_opts.h"
+#include <unistd.h>
+#include <getopt.h>
+
+static void print_usage(const char *prog);
+static void print_version(void);
 
 void parse_opts(int argc, char *argv[]){
 	while (1) {
@@ -24,42 +29,42 @@ void parse_opts(int argc, char *argv[]){
 			break;
 
 		switch (c) {
-		case 'H':
-			print_usage(argv[0]);
-			break;
-		case 'd':
+    		case 'H':
+    			print_usage(argv[0]);
+    			break;
+    		case 'd':
 
-			break;
-		case 'v':
+    			break;
+    		case 'v':
 
-			break;
-		case 'V':
-			print_version();
-			break;
-		case 'h':
+    			break;
+    		case 'V':
+    			print_version();
+    			break;
+    		case 'h':
 
-			break;
-		case 'p':
+    			break;
+    		case 'p':
 
-			break;
-		case 'U':
+    			break;
+    		case 'U':
 
-			break;
-		case 'P':
+    			break;
+    		case 'P':
 
-			break;
-		case 'N':
-			
-			break;
-		case 'D':
+    			break;
+    		case 'N':
 
-			break;
-		case 'S':
+    			break;
+    		case 'D':
 
-			break;
-		default:
-			print_usage(argv[0]);
-			break;
+    			break;
+    		case 'S':
+
+    			break;
+    		default:
+    			print_usage(argv[0]);
+    			break;
 		}
 	}
 }
@@ -71,20 +76,20 @@ static void print_usage(const char *prog){
         "  -H, --help         this help\n"
         "  -d, --debug        debug mode\n"
         "  -v, --verbose      enable verbose mode\n"
-        "  -V, --version      print version of this program\n");
+        "  -V, --version      print version of this program\n"
         "\n"
         "MQTT connection options: \n"
-        "  -h, --mqtt-host    hostname of mqtt bus (default localhost)\n"
-        "  -p, --mqtt-port    port of mqtt bus (default 1883)\n"
-        "  -P, --mqtt-pass    password of mqtt connection\n"
-        "  -U, --mqtt-user    username of mqtt connection\n"
+        "  -h, --mqtt-host    hostname of mqtt broker (default localhost)\n"
+        "  -p, --mqtt-port    port of mqtt broker (default 1883)\n"
+        "  -P, --mqtt-pass    password of mqtt broker\n"
+        "  -U, --mqtt-user    username of mqtt broker\n"
         "\n"
         "APA102 LED options: \n"
         "  -N, --led-n        number of leds\n"
         "  -D, --spi-dev      spi device to use (default /dev/spidev0.0)\n"
         "\n"
         "Snips device info: \n"
-        "  -S, --site-id      siteId to use (default)\n"
+        "  -S, --site-id      siteId to use (default default)\n");
     exit(1);
 }
 
