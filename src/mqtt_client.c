@@ -125,10 +125,12 @@ static uint8_t match_site_id(const char *message){
 
     if(!strcmp(site_id, rev_site_id->valuestring)){
         fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" GREEN " %s " NONE " \n", site_id, rev_site_id->valuestring);
+        cJSON_Delete(payload_json);
         return 1;
     }
     else{
         fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" RED " %s " NONE " \n", site_id, rev_site_id->valuestring);
+        cJSON_Delete(payload_json);
         return 0;
     }
 }
