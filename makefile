@@ -13,7 +13,8 @@ SOURCES = src/mqtt.c\
           src/apa102.c\
           src/get_config.c\
           src/state_handler.c\
-          src/rsp_corev2.c\
+					src/gpio_rw.c\
+          src/load_hw.c\
           src/cJSON.c\
           src/mqtt_client.c
 
