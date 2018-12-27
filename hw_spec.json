@@ -2,22 +2,22 @@
     "respeaker_core_v2":{
         "led_num":12,
         "power":{
-            "gpio":66,
-            "value":0
+            "gpio_pin":66,
+            "gpio_val":0
         }
     },
     "respeaker_4_mic_hat":{
         "led_num":12,
         "power":{
-            "gpio":5,
-            "value":0
+            "gpio_pin":5,
+            "gpio_val":0
         }
     },
     "respeaker_2_mic_hat":{
         "led_num":3,
         "button":{
-            "gpio":66,
-            "value":0
+            "gpio_pin":66,
+            "gpio_val":0
         }
     }
 }
