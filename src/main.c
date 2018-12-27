@@ -2,6 +2,7 @@
 #include "get_config.h"
 #include "state_handler.h"
 #include "mqtt_client.h"
+#include "load_hw.h"
 
 #include <mqtt.h>
 #include <common.h>
@@ -21,7 +22,6 @@ volatile sig_atomic_t   flag_terminate = 0;
 short                   flag_update = 1;
 short                   flag_sleepmode = 0;
 
-APA102      leds = {0, -1, NULL, 127};
 STATE       curr_state = ON_IDLE;
 COLOURS     action_colours = {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C};
 
@@ -75,14 +75,20 @@ int main(int argc, char const *argv[])
     read_config_file(configList, CONFIG_NUM);
 
     // get input parameters
-    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
+
+    //(argc > 1)? set_leds_number(atoi(argv[1])) : set_leds_number(atoi(configList[C_LED_NUM].value));
+
+    /*<Test Loading LED info from hw_spec.json file>*/
+    load_hw_spec_json(configList[C_MODEL].value);
+    set_power_pin();
+    
     addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
     port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
     username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
     password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
     site_id = (argc > 6)? argv[6] : configList[C_SITE_ID].value; // siteId
     // get brightness
-    leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
+    set_leds_brightness(atoi(configList[C_LED_BRI].value));
     get_action_colours();
 
     // if sleep mode is enabled
@@ -101,8 +107,8 @@ int main(int argc, char const *argv[])
     fprintf(stdout, "[Info] Initilisation Done! \n");
     fprintf(stdout, "[Info] Client Id ........... %s\n", client_id);
     fprintf(stdout, "[Info] Program ............. %s\n", argv[0]);
-    fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
-    fprintf(stdout, "[Info] Brightness .......... %d\n", leds.brightness);
+    //fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
+    //fprintf(stdout, "[Info] Brightness .......... %d\n", leds.brightness);
     fprintf(stdout, "[Info] Device .............. %s\n", configList[C_MODEL].value);
     fprintf(stdout, "[Info] Nightmode ........... %s\n", flag_sleepmode ? "Enabled": "Disabled");
     fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", addr, port);
@@ -210,21 +216,10 @@ char *generate_client_id(void){
 }
 
 void close_all(int status){
-    int fd_gpio;
-    char gpio_66[]={'6','6'};
-
-    clear();
-    if(if_config_true("model", configList, "rsp_corev2")){
-        fd_gpio = open("/sys/class/gpio/unexport", O_RDWR);
-        if(write(fd_gpio, gpio_66, sizeof(gpio_66))){
-            fprintf(stdout, "[Info] Closed GPIO66..\n");
-            close(fd_gpio);
-        }
-    }
+    reset_power_pin();
 
     terminate_mqtt_client();
-    if (leds.fd_spi != -1) close(leds.fd_spi);
-    if (leds.pixels) free(leds.pixels);
+    terminate_spi();
     pthread_cancel(curr_thread);
     exit(status);
 }
