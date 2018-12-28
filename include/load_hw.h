@@ -15,8 +15,8 @@
 extern snipsSkillConfig configList[CONFIG_NUM];
 
 typedef struct{
-    uint8_t pin;
-    uint8_t val;
+    int pin;
+    int val;
 }HW_GPIO_SPEC;
 
 /**

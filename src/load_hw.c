@@ -33,8 +33,10 @@ int load_hw_spec_json(const char *hw_model){
 
     hw_spec_model = cJSON_GetObjectItemCaseSensitive(hw_spec_json, hw_model);
 
-    load_led_num(hw_spec_model);
-    load_power_pin(hw_spec_model);
+    if (-1 == load_led_num(hw_spec_model))
+        return -1;
+    if (-1 == load_power_pin(hw_spec_model))
+        return -1;
     cJSON_Delete(hw_spec_json);
     return 0;
 }
