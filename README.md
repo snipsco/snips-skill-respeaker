@@ -14,7 +14,7 @@ In general: Improve the performance base on the previous version, support more h
 - [x] change to `cJSON` for parsing json string
 - [x] improve the command line parameter input
 - [ ] try new SPI buffer writing (Could improve the steability if there are many leds)
-- [ ] redefine the colour and brightness, the brightness should be separated from colour
+- [ ] redefine the colour and brightness, the brightness should be separated from colour. Colour information should be modified by user, so consider to save it in a Json file instead.
 - [ ] add verbose/debug mode 
 - [ ] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control. 
 
