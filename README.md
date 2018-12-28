@@ -4,6 +4,20 @@
 
 This skill controls the RGB LED on the respeaker mic hat.
 
+## TO DO LIST FOR 0.52 Version
+
+In general: Improve the performance base on the previous version, support more hardware. (respeaker 4 mic hat)
+
+- [x] separate mqtt client setup from `main.c`
+- [x] add hardware config file
+- [x] support gpio operatings through file system
+- [x] change to `cJSON` for parsing json string
+- [x] improve the command line parameter input
+- [ ] try new SPI buffer writing (Could improve the steability if there are many leds)
+- [ ] redefine the colour and brightness, the brightness should be separated from colour
+- [ ] add verbose/debug mode 
+- [ ] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control. 
+
 ## Support
 
 ![RPi 0](https://img.shields.io/badge/RPi%200-success-brightgreen.svg)
