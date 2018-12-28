@@ -3,6 +3,7 @@
 #include "state_handler.h"
 #include "mqtt_client.h"
 #include "load_hw.h"
+#include "parse_opts.h"
 
 #include <mqtt.h>
 #include <common.h>
@@ -12,6 +13,7 @@
 #define CLIENT_ID_LEN 10
 
 static void interrupt_handler(int sig);
+static void get_running_parameters(int argc, char *argv[]);
 
 void check_nightmode(void);
 char *generate_client_id(void);
@@ -31,15 +33,37 @@ uint8_t     sleep_minute;
 uint8_t     weak_hour;
 uint8_t     weak_minute;
 
-const char	*addr;
-const char	*port;
-const char  *username;
-const char  *password;
+struct{
+    /* MQTT connection */
+    char mqtt_host[50];
+    char mqtt_port[50];
+    char mqtt_user[50];
+    char mqtt_pass[50];
 
-const char  *site_id;
+    /* SiteId */
+    char snips_site_id[50];
 
-snipsSkillConfig configList[CONFIG_NUM]=
-{
+    /* Animation thread */
+    pthread_t curr_thread;
+    STATE curr_state;
+
+    /* Sleep mode */
+    uint8_t sleep_hour;
+    uint8_t sleep_minute;
+    uint8_t weak_hour;
+    uint8_t weak_minute;
+
+}RUN_PARA;
+
+
+const char *addr;
+const char *port;
+const char *username;
+const char *password;
+
+const char *site_id;
+
+snipsSkillConfig configList[CONFIG_NUM]={
     {{C_MODEL_STR}, {0}},
     {{C_SPI_DEV_STR}, {0}},
     {{C_LED_NUM_STR}, {0}},
@@ -65,8 +89,8 @@ snipsSkillConfig configList[CONFIG_NUM]=
     {{C_SITE_ID_STR}, {0}}
 };
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char *argv[]){
+    parse_opts(argc, argv);
     char *client_id;
     // generate a random id as client id
     client_id = generate_client_id();
@@ -80,13 +104,12 @@ int main(int argc, char const *argv[])
 
     /*<Test Loading LED info from hw_spec.json file>*/
     load_hw_spec_json(configList[C_MODEL].value);
-    set_power_pin();
-    
-    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
-    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
-    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
-    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
-    site_id = (argc > 6)? argv[6] : configList[C_SITE_ID].value; // siteId
+    if(-1 == set_power_pin())
+        close_all(EXIT_FAILURE);
+
+    get_running_parameters(argc, argv);
+
+
     // get brightness
     set_leds_brightness(atoi(configList[C_LED_BRI].value));
     get_action_colours();
@@ -127,7 +150,6 @@ int main(int argc, char const *argv[])
         usleep(10000);
     }
 
-    // clean
     close_all(EXIT_SUCCESS);
     return 0;
 }
@@ -151,6 +173,15 @@ uint32_t text_to_colour(const char* cTxt) {
         }
     }
     return 0;
+}
+
+static void get_running_parameters(int argc, char *argv[]){
+
+    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
+    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
+    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
+    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
+    site_id = (argc > 6)? argv[6] : configList[C_SITE_ID].value; // siteId
 }
 
 void get_action_colours() {
