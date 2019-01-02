@@ -1,9 +1,23 @@
 #include "animation.h"
-#include "apa102.h"
+#include "cAPA102.h"
 #include "verbose.h"
 
-extern APA102       leds;
+//extern APA102       leds;
 extern SNIPS_RUN_PARA RUN_PARA;
+
+/* @brief: Consider that each color has 255 level brightness,
+ *         this function remap the origin rgb value to a certain
+ *         level of brightness.
+*/
+static uint32_t remap_4byte(uint32_t color, uint8_t brightness){
+    uint8_t  r, g, b;
+
+    r = (uint8_t)( (color >> 16) * brightness / 255);
+    g = (uint8_t)( (color >> 8) * brightness / 255);
+    b = (uint8_t)( color * brightness / 255);
+
+    return (r << 16) | (g << 8) | b;
+}
 
 // 0
 void *on_idle(){
@@ -11,37 +25,40 @@ void *on_idle(){
     uint8_t led, step;
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
-    clear();
+    cAPA102_Clear_All();
     srand((unsigned int)time(NULL));
 
-    step = leds.brightness / STEP_COUNT;
+    step = 255 / STEP_COUNT;
     while(RUN_PARA.curr_state == ON_IDLE){
         delay_on_state(2000, ON_IDLE);
-        clear();
-        led = rand()%leds.numLEDs;
+        cAPA102_Clear_All();
+        led = rand()%RUN_PARA.LEDs.number;
 
         for (curr_bri = 0;
-            curr_bri < leds.brightness &&
+            curr_bri < 255 &&
             RUN_PARA.curr_state == ON_IDLE;
             curr_bri += step){
-            set_index_4byte(led, RUN_PARA.animation_color.idle | curr_bri);
-            show();
+            cAPA102_Set_Pixel_4byte(led, remap_4byte(RUN_PARA.animation_color.idle, curr_bri));
+            //set_index_4byte(led, );
+            cAPA102_Refresh();
             delay_on_state(100, ON_IDLE);
         }
-        curr_bri = leds.brightness;
-        for (curr_bri = leds.brightness;
+        curr_bri = 255;
+        for (curr_bri = 255;
             curr_bri > 0 &&
             RUN_PARA.curr_state == ON_IDLE;
             curr_bri -= step){
-            set_index_4byte(led, RUN_PARA.animation_color.idle | curr_bri);
-            show();
+            cAPA102_Set_Pixel_4byte(led, remap_4byte(RUN_PARA.animation_color.idle, curr_bri));
+            //set_index_4byte(led, RUN_PARA.animation_color.idle | curr_bri);
+            cAPA102_Refresh();
             delay_on_state(100, ON_IDLE);
         }
-        set_index_rgb(led, 0, 0, 0);
-        show();
+        cAPA102_Set_Pixel_4byte(led, 0);
+        //set_index_rgb(led, 0, 0, 0);
+        cAPA102_Refresh();
         delay_on_state(3000, ON_IDLE);
     }
-    clear();
+    cAPA102_Clear_All();
     return((void *)"ON_IDLE");
 }
 
@@ -50,19 +67,20 @@ void *on_listen(){
     uint8_t i,g,group;
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
-    clear();
-    group = leds.numLEDs/3;
+    cAPA102_Clear_All();
+    group = RUN_PARA.LEDs.number/3;
     while(RUN_PARA.curr_state == ON_LISTEN){
         for(i=0;i<3 && RUN_PARA.curr_state == ON_LISTEN; i++){
             for (g=0; g < group && RUN_PARA.curr_state == ON_LISTEN; g++)
-                set_index_4byte(g*3+i, RUN_PARA.animation_color.listen | leds.brightness);
-            show();
+                cAPA102_Set_Pixel_4byte(g*3+i, RUN_PARA.animation_color.listen);
+                //set_index_4byte(g*3+i, RUN_PARA.animation_color.listen | leds.brightness);
+            cAPA102_Refresh();
             delay_on_state(80, ON_LISTEN);
-            clear();
+            cAPA102_Clear_All();
             delay_on_state(80, ON_LISTEN);
         }
     }
-    clear();
+    cAPA102_Clear_All();
     return((void *)"ON_LISTEN");
 }
 
@@ -73,35 +91,38 @@ void *on_speak(){
     int curr_bri = 0;
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
-    clear();
+    cAPA102_Clear_All();
 
-    step = leds.brightness / STEP_COUNT;
+    step = 255 / STEP_COUNT;
     while(RUN_PARA.curr_state == ON_SPEAK){
         for (curr_bri = 0;
-            curr_bri < leds.brightness &&
+            curr_bri < 255 &&
             RUN_PARA.curr_state == ON_SPEAK;
             curr_bri += step){
-            for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == ON_SPEAK; j++)
-                set_index_4byte(j, RUN_PARA.animation_color.speak | curr_bri);
-            show();
+            for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == ON_SPEAK; j++)
+                cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.speak, curr_bri));
+                //set_index_4byte(j, RUN_PARA.animation_color.speak | curr_bri);
+            cAPA102_Refresh();
             delay_on_state(20, ON_SPEAK);
         }
-        curr_bri = leds.brightness;
-        for (curr_bri = leds.brightness;
+        curr_bri = 255;
+        for (curr_bri = 255;
             curr_bri > 0 &&
             RUN_PARA.curr_state == ON_SPEAK;
             curr_bri -= step){
-            for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == ON_SPEAK; j++)
-                set_index_4byte(j, RUN_PARA.animation_color.speak | curr_bri);
-            show();
+            for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == ON_SPEAK; j++)
+                cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.speak, curr_bri));
+                //set_index_4byte(j, RUN_PARA.animation_color.speak | curr_bri);
+            cAPA102_Refresh();
             delay_on_state(20, ON_SPEAK);
         }
-        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == ON_SPEAK; j++)
-            set_index_rgb(j, 0, 0, 0);
-        show();
+        cAPA102_Clear_All();
+        // for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == ON_SPEAK; j++)
+        //     set_index_rgb(j, 0, 0, 0);
+        cAPA102_Refresh();
         delay_on_state(200, ON_SPEAK);
     }
-    clear();
+    cAPA102_Clear_All();
     return((void *)"ON_SPEAK");
 }
 
@@ -112,30 +133,33 @@ void *to_mute(){
     int curr_bri = 0;
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
-    clear();
+    cAPA102_Clear_All();
 
-    step = leds.brightness / STEP_COUNT;
-    for (curr_bri = 0; curr_bri < leds.brightness && RUN_PARA.curr_state == TO_MUTE; curr_bri += step){
-        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_MUTE; j++)
-            set_index_4byte(j, RUN_PARA.animation_color.mute | curr_bri);
-        show();
+    step = 255 / STEP_COUNT;
+    for (curr_bri = 0; curr_bri < 255 && RUN_PARA.curr_state == TO_MUTE; curr_bri += step){
+        for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_MUTE; j++)
+            cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.mute ,curr_bri));
+            //set_index_4byte(j, RUN_PARA.animation_color.mute | curr_bri);
+        cAPA102_Refresh();
         delay_on_state(50, TO_MUTE);
     }
-    curr_bri = leds.brightness;
-    for (curr_bri = leds.brightness; curr_bri > 0 && RUN_PARA.curr_state == TO_MUTE; curr_bri -= step){
-        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_MUTE; j++)
-            set_index_4byte(j, RUN_PARA.animation_color.mute | curr_bri);
-        show();
+    curr_bri = 255;
+    for (curr_bri = 255; curr_bri > 0 && RUN_PARA.curr_state == TO_MUTE; curr_bri -= step){
+        for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_MUTE; j++)
+            cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.mute ,curr_bri));
+            //set_index_4byte(j, RUN_PARA.animation_color.mute | curr_bri);
+        cAPA102_Refresh();
         delay_on_state(50, TO_MUTE);
     }
-    for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_MUTE; j++)
-        set_index_rgb(j, 0, 0, 0);
-    show();
+    cAPA102_Clear_All();
+    // for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_MUTE; j++)
+    //     set_index_rgb(j, 0, 0, 0);
+    cAPA102_Refresh();
     if(RUN_PARA.curr_state == TO_MUTE){
         RUN_PARA.curr_state = ON_IDLE;
         RUN_PARA.if_update = 1;
     }
-    clear();
+    cAPA102_Clear_All();
     return((void *)"TO_MUTE");
 }
 
@@ -146,30 +170,33 @@ void *to_unmute(){
     int curr_bri = 0;
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
-    clear();
+    cAPA102_Clear_All();
 
-    step = leds.brightness / STEP_COUNT;
-    for (curr_bri = 0;curr_bri < leds.brightness && RUN_PARA.curr_state == TO_UNMUTE; curr_bri += step){
-        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_UNMUTE; j++)
-            set_index_4byte(j, RUN_PARA.animation_color.unmute | curr_bri);
-        show();
+    step = 255 / STEP_COUNT;
+    for (curr_bri = 0;curr_bri < 255 && RUN_PARA.curr_state == TO_UNMUTE; curr_bri += step){
+        for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_UNMUTE; j++)
+            cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.unmute ,curr_bri));
+            //set_index_4byte(j, RUN_PARA.animation_color.unmute | curr_bri);
+        cAPA102_Refresh();
         delay_on_state(50, TO_UNMUTE);
     }
-    curr_bri = leds.brightness;
-    for (curr_bri = leds.brightness; curr_bri > 0 && RUN_PARA.curr_state == TO_UNMUTE; curr_bri -= step){
-        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_UNMUTE; j++)
-            set_index_4byte(j, RUN_PARA.animation_color.unmute | curr_bri);
-        show();
+    curr_bri = 255;
+    for (curr_bri = 255; curr_bri > 0 && RUN_PARA.curr_state == TO_UNMUTE; curr_bri -= step){
+        for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_UNMUTE; j++)
+            cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.unmute ,curr_bri));
+            //set_index_4byte(j, RUN_PARA.animation_color.unmute | curr_bri);
+        cAPA102_Refresh();
         delay_on_state(50, TO_UNMUTE);
     }
-    for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_UNMUTE; j++)
-        set_index_rgb(j, 0, 0, 0);
-    show();
+    cAPA102_Clear_All();
+    // for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_UNMUTE; j++)
+    //     set_index_rgb(j, 0, 0, 0);
+    cAPA102_Refresh();
     if(RUN_PARA.curr_state == TO_UNMUTE){
         RUN_PARA.curr_state = ON_IDLE;
         RUN_PARA.if_update = 1;
     }
-    clear();
+    cAPA102_Clear_All();
     return((void *)"TO_UNMUTE");
 }
 
@@ -178,10 +205,10 @@ void *on_disabled(){
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
     while(RUN_PARA.curr_state == ON_DISABLED){
-        clear();
+        cAPA102_Clear_All();
         delay_on_state(100, ON_DISABLED);
     }
-    clear();
+    cAPA102_Clear_All();
     return((void *)"ON_DISABLED");
 }
 

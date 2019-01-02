@@ -10,7 +10,6 @@ CFLAGS =  -std=gnu99\
 SOURCES = src/mqtt.c\
           src/mqtt_pal.c\
           src/animation.c\
-          src/apa102.c\
           src/cAPA102.c\
           src/state_handler.c\
           src/gpio_rw.c\

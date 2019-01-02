@@ -1,4 +1,4 @@
-#include "apa102.h"
+#include "cAPA102.h"
 #include "state_handler.h"
 #include "mqtt_client.h"
 #include "load_hw.h"
@@ -110,7 +110,7 @@ void check_nightmode(void){
 void close_all(int status){
     reset_power_pin();
     terminate_mqtt_client();
-    terminate_spi();
+    cAPA102_Close();
     pthread_cancel(RUN_PARA.curr_thread);
     exit(status);
 }
@@ -126,12 +126,10 @@ int main(int argc, char *argv[]){
     if ( -1 == load_hw_spec_json(RUN_PARA.hardware_model))
         close_all(EXIT_FAILURE);
 
-    if(-1 == set_power_pin())
+    if( -1 == set_power_pin())
         close_all(EXIT_FAILURE);
 
-    // get brightness
-    set_leds_number(RUN_PARA.LEDs.number);
-    set_leds_brightness(RUN_PARA.max_brightness);
+    debug_run_para_dump();
 
     if (!start_mqtt_client(RUN_PARA.client_id,
                            RUN_PARA.mqtt_host,
@@ -140,11 +138,14 @@ int main(int argc, char *argv[]){
                            RUN_PARA.mqtt_pass))
         close_all(EXIT_FAILURE);
 
-    if(!apa102_spi_setup())
+    if ( -1 == cAPA102_Init(RUN_PARA.LEDs.number,
+                            RUN_PARA.LEDs.spi_bus,
+                            RUN_PARA.LEDs.spi_dev,
+                            RUN_PARA.max_brightness)){
+        verbose(V_NORMAL, stderr, " can not set LED!");
         close_all(EXIT_FAILURE);
+    }
 
-    debug_run_para_dump();
-    
     verbose(VV_INFO, stdout, "Initilisation Done!");
     verbose(VV_INFO, stdout, "Program ............. %s", argv[0]);
     verbose(VV_INFO, stdout, "Client Id ........... %s", RUN_PARA.client_id);
