@@ -5,33 +5,20 @@
 #include "parse_opts.h"
 #include "cCONFIG.h"
 #include "verbose.h"
+#include "load_sw.h"
+#include "gpio_rw.h"
 
 #include <mqtt.h>
 #include <common.h>
 #include <pthread.h>
 
-#define CLIENT_ID_LEN 10
-
-static void interrupt_handler(int sig);
-
-void check_nightmode(void);
-char *generate_client_id(void);
-void close_all(int status);
-void get_action_colours();
-
-int run_para_init(void);
-uint32_t text_to_colour(const char* cTxt);
-void debug_run_para_dump(void);
-int parse_hour_minute(const char *raw_value, uint8_t *hour, uint8_t *minute);
-
-uint8_t     sleep_hour;
-uint8_t     sleep_minute;
-uint8_t     weak_hour;
-uint8_t     weak_minute;
-
 SNIPS_RUN_PARA RUN_PARA = {
     /* Hardware */
     "",
+    {-1, -1, -1},
+    {-1, -1},
+    {-1, -1},
+
     /* Brightness */
     31,
     /* MQTT connection */
@@ -61,26 +48,89 @@ SNIPS_RUN_PARA RUN_PARA = {
     {1, 1, 1, 1, 1}
 };
 
+void interrupt_handler(int sig){
+    RUN_PARA.if_terminate = 1;
+}
+
+int set_power_pin(void){
+    if ( RUN_PARA.power.val == -1 || RUN_PARA.power.val == -1 ){
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
+        return 0;
+    }
+
+    if (-1 == GPIO_export(RUN_PARA.power.pin))
+        return -1;
+
+    if (-1 == GPIO_direction(RUN_PARA.power.pin, GPIO_OUT))
+        return -1;
+
+    if (-1 == GPIO_write(RUN_PARA.power.pin, RUN_PARA.power.val))
+        return -1;
+
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Set power pin %d to "LIGHT_GREEN"<%s>"NONE, __FUNCTION__, RUN_PARA.power.pin, (RUN_PARA.power.val)?"HIGH":"LOW");
+    return 1;
+}
+
+int reset_power_pin(void){
+    if ( RUN_PARA.power.val == -1 || RUN_PARA.power.val == -1 ){
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
+        return 0;
+    }
+
+    if (-1 == GPIO_unexport(RUN_PARA.power.pin))
+        return -1;
+
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Released power pin", __FUNCTION__);
+    return 1;
+}
+
+void check_nightmode(void){
+    time_t curr_time;
+    struct tm *read_time = NULL;
+
+    curr_time = time(NULL);
+    read_time = localtime(&curr_time);
+
+    if(read_time->tm_hour == RUN_PARA.sleep_hour &&
+        read_time->tm_min == RUN_PARA.sleep_minute &&
+        RUN_PARA.curr_state != ON_DISABLED){
+        RUN_PARA.curr_state = ON_DISABLED;
+        RUN_PARA.if_update = 1;
+        verbose(VV_INFO, stdout, "Nightmode started");
+    }
+    if(read_time->tm_hour == RUN_PARA.weak_hour &&
+        read_time->tm_min == RUN_PARA.weak_minute &&
+        RUN_PARA.curr_state == ON_DISABLED){
+        RUN_PARA.curr_state = ON_IDLE;
+        RUN_PARA.if_update = 1;
+        verbose(VV_INFO, stdout, "Nightmode terminated");
+    }
+}
+
+void close_all(int status){
+    reset_power_pin();
+    terminate_mqtt_client();
+    terminate_spi();
+    pthread_cancel(RUN_PARA.curr_thread);
+    exit(status);
+}
+
 int main(int argc, char *argv[]){
     setVerbose(VV_INFO);
-    if ( -1 == run_para_init() )
+    if ( -1 == load_sw_spec() )
         close_all(EXIT_FAILURE);
-
-    //debug_run_para_dump();
-
     parse_opts(argc, argv);
-
-    RUN_PARA.client_id = generate_client_id();
-
     signal(SIGINT, interrupt_handler);
 
-    /*<Test Loading LED info from hw_spec.json file>*/
-    load_hw_spec_json(RUN_PARA.hardware_model);
+    /* Load LED info from hw_spec.json file */
+    if ( -1 == load_hw_spec_json(RUN_PARA.hardware_model))
+        close_all(EXIT_FAILURE);
 
     if(-1 == set_power_pin())
         close_all(EXIT_FAILURE);
 
     // get brightness
+    set_leds_number(RUN_PARA.LEDs.number);
     set_leds_brightness(RUN_PARA.max_brightness);
 
     if (!start_mqtt_client(RUN_PARA.client_id,
@@ -93,6 +143,8 @@ int main(int argc, char *argv[]){
     if(!apa102_spi_setup())
         close_all(EXIT_FAILURE);
 
+    debug_run_para_dump();
+    
     verbose(VV_INFO, stdout, "Initilisation Done!");
     verbose(VV_INFO, stdout, "Program ............. %s", argv[0]);
     verbose(VV_INFO, stdout, "Client Id ........... %s", RUN_PARA.client_id);
@@ -117,213 +169,4 @@ int main(int argc, char *argv[]){
 
     close_all(EXIT_SUCCESS);
     return 0;
-}
-
-int run_para_init(void){
-    const char *temp = NULL;
-    int res;
-    res = cCONFIG_Parse_Config(CONFIG_FILE);
-    if (-1 == res)
-        return -1;
-
-    temp = cCONFIG_Value_Raw(C_MODEL_STR);
-    if (temp)
-        strcpy(RUN_PARA.hardware_model, temp);
-
-    temp = cCONFIG_Value_Raw(C_LED_BRI_STR);
-    if (temp)
-        RUN_PARA.max_brightness = atoi(temp);
-
-    temp = cCONFIG_Value_Raw(C_MQTT_HOST_STR);
-    if (temp)
-        strcpy(RUN_PARA.mqtt_host, temp);
-
-    temp = cCONFIG_Value_Raw(C_MQTT_PORT_STR);
-    if (temp)
-        strcpy(RUN_PARA.mqtt_port, temp);
-
-    temp = cCONFIG_Value_Raw(C_MQTT_USER_STR);
-    if (temp)
-        strcpy(RUN_PARA.mqtt_user, temp);
-
-    temp = cCONFIG_Value_Raw(C_MQTT_PASS_STR);
-    if (temp)
-        strcpy(RUN_PARA.mqtt_pass, temp);
-
-    temp = cCONFIG_Value_Raw(C_SITE_ID_STR);
-    if (temp)
-        strcpy(RUN_PARA.snips_site_id, temp);
-
-    /* color */
-    temp = cCONFIG_Value_Raw(C_IDLE_COLOUR_STR);
-    if (temp)
-        RUN_PARA.animation_color.idle = text_to_colour(temp);
-
-    temp = cCONFIG_Value_Raw(C_LISTEN_COLOUR_STR);
-    if (temp)
-        RUN_PARA.animation_color.listen = text_to_colour(temp);
-
-    temp = cCONFIG_Value_Raw(C_SPEAK_COLOUR_STR);
-    if (temp)
-        RUN_PARA.animation_color.speak = text_to_colour(temp);
-
-    temp = cCONFIG_Value_Raw(C_MUTE_COLOUR_STR);
-    if (temp)
-        RUN_PARA.animation_color.mute = text_to_colour(temp);
-
-    temp = cCONFIG_Value_Raw(C_UNMUTE_COLOUR_STR);
-    if (temp)
-        RUN_PARA.animation_color.unmute = text_to_colour(temp);
-
-    /* Animations */
-    if (!cCONFIG_Value_Is_True(C_ON_IDLE_STR))
-        RUN_PARA.animation_enable[ON_IDLE] = 0;
-    if (!cCONFIG_Value_Is_True(C_ON_LISTEN_STR))
-        RUN_PARA.animation_enable[ON_LISTEN] = 0;
-    if (!cCONFIG_Value_Is_True(C_ON_SPEAK_STR))
-        RUN_PARA.animation_enable[ON_SPEAK] = 0;
-    if (!cCONFIG_Value_Is_True(C_TO_MUTE_STR))
-        RUN_PARA.animation_enable[TO_MUTE] = 0;
-    if (!cCONFIG_Value_Is_True(C_TO_UNMUTE_STR))
-        RUN_PARA.animation_enable[TO_UNMUTE] = 0;
-
-    /* Sleep mode */
-    if (cCONFIG_Value_Is_True(C_NIGHTMODE_STR)){
-        RUN_PARA.if_sleepmode = 1;
-        temp = cCONFIG_Value_Raw(C_GO_SLEEP_STR);
-        parse_hour_minute(temp, &RUN_PARA.sleep_hour, &RUN_PARA.sleep_minute);
-        temp = cCONFIG_Value_Raw(C_GO_WEAK_STR);
-        parse_hour_minute(temp, &RUN_PARA.weak_hour, &RUN_PARA.weak_minute);
-    }
-
-    cCONFIG_Delete_List();
-    return 0;
-}
-
-void debug_run_para_dump(void){
-    /* Hardware */
-    printf("hardware_model : %s\n", RUN_PARA.hardware_model);
-
-    /* Brightness */
-    printf("max_brightness : %d\n", RUN_PARA.max_brightness);
-
-    /* MQTT connection */
-    printf("mqtt_host : %s\n", RUN_PARA.mqtt_host);
-    printf("mqtt_port : %s\n", RUN_PARA.mqtt_port);
-    printf("mqtt_user : %s\n", RUN_PARA.mqtt_user);
-    printf("mqtt_pass : %s\n", RUN_PARA.mqtt_pass);
-
-    /* SiteId */
-    printf("site_id : %s\n", RUN_PARA.snips_site_id);
-
-    /* Client ID */
-    printf("client_id : %s\n", RUN_PARA.client_id);
-
-    /* Colour */
-    printf("idle color :   %8x\n", RUN_PARA.animation_color.idle);
-    printf("speak color :  %8x\n", RUN_PARA.animation_color.speak);
-    printf("listen color : %8x\n", RUN_PARA.animation_color.listen);
-    printf("mute color :   %8x\n", RUN_PARA.animation_color.mute);
-    printf("unmute color : %8x\n", RUN_PARA.animation_color.unmute);
-
-    /* Animation Enable */
-    printf("on_idle :   %s\n", RUN_PARA.animation_enable[ON_IDLE] ? "true" : "false");
-    printf("on_listen : %s\n", RUN_PARA.animation_enable[ON_LISTEN] ? "true" : "false");
-    printf("on_speak :  %s\n", RUN_PARA.animation_enable[ON_SPEAK] ? "true" : "false");
-    printf("to_mute :   %s\n", RUN_PARA.animation_enable[TO_MUTE] ? "true" : "false");
-    printf("to_unmute : %s\n", RUN_PARA.animation_enable[TO_UNMUTE] ? "true" : "false");
-}
-
-uint32_t text_to_colour(const char* cTxt) {
-    if (strlen(cTxt) != 0) {
-        if (strcmp(cTxt, "red") == 0) {
-            return RED_C;
-        } else if (strcmp(cTxt, "green") == 0) {
-            return GREEN_C;
-        } else if (strcmp(cTxt, "blue") == 0) {
-            return BLUE_C;
-        } else if (strcmp(cTxt, "yellow") == 0) {
-            return YELLOW_C;
-        } else if (strcmp(cTxt, "purple") == 0) {
-            return PURPLE_C;
-        } else if (strcmp(cTxt, "teal") == 0) {
-            return TEAL_C;
-        } else if (strcmp(cTxt, "orange") == 0) {
-            return ORANGE_C;
-        }
-    }
-    return 0;
-}
-
-void check_nightmode(void){
-    time_t curr_time;
-    struct tm *read_time = NULL;
-
-    curr_time = time(NULL);
-    read_time = localtime(&curr_time);
-
-    if(read_time->tm_hour == sleep_hour &&
-        read_time->tm_min == sleep_minute &&
-        RUN_PARA.curr_state != ON_DISABLED){
-        RUN_PARA.curr_state = ON_DISABLED;
-        RUN_PARA.if_update = 1;
-        verbose(VV_INFO, stdout, "Nightmode started");
-    }
-    if(read_time->tm_hour == weak_hour &&
-        read_time->tm_min == weak_minute &&
-        RUN_PARA.curr_state == ON_DISABLED){
-        RUN_PARA.curr_state = ON_IDLE;
-        RUN_PARA.if_update = 1;
-        verbose(VV_INFO, stdout, "Nightmode terminated");
-    }
-}
-
-char *generate_client_id(void){
-    int i ,seed;
-    static char id[CLIENT_ID_LEN + 1] = {0};
-    srand(time(NULL));
-    for (i = 0; i < CLIENT_ID_LEN; i++){
-        seed = rand()%3;
-        switch(seed){
-            case 0:
-                id[i] = rand()%26 + 'a';
-                break;
-            case 1:
-                id[i] = rand()%26 + 'A';
-                break;
-            case 2:
-                id[i] = rand()%10 + '0';
-                break;
-        }
-    }
-    return id;
-}
-
-int parse_hour_minute(const char *raw_value, uint8_t *hour, uint8_t *minute){
-    char *p;
-    char h[3]="";
-    char m[3]="";
-
-    p = strchr(raw_value, ':');
-    if (p != NULL){
-        strncpy(h, raw_value, p - raw_value);
-        strcpy(m, p+1);
-        *hour = atoi(h);
-        *minute = atoi(m);
-        return 1;
-    }
-    return 0;
-}
-
-void close_all(int status){
-    reset_power_pin();
-
-    terminate_mqtt_client();
-    terminate_spi();
-    pthread_cancel(RUN_PARA.curr_thread);
-    exit(status);
-}
-
-static void interrupt_handler(int sig){
-    RUN_PARA.if_terminate = 1;
 }

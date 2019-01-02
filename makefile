@@ -11,15 +11,17 @@ SOURCES = src/mqtt.c\
           src/mqtt_pal.c\
           src/animation.c\
           src/apa102.c\
+          src/cAPA102.c\
           src/state_handler.c\
           src/gpio_rw.c\
           src/parse_opts.c\
           src/load_hw.c\
+          src/load_sw.c\
           src/cJSON.c\
           src/mqtt_client.c\
-		  src/cCONFIG.c\
-		  src/verbose.c
-		  
+          src/cCONFIG.c\
+          src/verbose.c
+
 APP = action-app_respeaker
 
 all: $(APP)

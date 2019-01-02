@@ -96,11 +96,6 @@ enum CONFIG_ENTITY{
 
 #define CONFIG_FILE    "config.ini"
 
-typedef struct{
-    char key[20];
-    char value[50];
-}snipsSkillConfig;
-
 #define CLIENT_ID_LEN 10
 
 #define RED_C    0xFF000000
@@ -120,8 +115,23 @@ typedef struct{
 }COLOURS;
 
 typedef struct{
+    int number;
+    int spi_bus;
+    int spi_dev;
+}HW_LED_SPEC;
+
+typedef struct{
+    int pin;
+    int val;
+}HW_GPIO_SPEC;
+
+typedef struct{
     /* Hardware */
     char hardware_model[50];
+    HW_LED_SPEC LEDs;
+    HW_GPIO_SPEC power;
+    HW_GPIO_SPEC button;
+
     /* Brightness */
     uint8_t max_brightness;
     /* MQTT connection */
@@ -157,5 +167,7 @@ typedef struct{
     /* Animation Enable */
     uint8_t animation_enable[STATE_NUM];
 }SNIPS_RUN_PARA;
+
+#define CLIENT_ID_LEN 10
 
 #endif
