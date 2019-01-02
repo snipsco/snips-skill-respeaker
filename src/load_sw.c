@@ -184,3 +184,13 @@ void debug_run_para_dump(void){
     verbose(VVV_DEBUG, stdout, "to_mute :   %s", RUN_PARA.animation_enable[TO_MUTE] ? "true" : "false");
     verbose(VVV_DEBUG, stdout, "to_unmute : %s", RUN_PARA.animation_enable[TO_UNMUTE] ? "true" : "false");
 }
+
+void dump_running_info(void){
+    verbose(VV_INFO, stdout, "Initilisation Done!");
+    verbose(VV_INFO, stdout, "Client Id ........... %s", RUN_PARA.client_id);
+    verbose(VV_INFO, stdout, "Brightness .......... %d", RUN_PARA.max_brightness);
+    verbose(VV_INFO, stdout, "Device .............. %s", RUN_PARA.hardware_model);
+    verbose(VV_INFO, stdout, "Nightmode ........... %s", RUN_PARA.if_sleepmode ? "Enabled": "Disabled");
+    verbose(VV_INFO, stdout, "MQTT Bus ............ %s:%s", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
+    verbose(VV_INFO, stdout, "Press CTRL-C to exit.");
+}

@@ -122,7 +122,6 @@ int main(int argc, char *argv[]){
     parse_opts(argc, argv);
     signal(SIGINT, interrupt_handler);
 
-    /* Load LED info from hw_spec.json file */
     if ( -1 == load_hw_spec_json(RUN_PARA.hardware_model))
         close_all(EXIT_FAILURE);
 
@@ -141,22 +140,13 @@ int main(int argc, char *argv[]){
     if ( -1 == cAPA102_Init(RUN_PARA.LEDs.number,
                             RUN_PARA.LEDs.spi_bus,
                             RUN_PARA.LEDs.spi_dev,
-                            RUN_PARA.max_brightness)){
-        verbose(V_NORMAL, stderr, " can not set LED!");
+                            RUN_PARA.max_brightness))
         close_all(EXIT_FAILURE);
-    }
 
-    verbose(VV_INFO, stdout, "Initilisation Done!");
-    verbose(VV_INFO, stdout, "Program ............. %s", argv[0]);
-    verbose(VV_INFO, stdout, "Client Id ........... %s", RUN_PARA.client_id);
-    verbose(VV_INFO, stdout, "Brightness .......... %d", RUN_PARA.max_brightness);
-    verbose(VV_INFO, stdout, "Device .............. %s", RUN_PARA.hardware_model);
-    verbose(VV_INFO, stdout, "Nightmode ........... %s", RUN_PARA.if_sleepmode ? "Enabled": "Disabled");
-    verbose(VV_INFO, stdout, "MQTT Bus ............ %s:%s", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
-    verbose(VV_INFO, stdout, "Press CTRL-C to exit.");
+    dump_running_info();
 
     while(1){
-        if(RUN_PARA.if_sleepmode)
+        if (RUN_PARA.if_sleepmode)
             check_nightmode();
 
         if (RUN_PARA.if_update)
@@ -164,10 +154,8 @@ int main(int argc, char *argv[]){
 
         if (RUN_PARA.if_terminate)
             break;
-
         usleep(10000);
     }
-
     close_all(EXIT_SUCCESS);
     return 0;
 }
