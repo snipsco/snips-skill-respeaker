@@ -4,18 +4,16 @@
 #include <common.h>
 
 #define HW_SPEC_FILE_LEN 2048
-#define HW_SPEC_FILE "hw_spec.json"
 
-#define HW_LED_NUM "led_num"
-#define HW_POWER "power"
-#define HW_BUTTON "button"
-#define HW_GPIO_PIN "gpio_pin"
-#define HW_GPIO_VAL "gpio_val"
+#define HW_SPEC_FILE   "hw_spec.json"
 
-typedef struct{
-    int pin;
-    int val;
-}HW_GPIO_SPEC;
+#define HW_LED_NUM     "led_num"
+#define HW_LED_SPI_BUS "spi_bus"
+#define HW_LED_SPI_DEV "spi_dev"
+#define HW_POWER       "power"
+#define HW_BUTTON      "button"
+#define HW_GPIO_PIN    "gpio_pin"
+#define HW_GPIO_VAL    "gpio_val"
 
 /**
  * @brief Load specification to system, including leds_number, power/button pin etc
@@ -25,19 +23,5 @@ typedef struct{
  * @returns \-1 faild or \0 successful
  */
 int load_hw_spec_json(const char *hw_model);
-
-/**
- * @brief Set the power pin
- *
- * @returns \-1 error or \0 no power pin \1 successful
- */
-int set_power_pin(void);
-
-/**
- * @brief Release the power pin
- *
- * @returns \-1 error or \0 no power pin \1 successful
- */
-int reset_power_pin(void);
 
 #endif
