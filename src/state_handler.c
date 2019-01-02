@@ -1,6 +1,5 @@
 #include "state_handler.h"
 #include "animation.h"
-#include "get_config.h"
 
 extern SNIPS_RUN_PARA       RUN_PARA;
 

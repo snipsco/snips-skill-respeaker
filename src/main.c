@@ -21,6 +21,7 @@ void get_action_colours();
 int run_para_init(void);
 uint32_t text_to_colour(const char* cTxt);
 void debug_run_para_dump(void);
+int parse_hour_minute(const char *raw_value, uint8_t *hour, uint8_t *minute);
 
 uint8_t     sleep_hour;
 uint8_t     sleep_minute;
@@ -81,13 +82,6 @@ int main(int argc, char *argv[]){
     // get brightness
     set_leds_brightness(RUN_PARA.max_brightness);
 
-    // if sleep mode is enabled
-    // if (if_config_true("nightmode", configList, NULL) == 1){
-    //     flag_sleepmode = 1;
-    //     parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
-    //     parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
-    // }
-
     if (!start_mqtt_client(RUN_PARA.client_id,
                            RUN_PARA.mqtt_host,
                            RUN_PARA.mqtt_port,
@@ -104,7 +98,7 @@ int main(int argc, char *argv[]){
     //fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
     fprintf(stdout, "[Info] Brightness .......... %d\n", RUN_PARA.max_brightness);
     fprintf(stdout, "[Info] Device .............. %s\n", RUN_PARA.hardware_model);
-    //fprintf(stdout, "[Info] Nightmode ........... %s\n", flag_sleepmode ? "Enabled": "Disabled");
+    fprintf(stdout, "[Info] Nightmode ........... %s\n", RUN_PARA.if_sleepmode ? "Enabled": "Disabled");
     fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
     fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
 
@@ -192,6 +186,15 @@ int run_para_init(void){
         RUN_PARA.animation_enable[TO_MUTE] = 0;
     if (!cCONFIG_Value_Is_True(C_TO_UNMUTE_STR))
         RUN_PARA.animation_enable[TO_UNMUTE] = 0;
+
+    /* Sleep mode */
+    if (cCONFIG_Value_Is_True(C_NIGHTMODE_STR)){
+        RUN_PARA.if_sleepmode = 1;
+        temp = cCONFIG_Value_Raw(C_GO_SLEEP_STR);
+        parse_hour_minute(temp, &RUN_PARA.sleep_hour, &RUN_PARA.sleep_minute);
+        temp = cCONFIG_Value_Raw(C_GO_WEAK_STR);
+        parse_hour_minute(temp, &RUN_PARA.weak_hour, &RUN_PARA.weak_minute);
+    }
 
     cCONFIG_Delete_List();
     return 0;
@@ -294,6 +297,22 @@ char *generate_client_id(void){
         }
     }
     return id;
+}
+
+int parse_hour_minute(const char *raw_value, uint8_t *hour, uint8_t *minute){
+    char *p;
+    char h[3]="";
+    char m[3]="";
+
+    p = strchr(raw_value, ':');
+    if (p != NULL){
+        strncpy(h, raw_value, p - raw_value);
+        strcpy(m, p+1);
+        *hour = atoi(h);
+        *minute = atoi(m);
+        return 1;
+    }
+    return 0;
 }
 
 void close_all(int status){
