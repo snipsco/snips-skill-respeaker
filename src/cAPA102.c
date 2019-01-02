@@ -55,7 +55,7 @@ int cAPA102_Init(uint32_t led_num, uint8_t spi_bus, uint8_t spi_dev, uint8_t bri
         cAPA012_BUF.brightness = 0xE0 | (0x1F & brightness);
     cAPA012_BUF.pixels = (uint8_t *)malloc(cAPA012_BUF.number * 4);
     cAPA012_BUF.fd_spi = cAPA102_Try_Open_SPI_Dev(RETRY_TIMES, RETRY_GAP_SEC, spi_bus, spi_dev);
-    if (cAPA012_BUF.fd_spi)
+    if ( -1 == cAPA012_BUF.fd_spi )
         return -1;
     cAPA102_Clear_All();
     return 0;
