@@ -16,7 +16,7 @@
     "respeaker_2_mic_hat":{
         "led_num":3,
         "button":{
-            "gpio_pin":66,
+            "gpio_pin":17,
             "gpio_val":0
         }
     }
