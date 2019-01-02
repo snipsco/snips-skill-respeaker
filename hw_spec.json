@@ -10,7 +10,7 @@
         "led_num":12,
         "power":{
             "gpio_pin":5,
-            "gpio_val":0
+            "gpio_val":1
         }
     },
     "respeaker_2_mic_hat":{
