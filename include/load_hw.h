@@ -12,8 +12,6 @@
 #define HW_GPIO_PIN "gpio_pin"
 #define HW_GPIO_VAL "gpio_val"
 
-extern snipsSkillConfig configList[CONFIG_NUM];
-
 typedef struct{
     int pin;
     int val;

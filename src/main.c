@@ -1,150 +1,121 @@
 #include "apa102.h"
-#include "get_config.h"
 #include "state_handler.h"
 #include "mqtt_client.h"
 #include "load_hw.h"
 #include "parse_opts.h"
+#include "cCONFIG.h"
 
 #include <mqtt.h>
 #include <common.h>
 #include <pthread.h>
-#include <signal.h>
 
 #define CLIENT_ID_LEN 10
 
 static void interrupt_handler(int sig);
-static void get_running_parameters(int argc, char *argv[]);
 
 void check_nightmode(void);
 char *generate_client_id(void);
 void close_all(int status);
 void get_action_colours();
 
-volatile sig_atomic_t   flag_terminate = 0;
-short                   flag_update = 1;
-short                   flag_sleepmode = 0;
+int run_para_init(void);
+uint32_t text_to_colour(const char* cTxt);
+void debug_run_para_dump(void);
 
-STATE       curr_state = ON_IDLE;
-COLOURS     action_colours = {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C};
-
-pthread_t   curr_thread;
 uint8_t     sleep_hour;
 uint8_t     sleep_minute;
 uint8_t     weak_hour;
 uint8_t     weak_minute;
 
-struct{
+SNIPS_RUN_PARA RUN_PARA = {
+    /* Hardware */
+    "",
+    /* Brightness */
+    31,
     /* MQTT connection */
-    char mqtt_host[50];
-    char mqtt_port[50];
-    char mqtt_user[50];
-    char mqtt_pass[50];
-
+    "localhost",
+    "1883",
+    "",
+    "",
     /* SiteId */
-    char snips_site_id[50];
-
+    "default",
+    /* Client ID */
+    NULL,
     /* Animation thread */
-    pthread_t curr_thread;
-    STATE curr_state;
-
+    0, // NULL
+    ON_IDLE,
+    /* Colour */
+    {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C},
     /* Sleep mode */
-    uint8_t sleep_hour;
-    uint8_t sleep_minute;
-    uint8_t weak_hour;
-    uint8_t weak_minute;
-
-}RUN_PARA;
-
-
-const char *addr;
-const char *port;
-const char *username;
-const char *password;
-
-const char *site_id;
-
-snipsSkillConfig configList[CONFIG_NUM]={
-    {{C_MODEL_STR}, {0}},
-    {{C_SPI_DEV_STR}, {0}},
-    {{C_LED_NUM_STR}, {0}},
-    {{C_LED_BRI_STR}, {0}},
-    {{C_MQTT_HOST_STR}, {0}},
-    {{C_MQTT_PORT_STR}, {0}},
-    {{C_MQTT_USER_STR}, {0}},
-    {{C_MQTT_PASS_STR}, {0}},
-    {{C_ON_IDLE_STR}, {0}},
-    {{C_ON_LISTEN_STR}, {0}},
-    {{C_ON_SPEAK_STR}, {0}},
-    {{C_TO_MUTE_STR}, {0}},
-    {{C_TO_UNMUTE_STR}, {0}},
-    {{C_IDLE_COLOUR_STR}, {0}},
-    {{C_LISTEN_COLOUR_STR}, {0}},
-    {{C_SPEAK_COLOUR_STR}, {0}},
-    {{C_MUTE_COLOUR_STR}, {0}},
-    {{C_UNMUTE_COLOUR_STR}, {0}},
-    {{C_NIGHTMODE_STR}, {0}},
-    {{C_GO_SLEEP_STR}, {0}},
-    {{C_GO_WEAK_STR}, {0}},
-    {{C_ON_DISABLED_STR}, {"1"}},
-    {{C_SITE_ID_STR}, {0}}
+    0,
+    0,
+    0,
+    0,
+    /* Flags */
+    0,
+    1,
+    0,
+    /* Animation Enable */
+    {1, 1, 1, 1, 1}
 };
 
 int main(int argc, char *argv[]){
+
+    if ( -1 == run_para_init() )
+        close_all(EXIT_FAILURE);
+
+    debug_run_para_dump();
+
     parse_opts(argc, argv);
-    char *client_id;
-    // generate a random id as client id
-    client_id = generate_client_id();
+
+    RUN_PARA.client_id = generate_client_id();
+
     signal(SIGINT, interrupt_handler);
-    // get config.ini
-    read_config_file(configList, CONFIG_NUM);
-
-    // get input parameters
-
-    //(argc > 1)? set_leds_number(atoi(argv[1])) : set_leds_number(atoi(configList[C_LED_NUM].value));
 
     /*<Test Loading LED info from hw_spec.json file>*/
-    load_hw_spec_json(configList[C_MODEL].value);
+    load_hw_spec_json(RUN_PARA.hardware_model);
+
     if(-1 == set_power_pin())
         close_all(EXIT_FAILURE);
 
-    get_running_parameters(argc, argv);
-
-
     // get brightness
-    set_leds_brightness(atoi(configList[C_LED_BRI].value));
-    get_action_colours();
+    set_leds_brightness(RUN_PARA.max_brightness);
 
     // if sleep mode is enabled
-    if (if_config_true("nightmode", configList, NULL) == 1){
-        flag_sleepmode = 1;
-        parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
-        parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
-    }
+    // if (if_config_true("nightmode", configList, NULL) == 1){
+    //     flag_sleepmode = 1;
+    //     parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
+    //     parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
+    // }
 
-    if (!start_mqtt_client(client_id, addr, port, username, password))
+    if (!start_mqtt_client(RUN_PARA.client_id,
+                           RUN_PARA.mqtt_host,
+                           RUN_PARA.mqtt_port,
+                           RUN_PARA.mqtt_user,
+                           RUN_PARA.mqtt_pass))
         close_all(EXIT_FAILURE);
 
     if(!apa102_spi_setup())
         close_all(EXIT_FAILURE);
 
     fprintf(stdout, "[Info] Initilisation Done! \n");
-    fprintf(stdout, "[Info] Client Id ........... %s\n", client_id);
     fprintf(stdout, "[Info] Program ............. %s\n", argv[0]);
+    fprintf(stdout, "[Info] Client Id ........... %s\n", RUN_PARA.client_id);
     //fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
-    //fprintf(stdout, "[Info] Brightness .......... %d\n", leds.brightness);
-    fprintf(stdout, "[Info] Device .............. %s\n", configList[C_MODEL].value);
-    fprintf(stdout, "[Info] Nightmode ........... %s\n", flag_sleepmode ? "Enabled": "Disabled");
-    fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", addr, port);
+    fprintf(stdout, "[Info] Brightness .......... %d\n", RUN_PARA.max_brightness);
+    fprintf(stdout, "[Info] Device .............. %s\n", RUN_PARA.hardware_model);
+    //fprintf(stdout, "[Info] Nightmode ........... %s\n", flag_sleepmode ? "Enabled": "Disabled");
+    fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
     fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
 
     while(1){
-        if(flag_sleepmode)
+        if(RUN_PARA.if_sleepmode)
             check_nightmode();
 
-        if (flag_update)
+        if (RUN_PARA.if_update)
             state_machine_update();
 
-        if (flag_terminate)
+        if (RUN_PARA.if_terminate)
             break;
 
         usleep(10000);
@@ -152,6 +123,112 @@ int main(int argc, char *argv[]){
 
     close_all(EXIT_SUCCESS);
     return 0;
+}
+
+int run_para_init(void){
+    const char *temp = NULL;
+    int res;
+    res = cCONFIG_Parse_Config(CONFIG_FILE);
+    if (-1 == res)
+        return -1;
+
+    temp = cCONFIG_Value_Raw(C_MODEL_STR);
+    if (temp)
+        strcpy(RUN_PARA.hardware_model, temp);
+
+    temp = cCONFIG_Value_Raw(C_LED_BRI_STR);
+    if (temp)
+        RUN_PARA.max_brightness = atoi(temp);
+
+    temp = cCONFIG_Value_Raw(C_MQTT_HOST_STR);
+    if (temp)
+        strcpy(RUN_PARA.mqtt_host, temp);
+
+    temp = cCONFIG_Value_Raw(C_MQTT_PORT_STR);
+    if (temp)
+        strcpy(RUN_PARA.mqtt_port, temp);
+
+    temp = cCONFIG_Value_Raw(C_MQTT_USER_STR);
+    if (temp)
+        strcpy(RUN_PARA.mqtt_user, temp);
+
+    temp = cCONFIG_Value_Raw(C_MQTT_PASS_STR);
+    if (temp)
+        strcpy(RUN_PARA.mqtt_pass, temp);
+
+    temp = cCONFIG_Value_Raw(C_SITE_ID_STR);
+    if (temp)
+        strcpy(RUN_PARA.snips_site_id, temp);
+
+    /* color */
+    temp = cCONFIG_Value_Raw(C_IDLE_COLOUR_STR);
+    if (temp)
+        RUN_PARA.animation_color.idle = text_to_colour(temp);
+
+    temp = cCONFIG_Value_Raw(C_LISTEN_COLOUR_STR);
+    if (temp)
+        RUN_PARA.animation_color.listen = text_to_colour(temp);
+
+    temp = cCONFIG_Value_Raw(C_SPEAK_COLOUR_STR);
+    if (temp)
+        RUN_PARA.animation_color.speak = text_to_colour(temp);
+
+    temp = cCONFIG_Value_Raw(C_MUTE_COLOUR_STR);
+    if (temp)
+        RUN_PARA.animation_color.mute = text_to_colour(temp);
+
+    temp = cCONFIG_Value_Raw(C_UNMUTE_COLOUR_STR);
+    if (temp)
+        RUN_PARA.animation_color.unmute = text_to_colour(temp);
+
+    /* Animations */
+    if (!cCONFIG_Value_Is_True(C_ON_IDLE_STR))
+        RUN_PARA.animation_enable[ON_IDLE] = 0;
+    if (!cCONFIG_Value_Is_True(C_ON_LISTEN_STR))
+        RUN_PARA.animation_enable[ON_LISTEN] = 0;
+    if (!cCONFIG_Value_Is_True(C_ON_SPEAK_STR))
+        RUN_PARA.animation_enable[ON_SPEAK] = 0;
+    if (!cCONFIG_Value_Is_True(C_TO_MUTE_STR))
+        RUN_PARA.animation_enable[TO_MUTE] = 0;
+    if (!cCONFIG_Value_Is_True(C_TO_UNMUTE_STR))
+        RUN_PARA.animation_enable[TO_UNMUTE] = 0;
+
+    cCONFIG_Delete_List();
+    return 0;
+}
+
+void debug_run_para_dump(void){
+    /* Hardware */
+    printf("hardware_model : %s\n", RUN_PARA.hardware_model);
+
+    /* Brightness */
+    printf("max_brightness : %d\n", RUN_PARA.max_brightness);
+
+    /* MQTT connection */
+    printf("mqtt_host : %s\n", RUN_PARA.mqtt_host);
+    printf("mqtt_port : %s\n", RUN_PARA.mqtt_port);
+    printf("mqtt_user : %s\n", RUN_PARA.mqtt_user);
+    printf("mqtt_pass : %s\n", RUN_PARA.mqtt_pass);
+
+    /* SiteId */
+    printf("site_id : %s\n", RUN_PARA.snips_site_id);
+
+    /* Client ID */
+    printf("client_id : %s\n", RUN_PARA.client_id);
+
+    /* Colour */
+    printf("idle color :   %8x\n", RUN_PARA.animation_color.idle);
+    printf("speak color :  %8x\n", RUN_PARA.animation_color.speak);
+    printf("listen color : %8x\n", RUN_PARA.animation_color.listen);
+    printf("mute color :   %8x\n", RUN_PARA.animation_color.mute);
+    printf("unmute color : %8x\n", RUN_PARA.animation_color.unmute);
+
+    /* Animation Enable */
+    printf("on_idle :   %s\n", RUN_PARA.animation_enable[ON_IDLE] ? "true" : "false");
+    printf("on_listen : %s\n", RUN_PARA.animation_enable[ON_LISTEN] ? "true" : "false");
+    printf("on_speak :  %s\n", RUN_PARA.animation_enable[ON_SPEAK] ? "true" : "false");
+    printf("to_mute :   %s\n", RUN_PARA.animation_enable[TO_MUTE] ? "true" : "false");
+    printf("to_unmute : %s\n", RUN_PARA.animation_enable[TO_UNMUTE] ? "true" : "false");
 }
 
 uint32_t text_to_colour(const char* cTxt) {
@@ -175,33 +252,6 @@ uint32_t text_to_colour(const char* cTxt) {
     return 0;
 }
 
-static void get_running_parameters(int argc, char *argv[]){
-
-    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
-    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
-    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
-    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
-    site_id = (argc > 6)? argv[6] : configList[C_SITE_ID].value; // siteId
-}
-
-void get_action_colours() {
-    uint32_t idle_c = text_to_colour(configList[C_IDLE_COLOUR].value);
-    if (idle_c != 0)
-        action_colours.idle = idle_c;
-    uint32_t listen_c = text_to_colour(configList[C_LISTEN_COLOUR].value);
-    if (listen_c != 0)
-        action_colours.listen = listen_c;
-    uint32_t speak_c = text_to_colour(configList[C_SPEAK_COLOUR].value);
-    if (speak_c != 0)
-        action_colours.speak = speak_c;
-    uint32_t mute_c = text_to_colour(configList[C_MUTE_COLOUR].value);
-    if (mute_c != 0)
-        action_colours.mute = mute_c;
-    uint32_t unmute_c = text_to_colour(configList[C_UNMUTE_COLOUR].value);
-    if (unmute_c != 0)
-        action_colours.unmute = unmute_c;
-}
-
 void check_nightmode(void){
     time_t curr_time;
     struct tm *read_time = NULL;
@@ -211,16 +261,16 @@ void check_nightmode(void){
 
     if(read_time->tm_hour == sleep_hour &&
         read_time->tm_min == sleep_minute &&
-        curr_state != ON_DISABLED){
-        curr_state = ON_DISABLED;
-        flag_update = 1;
+        RUN_PARA.curr_state != ON_DISABLED){
+        RUN_PARA.curr_state = ON_DISABLED;
+        RUN_PARA.if_update = 1;
         fprintf(stdout, "[Info] ------>  Nightmode started\n");
     }
     if(read_time->tm_hour == weak_hour &&
         read_time->tm_min == weak_minute &&
-        curr_state == ON_DISABLED){
-        curr_state = ON_IDLE;
-        flag_update = 1;
+        RUN_PARA.curr_state == ON_DISABLED){
+        RUN_PARA.curr_state = ON_IDLE;
+        RUN_PARA.if_update = 1;
         fprintf(stdout, "[Info] ------>  Nightmode terminated\n");
     }
 }
@@ -251,10 +301,10 @@ void close_all(int status){
 
     terminate_mqtt_client();
     terminate_spi();
-    pthread_cancel(curr_thread);
+    pthread_cancel(RUN_PARA.curr_thread);
     exit(status);
 }
 
 static void interrupt_handler(int sig){
-    flag_terminate = 1;
+    RUN_PARA.if_terminate = 1;
 }

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <signal.h>
 
 #define NUM_TOPIC       10
 #define HOT_ON          "hermes/hotword/toggleOn"
@@ -118,5 +119,43 @@ typedef struct{
     uint32_t unmute;
 }COLOURS;
 
+typedef struct{
+    /* Hardware */
+    char hardware_model[50];
+    /* Brightness */
+    uint8_t max_brightness;
+    /* MQTT connection */
+    char mqtt_host[50];
+    char mqtt_port[50];
+    char mqtt_user[50];
+    char mqtt_pass[50];
+
+    /* SiteId */
+    char snips_site_id[50];
+
+    /* Client ID */
+    char *client_id;
+
+    /* Animation thread */
+    pthread_t curr_thread;
+    STATE     curr_state;
+
+    /* Colour */
+    COLOURS animation_color;
+
+    /* Sleep mode */
+    uint8_t sleep_hour;
+    uint8_t sleep_minute;
+    uint8_t weak_hour;
+    uint8_t weak_minute;
+
+    /* Flags */
+    volatile sig_atomic_t   if_terminate;
+    uint8_t                 if_update;
+    uint8_t                 if_sleepmode;
+
+    /* Animation Enable */
+    uint8_t animation_enable[STATE_NUM];
+}SNIPS_RUN_PARA;
 
 #endif

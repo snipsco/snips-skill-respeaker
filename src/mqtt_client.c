@@ -11,7 +11,7 @@ static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *p
 static int match_site_id(const char *message);
 static void* mqtt_client_refresher(void* mqtt_client);
 
-extern const char *site_id;
+extern SNIPS_RUN_PARA RUN_PARA;
 
 struct      mqtt_client mqtt_client;
 pthread_t   mqtt_client_daemon;
@@ -123,13 +123,13 @@ static int match_site_id(const char *message){
 
     rev_site_id = cJSON_GetObjectItemCaseSensitive(payload_json, "siteId");
 
-    if(!strcmp(site_id, rev_site_id->valuestring)){
-        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" GREEN " %s " NONE " \n", site_id, rev_site_id->valuestring);
+    if(!strcmp(RUN_PARA.snips_site_id, rev_site_id->valuestring)){
+        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" GREEN " %s " NONE " \n", RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
         return 1;
     }
     else{
-        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" RED " %s " NONE " \n", site_id, rev_site_id->valuestring);
+        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" RED " %s " NONE " \n", RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
         return 0;
     }

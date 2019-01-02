@@ -3,40 +3,37 @@
 #include "log.h"
 
 extern APA102       leds;
-extern COLOURS      action_colours;
-extern STATE        curr_state;
-extern short        flag_update;
-extern pthread_t    curr_thread;
+extern SNIPS_RUN_PARA RUN_PARA;
 
 // 0
 void *on_idle(){
     int curr_bri = 0;
     uint8_t led, step;
     fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
-    flag_update = 0;
+    RUN_PARA.if_update = 0;
     clear();
     srand((unsigned int)time(NULL));
 
     step = leds.brightness / STEP_COUNT;
-    while(curr_state == ON_IDLE){
+    while(RUN_PARA.curr_state == ON_IDLE){
         delay_on_state(2000, ON_IDLE);
         clear();
         led = rand()%leds.numLEDs;
 
         for (curr_bri = 0;
             curr_bri < leds.brightness &&
-            curr_state == ON_IDLE;
+            RUN_PARA.curr_state == ON_IDLE;
             curr_bri += step){
-            set_index_4byte(led, action_colours.idle | curr_bri);
+            set_index_4byte(led, RUN_PARA.animation_color.idle | curr_bri);
             show();
             delay_on_state(100, ON_IDLE);
         }
         curr_bri = leds.brightness;
         for (curr_bri = leds.brightness;
             curr_bri > 0 &&
-            curr_state == ON_IDLE;
+            RUN_PARA.curr_state == ON_IDLE;
             curr_bri -= step){
-            set_index_4byte(led, action_colours.idle | curr_bri);
+            set_index_4byte(led, RUN_PARA.animation_color.idle | curr_bri);
             show();
             delay_on_state(100, ON_IDLE);
         }
@@ -52,13 +49,13 @@ void *on_idle(){
 void *on_listen(){
     uint8_t i,g,group;
     fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
-    flag_update = 0;
+    RUN_PARA.if_update = 0;
     clear();
     group = leds.numLEDs/3;
-    while(curr_state == ON_LISTEN){
-        for(i=0;i<3 && curr_state == ON_LISTEN; i++){
-            for (g=0; g < group && curr_state == ON_LISTEN; g++)
-                set_index_4byte(g*3+i, action_colours.listen | leds.brightness);
+    while(RUN_PARA.curr_state == ON_LISTEN){
+        for(i=0;i<3 && RUN_PARA.curr_state == ON_LISTEN; i++){
+            for (g=0; g < group && RUN_PARA.curr_state == ON_LISTEN; g++)
+                set_index_4byte(g*3+i, RUN_PARA.animation_color.listen | leds.brightness);
             show();
             delay_on_state(80, ON_LISTEN);
             clear();
@@ -75,31 +72,31 @@ void *on_speak(){
     uint8_t step;
     int curr_bri = 0;
     fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
-    flag_update = 0;
+    RUN_PARA.if_update = 0;
     clear();
 
     step = leds.brightness / STEP_COUNT;
-    while(curr_state == ON_SPEAK){
+    while(RUN_PARA.curr_state == ON_SPEAK){
         for (curr_bri = 0;
             curr_bri < leds.brightness &&
-            curr_state == ON_SPEAK;
+            RUN_PARA.curr_state == ON_SPEAK;
             curr_bri += step){
-            for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
-                set_index_4byte(j, action_colours.speak | curr_bri);
+            for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == ON_SPEAK; j++)
+                set_index_4byte(j, RUN_PARA.animation_color.speak | curr_bri);
             show();
             delay_on_state(20, ON_SPEAK);
         }
         curr_bri = leds.brightness;
         for (curr_bri = leds.brightness;
             curr_bri > 0 &&
-            curr_state == ON_SPEAK;
+            RUN_PARA.curr_state == ON_SPEAK;
             curr_bri -= step){
-            for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
-                set_index_4byte(j, action_colours.speak | curr_bri);
+            for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == ON_SPEAK; j++)
+                set_index_4byte(j, RUN_PARA.animation_color.speak | curr_bri);
             show();
             delay_on_state(20, ON_SPEAK);
         }
-        for (j = 0; j < leds.numLEDs && curr_state == ON_SPEAK; j++)
+        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == ON_SPEAK; j++)
             set_index_rgb(j, 0, 0, 0);
         show();
         delay_on_state(200, ON_SPEAK);
@@ -114,29 +111,29 @@ void *to_mute(){
     uint8_t step;
     int curr_bri = 0;
     fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
-    flag_update = 0;
+    RUN_PARA.if_update = 0;
     clear();
 
     step = leds.brightness / STEP_COUNT;
-    for (curr_bri = 0; curr_bri < leds.brightness && curr_state == TO_MUTE; curr_bri += step){
-        for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_4byte(j, action_colours.mute | curr_bri);
+    for (curr_bri = 0; curr_bri < leds.brightness && RUN_PARA.curr_state == TO_MUTE; curr_bri += step){
+        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_MUTE; j++)
+            set_index_4byte(j, RUN_PARA.animation_color.mute | curr_bri);
         show();
         delay_on_state(50, TO_MUTE);
     }
     curr_bri = leds.brightness;
-    for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_MUTE; curr_bri -= step){
-        for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
-            set_index_4byte(j, action_colours.mute | curr_bri);
+    for (curr_bri = leds.brightness; curr_bri > 0 && RUN_PARA.curr_state == TO_MUTE; curr_bri -= step){
+        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_MUTE; j++)
+            set_index_4byte(j, RUN_PARA.animation_color.mute | curr_bri);
         show();
         delay_on_state(50, TO_MUTE);
     }
-    for (j = 0; j < leds.numLEDs && curr_state == TO_MUTE; j++)
+    for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_MUTE; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state == TO_MUTE){
-        curr_state = ON_IDLE;
-        flag_update = 1;
+    if(RUN_PARA.curr_state == TO_MUTE){
+        RUN_PARA.curr_state = ON_IDLE;
+        RUN_PARA.if_update = 1;
     }
     clear();
     return((void *)"TO_MUTE");
@@ -148,29 +145,29 @@ void *to_unmute(){
     uint8_t step;
     int curr_bri = 0;
     fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
-    flag_update = 0;
+    RUN_PARA.if_update = 0;
     clear();
 
     step = leds.brightness / STEP_COUNT;
-    for (curr_bri = 0;curr_bri < leds.brightness && curr_state == TO_UNMUTE; curr_bri += step){
-        for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
-            set_index_4byte(j, action_colours.unmute | curr_bri);
+    for (curr_bri = 0;curr_bri < leds.brightness && RUN_PARA.curr_state == TO_UNMUTE; curr_bri += step){
+        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_UNMUTE; j++)
+            set_index_4byte(j, RUN_PARA.animation_color.unmute | curr_bri);
         show();
         delay_on_state(50, TO_UNMUTE);
     }
     curr_bri = leds.brightness;
-    for (curr_bri = leds.brightness; curr_bri > 0 && curr_state == TO_UNMUTE; curr_bri -= step){
-        for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
-            set_index_4byte(j, action_colours.unmute | curr_bri);
+    for (curr_bri = leds.brightness; curr_bri > 0 && RUN_PARA.curr_state == TO_UNMUTE; curr_bri -= step){
+        for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_UNMUTE; j++)
+            set_index_4byte(j, RUN_PARA.animation_color.unmute | curr_bri);
         show();
         delay_on_state(50, TO_UNMUTE);
     }
-    for (j = 0; j < leds.numLEDs && curr_state == TO_UNMUTE; j++)
+    for (j = 0; j < leds.numLEDs && RUN_PARA.curr_state == TO_UNMUTE; j++)
         set_index_rgb(j, 0, 0, 0);
     show();
-    if(curr_state == TO_UNMUTE){
-        curr_state = ON_IDLE;
-        flag_update = 1;
+    if(RUN_PARA.curr_state == TO_UNMUTE){
+        RUN_PARA.curr_state = ON_IDLE;
+        RUN_PARA.if_update = 1;
     }
     clear();
     return((void *)"TO_UNMUTE");
@@ -179,8 +176,8 @@ void *to_unmute(){
 // 5
 void *on_disabled(){
     fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
-    flag_update = 0;
-    while(curr_state == ON_DISABLED){
+    RUN_PARA.if_update = 0;
+    while(RUN_PARA.curr_state == ON_DISABLED){
         clear();
         delay_on_state(100, ON_DISABLED);
     }
@@ -189,6 +186,6 @@ void *on_disabled(){
 }
 
 void delay_on_state(int ms, int state){
-    for (int j = 0; j < ms && curr_state == state; j++)
+    for (int j = 0; j < ms && RUN_PARA.curr_state == state; j++)
         usleep(1000);
 }
