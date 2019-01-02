@@ -1,8 +1,7 @@
 # Hardware Info
-model=rpi_*
-#model=rsp_corev2
-spi_dev=0:0
-led_num=3
+model=respeaker_2_mic_hat
+#model=respeaker_4_mic_hat
+#model=respeaker_core_v2
 
 # Animation
 on_idle=true
@@ -33,7 +32,5 @@ mqtt_port=1883
 # Device Info
 site_id=default
 
-# Brightness Range 0,255
-led_bri=64
-
-#END OF CONFIG
+# Brightness Range 0,31
+led_bri=10
