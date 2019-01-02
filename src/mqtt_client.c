@@ -3,7 +3,7 @@
 #include "cJSON.h"
 #include "mqtt.h"
 #include "posix_sockets.h"
-#include "log.h"
+#include "verbose.h"
 
 #include <pthread.h>
 
@@ -64,25 +64,25 @@ int start_mqtt_client(const char *mqtt_client_id,
                  400);
 
     if (mqtt_client.error != MQTT_OK) {
-        fprintf(stderr, "error: %s\n", mqtt_error_str(mqtt_client.error));
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" %s", __FUNCTION__, mqtt_error_str(mqtt_client.error));
         return 0;
     }
 
     if(pthread_create(&mqtt_client_daemon, NULL, mqtt_client_refresher, &mqtt_client)) {
-        fprintf(stderr, "[Error] Failed to start client daemon.\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to start client daemon", __FUNCTION__);
         return 0;
     }
 
     for(int i=0;i<NUM_TOPIC;i++)
         if( MQTT_OK != mqtt_subscribe(&mqtt_client, topics[i], 0)){
-            printf("[Error] Subscribe error\n");
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Subscribe error", __FUNCTION__);
             return 0;
         }
     return 1;
 }
 
 void terminate_mqtt_client(void){
-    fprintf(stdout, "[Info] disconnecting mqtt \n");
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Disconnecting mqtt", __FUNCTION__);
     sleep(1);
     if (fd_mqtt_sock != -1)
         close(fd_mqtt_sock);
@@ -95,7 +95,7 @@ static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *p
     memcpy(topic_name, published->topic_name, published->topic_name_size);
     topic_name[published->topic_name_size] = '\0';
 
-    printf("[Receive] topic "PURPLE" %s "NONE"\n", topic_name);
+    verbose(VV_INFO, stdout, "[Receive] topic "PURPLE" %s "NONE, topic_name);
     if (!match_site_id(published->application_message))
         return;
     state_handler_main(topic_name);
@@ -117,19 +117,19 @@ static int match_site_id(const char *message){
     if (payload_json == NULL){
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL)
-            fprintf(stderr, "[Error] from parsing message : %s\n", error_ptr);
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" from parsing message : %s", __FUNCTION__, error_ptr);
         return -1;
     }
 
     rev_site_id = cJSON_GetObjectItemCaseSensitive(payload_json, "siteId");
 
     if(!strcmp(RUN_PARA.snips_site_id, rev_site_id->valuestring)){
-        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" GREEN " %s " NONE " \n", RUN_PARA.snips_site_id, rev_site_id->valuestring);
+        verbose(VV_INFO, stdout, "Current site" GREEN " %s" NONE " / Received from site" GREEN " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
         return 1;
     }
     else{
-        fprintf(stdout, "[Info] Current site" GREEN " %s" NONE " / Received from site" RED " %s " NONE " \n", RUN_PARA.snips_site_id, rev_site_id->valuestring);
+        verbose(VV_INFO, stdout, "Current site" GREEN " %s" NONE " / Received from site" RED " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
         return 0;
     }

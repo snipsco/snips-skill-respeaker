@@ -4,6 +4,7 @@
 #include "load_hw.h"
 #include "parse_opts.h"
 #include "cCONFIG.h"
+#include "verbose.h"
 
 #include <mqtt.h>
 #include <common.h>
@@ -61,11 +62,11 @@ SNIPS_RUN_PARA RUN_PARA = {
 };
 
 int main(int argc, char *argv[]){
-
+    setVerbose(VV_INFO);
     if ( -1 == run_para_init() )
         close_all(EXIT_FAILURE);
 
-    debug_run_para_dump();
+    //debug_run_para_dump();
 
     parse_opts(argc, argv);
 
@@ -92,15 +93,14 @@ int main(int argc, char *argv[]){
     if(!apa102_spi_setup())
         close_all(EXIT_FAILURE);
 
-    fprintf(stdout, "[Info] Initilisation Done! \n");
-    fprintf(stdout, "[Info] Program ............. %s\n", argv[0]);
-    fprintf(stdout, "[Info] Client Id ........... %s\n", RUN_PARA.client_id);
-    //fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
-    fprintf(stdout, "[Info] Brightness .......... %d\n", RUN_PARA.max_brightness);
-    fprintf(stdout, "[Info] Device .............. %s\n", RUN_PARA.hardware_model);
-    fprintf(stdout, "[Info] Nightmode ........... %s\n", RUN_PARA.if_sleepmode ? "Enabled": "Disabled");
-    fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
-    fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
+    verbose(VV_INFO, stdout, "Initilisation Done!");
+    verbose(VV_INFO, stdout, "Program ............. %s", argv[0]);
+    verbose(VV_INFO, stdout, "Client Id ........... %s", RUN_PARA.client_id);
+    verbose(VV_INFO, stdout, "Brightness .......... %d", RUN_PARA.max_brightness);
+    verbose(VV_INFO, stdout, "Device .............. %s", RUN_PARA.hardware_model);
+    verbose(VV_INFO, stdout, "Nightmode ........... %s", RUN_PARA.if_sleepmode ? "Enabled": "Disabled");
+    verbose(VV_INFO, stdout, "MQTT Bus ............ %s:%s", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
+    verbose(VV_INFO, stdout, "Press CTRL-C to exit.");
 
     while(1){
         if(RUN_PARA.if_sleepmode)
@@ -267,14 +267,14 @@ void check_nightmode(void){
         RUN_PARA.curr_state != ON_DISABLED){
         RUN_PARA.curr_state = ON_DISABLED;
         RUN_PARA.if_update = 1;
-        fprintf(stdout, "[Info] ------>  Nightmode started\n");
+        verbose(VV_INFO, stdout, "Nightmode started");
     }
     if(read_time->tm_hour == weak_hour &&
         read_time->tm_min == weak_minute &&
         RUN_PARA.curr_state == ON_DISABLED){
         RUN_PARA.curr_state = ON_IDLE;
         RUN_PARA.if_update = 1;
-        fprintf(stdout, "[Info] ------>  Nightmode terminated\n");
+        verbose(VV_INFO, stdout, "Nightmode terminated");
     }
 }
 

@@ -1,4 +1,5 @@
 #include "gpio_rw.h"
+#include "verbose.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -15,7 +16,7 @@ int GPIO_export(int pin){
 
   	fd = open("/sys/class/gpio/export", O_WRONLY);
   	if (-1 == fd) {
-  		fprintf(stderr, "Failed to open export for writing!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to open export for writing!", __FUNCTION__);
   		return(-1);
   	}
 
@@ -32,7 +33,7 @@ int GPIO_unexport(int pin){
 
 	fd = open("/sys/class/gpio/unexport", O_WRONLY);
 	if (-1 == fd) {
-		fprintf(stderr, "Failed to open unexport for writing!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to open unexport for writing!", __FUNCTION__);
 		return(-1);
 	}
 
@@ -52,12 +53,12 @@ int GPIO_direction(int pin, int dir){
   	snprintf(path, DIRECTION_MAX, "/sys/class/gpio/gpio%d/direction", pin);
   	fd = open(path, O_WRONLY);
   	if (-1 == fd) {
-  		fprintf(stderr, "Failed to open gpio direction for writing!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to open gpio direction for writing!", __FUNCTION__);
   		return(-1);
   	}
 
   	if (-1 == write(fd, &s_directions_str[GPIO_IN == dir ? 0 : 3], GPIO_IN == dir ? 2 : 3)) {
-  		fprintf(stderr, "Failed to set direction!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to set direction!", __FUNCTION__);
   		return(-1);
   	}
 
@@ -74,12 +75,12 @@ int GPIO_read(int pin){
   	snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
   	fd = open(path, O_RDONLY);
   	if (-1 == fd) {
-  		fprintf(stderr, "Failed to open gpio value for reading!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to open gpio value for reading!", __FUNCTION__);
   		return(-1);
   	}
 
   	if (-1 == read(fd, value_str, 3)) {
-  		fprintf(stderr, "Failed to read value!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to read value!", __FUNCTION__);
   		return(-1);
   	}
 
@@ -97,12 +98,12 @@ int GPIO_write(int pin, int value){
   	snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
   	fd = open(path, O_WRONLY);
   	if (-1 == fd) {
-  		fprintf(stderr, "Failed to open gpio value for writing!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to open gpio value for writing!", __FUNCTION__);
   		return(-1);
   	}
 
   	if (1 != write(fd, &s_values_str[GPIO_LOW == value ? 0 : 1], 1)) {
-  		fprintf(stderr, "Failed to write value!\n");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to write value!", __FUNCTION__);
   		return(-1);
   	}
 

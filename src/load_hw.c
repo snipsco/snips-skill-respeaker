@@ -2,6 +2,7 @@
 #include "cJSON.h"
 #include "gpio_rw.h"
 #include "apa102.h"
+#include "verbose.h"
 
 static HW_GPIO_SPEC hw_power_gpio = {-1, -1};
 
@@ -27,7 +28,7 @@ int load_hw_spec_json(const char *hw_model){
     if (hw_spec_json == NULL){
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL)
-            fprintf(stderr, "[Error] from parsing message : %s\n", error_ptr);
+            verbose(V_NORMAL, stderr, "from parsing message : %s", error_ptr);
         return -1;
     }
 
@@ -55,7 +56,7 @@ static int load_json_file(const char *_DIR, char *json_file_buffer){
     int count = 0;
     pFILE = fopen(_DIR, "r");
     if (NULL == pFILE){
-        perror("[Error] Can not load "HW_SPEC_FILE" ");
+        verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Can not load "HW_SPEC_FILE" ", __FUNCTION__);
         return -1;
     }
 
@@ -80,11 +81,11 @@ static int load_led_num(cJSON *spec){
             set_leds_number(led_num->valueint);
         }
         else{
-            fprintf(stdout, "[Load HW] Invalide led number (0-255)\n");
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Invalide led number (0-255)", __FUNCTION__);
             return -1;
         }
     }else{
-        fprintf(stdout, "[Load HW] No led number specification found\n");
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" No led number specification found", __FUNCTION__);
         return -1;
     }
     return 0;
@@ -101,27 +102,27 @@ static int load_power_pin(cJSON *spec){
 
     cJSON *power_spec = cJSON_GetObjectItemCaseSensitive(spec, HW_POWER);
     if (NULL == power_spec){
-        fprintf(stdout, "[Load HW] Model has no power pin\n");
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Model has no power pin", __FUNCTION__);
         return 0;
     }else{
         pin = cJSON_GetObjectItemCaseSensitive(power_spec, HW_GPIO_PIN);
         val = cJSON_GetObjectItemCaseSensitive(power_spec, HW_GPIO_VAL);
         if (!cJSON_IsNumber(pin) || !cJSON_IsNumber(val)){
-            fprintf(stderr, "[Load HW] Model has invalide pin and val\n");
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Model has invalide pin and val", __FUNCTION__);
             return -1;
         }
 
         if (pin->valueint > 0)
             hw_power_gpio.pin = pin->valueint;
         else{
-            fprintf(stderr, "[Load HW] Model has invalide gpio_pin number\n");
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Model has invalide gpio_pin number", __FUNCTION__);
             return -1;
         }
 
         if (val->valueint == 0 || val->valueint == 1)
             hw_power_gpio.val = val->valueint;
         else{
-            fprintf(stderr, "[Load HW] Model has invalide gpio_val number (0,1)\n");
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Model has invalide gpio_val number (0,1)", __FUNCTION__);
             return -1;
         }
         return 1;
@@ -135,7 +136,7 @@ static int load_power_pin(cJSON *spec){
  */
 int set_power_pin(void){
     if ( hw_power_gpio.val == -1 || hw_power_gpio.val == -1 ){
-        fprintf(stdout, "[Set power] Mode has no power pin\n");
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
         return 0;
     }
 
@@ -148,7 +149,7 @@ int set_power_pin(void){
     if (-1 == GPIO_write(hw_power_gpio.pin, hw_power_gpio.val))
         return -1;
 
-    fprintf(stdout, "[Set power] Set power pin %d to %s\n", hw_power_gpio.pin, (hw_power_gpio.val)?"HIGH":"LOW");
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Set power pin %d to "LIGHT_GREEN"<%s>"NONE, __FUNCTION__, hw_power_gpio.pin, (hw_power_gpio.val)?"HIGH":"LOW");
     return 1;
 }
 
@@ -159,13 +160,13 @@ int set_power_pin(void){
  */
 int reset_power_pin(void){
     if ( hw_power_gpio.val == -1 || hw_power_gpio.val == -1 ){
-        fprintf(stdout, "[Reset power] Mode has no power pin\n");
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
         return 0;
     }
 
     if (-1 == GPIO_unexport(hw_power_gpio.pin))
         return -1;
 
-    fprintf(stdout, "[Reset power] Released power pin\n");
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Released power pin", __FUNCTION__);
     return 1;
 }

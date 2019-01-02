@@ -1,6 +1,6 @@
 #include "animation.h"
 #include "apa102.h"
-#include "log.h"
+#include "verbose.h"
 
 extern APA102       leds;
 extern SNIPS_RUN_PARA RUN_PARA;
@@ -9,7 +9,7 @@ extern SNIPS_RUN_PARA RUN_PARA;
 void *on_idle(){
     int curr_bri = 0;
     uint8_t led, step;
-    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
     clear();
     srand((unsigned int)time(NULL));
@@ -48,7 +48,7 @@ void *on_idle(){
 // 1
 void *on_listen(){
     uint8_t i,g,group;
-    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
     clear();
     group = leds.numLEDs/3;
@@ -71,7 +71,7 @@ void *on_speak(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
     clear();
 
@@ -110,7 +110,7 @@ void *to_mute(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
     clear();
 
@@ -144,7 +144,7 @@ void *to_unmute(){
     uint8_t j;
     uint8_t step;
     int curr_bri = 0;
-    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
     clear();
 
@@ -175,7 +175,7 @@ void *to_unmute(){
 
 // 5
 void *on_disabled(){
-    fprintf(stdout, "[Animation] ------>  " BLUE " %s " NONE " started\n", __FUNCTION__);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" animation started", __FUNCTION__);
     RUN_PARA.if_update = 0;
     while(RUN_PARA.curr_state == ON_DISABLED){
         clear();

@@ -1,5 +1,6 @@
 #include "state_handler.h"
 #include "animation.h"
+#include "verbose.h"
 
 extern SNIPS_RUN_PARA       RUN_PARA;
 
@@ -32,10 +33,10 @@ void state_machine_update(void){
     void *ret_val="NONE";
 
     if ( RUN_PARA.animation_enable[RUN_PARA.curr_state] ){
-        fprintf(stdout, "[Debug] State is changed to %d\n", RUN_PARA.curr_state);
+        verbose(VVV_DEBUG, stdout, "State is changed to %d", RUN_PARA.curr_state);
         // block until the previous terminate
         pthread_join(RUN_PARA.curr_thread,&ret_val);
-        fprintf(stdout, "[Debug] Previous thread %s terminated with success\n",(char*)ret_val);
+        verbose(VVV_DEBUG, stdout, "Previous thread %s terminated with success", (char*)ret_val);
         pthread_create(&RUN_PARA.curr_thread, NULL, state_functions[RUN_PARA.curr_state], NULL);
     }else{
         RUN_PARA.if_update = 0;

@@ -1,4 +1,6 @@
 #include "parse_opts.h"
+#include "verbose.h"
+
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
@@ -36,10 +38,10 @@ void parse_opts(int argc, char *argv[]){
     			print_usage(argv[0]);
     			break;
     		case 'd':
-                // Verbose Debug level
+                setVerbose(VVV_DEBUG);
     			break;
     		case 'v':
-                // Verbose Info level
+                setVerbose(VV_INFO);
     			break;
     		case 'V':
     			print_version();

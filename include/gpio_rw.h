@@ -59,30 +59,3 @@ int GPIO_read(int pin);
 int GPIO_write(int pin, int value);
 
 #endif
-
-/* example of using */
-// /*
-//  * Enable GPIO pins
-//  */
-// if (-1 == GPIOExport(POUT) || -1 == GPIOExport(PIN))
-//
-// /*
-//  * Set GPIO directions
-//  */
-// if (-1 == GPIODirection(POUT, OUT) || -1 == GPIODirection(PIN, IN))
-//
-//
-// /*
-//  * Write GPIO value
-//  */
-// if (-1 == GPIOWrite(POUT, repeat % 2))
-//
-// /*
-//  * Read GPIO value
-//  */
-// printf("I'm reading %d in GPIO %d\n", GPIORead(PIN), PIN);
-//
-// /*
-//  * Disable GPIO pins
-//  */
-// if (-1 == GPIOUnexport(POUT) || -1 == GPIOUnexport(PIN))
