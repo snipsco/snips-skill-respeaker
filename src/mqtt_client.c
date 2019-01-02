@@ -96,6 +96,7 @@ static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *p
     topic_name[published->topic_name_size] = '\0';
 
     verbose(VV_INFO, stdout, "[Receive] topic "PURPLE" %s "NONE, topic_name);
+    //if(strcmp(topic_name, END_SAY))
     if (!match_site_id(published->application_message))
         return;
     state_handler_main(topic_name);
@@ -122,7 +123,9 @@ static int match_site_id(const char *message){
     }
 
     rev_site_id = cJSON_GetObjectItemCaseSensitive(payload_json, "siteId");
-
+    if (rev_site_id == NULL)
+        return 1;
+        
     if(!strcmp(RUN_PARA.snips_site_id, rev_site_id->valuestring)){
         verbose(VV_INFO, stdout, "Current site" GREEN " %s" NONE " / Received from site" GREEN " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
