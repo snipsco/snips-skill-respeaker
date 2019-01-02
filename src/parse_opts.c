@@ -1,9 +1,12 @@
 #include "parse_opts.h"
 #include <unistd.h>
 #include <getopt.h>
+#include <string.h>
 
 static void print_usage(const char *prog);
 static void print_version(void);
+
+extern SNIPS_RUN_PARA RUN_PARA;
 
 void parse_opts(int argc, char *argv[]){
 	while (1) {
@@ -33,34 +36,34 @@ void parse_opts(int argc, char *argv[]){
     			print_usage(argv[0]);
     			break;
     		case 'd':
-
+                // Verbose Debug level
     			break;
     		case 'v':
-
+                // Verbose Info level
     			break;
     		case 'V':
     			print_version();
     			break;
     		case 'h':
-
+                strcpy(RUN_PARA.mqtt_host,optarg);
     			break;
     		case 'p':
-
+                strcpy(RUN_PARA.mqtt_port, optarg);
     			break;
     		case 'U':
-
+                strcpy(RUN_PARA.mqtt_user, optarg);
     			break;
     		case 'P':
-
+                strcpy(RUN_PARA.mqtt_pass, optarg);
     			break;
     		case 'N':
-
+                //atoi(optarg);
     			break;
     		case 'D':
-
+                //atoi(optarg);
     			break;
     		case 'S':
-
+                strcpy(RUN_PARA.snips_site_id, optarg);
     			break;
     		default:
     			print_usage(argv[0]);
