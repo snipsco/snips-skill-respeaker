@@ -11,6 +11,7 @@
 #include <mqtt.h>
 #include <common.h>
 #include <pthread.h>
+#include <time.h>
 
 SNIPS_RUN_PARA RUN_PARA = {
     /* Hardware */
@@ -61,6 +62,8 @@ int set_power_pin(void){
     if (-1 == GPIO_export(RUN_PARA.power.pin))
         return -1;
 
+    sleep(1);
+    
     if (-1 == GPIO_direction(RUN_PARA.power.pin, GPIO_OUT))
         return -1;
 
