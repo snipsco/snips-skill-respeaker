@@ -14,16 +14,16 @@ static void to_mute_handler(const char *topic);
 static void to_unmute_handler(const char *topic);
 static void on_disabled_handler(const char *topic);
 
-static void* (*state_functions[STATE_NUM])()={ 
-    on_idle, 
+static void* (*state_functions[STATE_NUM])()={
+    on_idle,
     on_listen,
-    on_speak, 
-    to_mute, 
+    on_speak,
+    to_mute,
     to_unmute,
     on_disabled
 };
 
-static void (*state_handlers[STATE_NUM])(const char *)={ 
+static void (*state_handlers[STATE_NUM])(const char *)={
     on_idle_handler, 	//0
     on_listen_handler,	//1
     on_speak_handler,	//2
@@ -55,6 +55,24 @@ void state_machine_update(void){
     }
 }
 
+void state_machine(void){
+  fprintf(stdout, "[Debug] animation state machine started \n");
+  while (1) {
+    if (flag_update)
+      state_functions[curr_state]();
+    // switch (curr_state) {
+    //   case ON_IDLE:
+    //     state_functions[curr_state]();
+    //   case ON_LISTEN:
+    //
+    //   case ON_SPEAK:
+    //   case TO_MUTE:
+    //   case TO_UNMUTE:
+    //   case ON_DISABLED:
+    // }
+  }
+}
+
 void state_handler_main(const char *topic){
 	STATE last_state = curr_state;
 	state_handlers[curr_state](topic);
@@ -63,7 +81,7 @@ void state_handler_main(const char *topic){
 }
 
 static void on_idle_handler(const char *topic){
-	if (!strcmp(topic, STA_LIS))        
+	if (!strcmp(topic, STA_LIS))
         curr_state = ON_LISTEN;
     else if (!strcmp(topic, SUD_OFF))
         curr_state = TO_MUTE;
