@@ -21,6 +21,10 @@ In general: Improve the performance base on the previous version, support more h
 - [ ] support button press
 - [ ] separate version info to a file
 
+## Known Issue
+
+- If using the global current method to set the led brightness, it does not work under some certain condition. Better to limit the PWM value but the static current control. 
+
 ## Support
 
 ![RPi 0](https://img.shields.io/badge/RPi%200-success-brightgreen.svg)
