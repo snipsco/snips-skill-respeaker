@@ -42,7 +42,7 @@ int start_mqtt_client(const char *mqtt_client_id,
     fd_mqtt_sock = open_nb_socket(mqtt_addr, mqtt_port);
     if (fd_mqtt_sock == -1) {
         perror("[Error] Failed to open socket: ");
-        return 0;
+        return -1;
     }
 
     mqtt_init(&mqtt_client,
@@ -65,20 +65,20 @@ int start_mqtt_client(const char *mqtt_client_id,
 
     if (mqtt_client.error != MQTT_OK) {
         verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" %s", __FUNCTION__, mqtt_error_str(mqtt_client.error));
-        return 0;
+        return -1;
     }
 
     if(pthread_create(&mqtt_client_daemon, NULL, mqtt_client_refresher, &mqtt_client)) {
         verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to start client daemon", __FUNCTION__);
-        return 0;
+        return -1;
     }
 
     for(int i=0;i<NUM_TOPIC;i++)
         if( MQTT_OK != mqtt_subscribe(&mqtt_client, topics[i], 0)){
             verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Subscribe error", __FUNCTION__);
-            return 0;
+            return -1;
         }
-    return 1;
+    return 0;
 }
 
 void terminate_mqtt_client(void){

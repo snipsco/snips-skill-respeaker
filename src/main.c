@@ -63,7 +63,7 @@ int set_power_pin(void){
         return -1;
 
     sleep(1);
-    
+
     if (-1 == GPIO_direction(RUN_PARA.power.pin, GPIO_OUT))
         return -1;
 
@@ -128,16 +128,16 @@ int main(int argc, char *argv[]){
     if ( -1 == load_hw_spec_json(RUN_PARA.hardware_model))
         close_all(EXIT_FAILURE);
 
-    if( -1 == set_power_pin())
+    if ( -1 == set_power_pin())
         close_all(EXIT_FAILURE);
 
     debug_run_para_dump();
 
-    if (!start_mqtt_client(RUN_PARA.client_id,
-                           RUN_PARA.mqtt_host,
-                           RUN_PARA.mqtt_port,
-                           RUN_PARA.mqtt_user,
-                           RUN_PARA.mqtt_pass))
+    if ( -1 == start_mqtt_client(RUN_PARA.client_id,
+                                 RUN_PARA.mqtt_host,
+                                 RUN_PARA.mqtt_port,
+                                 RUN_PARA.mqtt_user,
+                                 RUN_PARA.mqtt_pass))
         close_all(EXIT_FAILURE);
 
     if ( -1 == cAPA102_Init(RUN_PARA.LEDs.number,
