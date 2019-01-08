@@ -90,6 +90,33 @@ void terminate_mqtt_client(void){
         pthread_cancel(mqtt_client_daemon);
 }
 
+void mqtt_hotword_trigger(void){
+    char *topic = "hermes/dialogueManager/startSession";
+    char application_message[1024];
+    sprintf(application_message, "{\"siteId\":\"%s\",\"init\":{\"type\":\"action\"}}", RUN_PARA.snips_site_id);
+    mqtt_publish(&mqtt_client, topic, application_message, strlen(application_message), 0);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing to topic : %s ", __FUNCTION__, topic);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing message : %s ", __FUNCTION__, application_message);
+}
+
+void mqtt_mute_feedback(void){
+    char *topic = "hermes/feedback/sound/toggleOff";
+    char application_message[1024];
+    sprintf(application_message, "{\"siteId\":\"%s\"}", RUN_PARA.snips_site_id);
+    mqtt_publish(&mqtt_client, topic, application_message, strlen(application_message), 0);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing to topic : %s ", __FUNCTION__, topic);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing message : %s ", __FUNCTION__, application_message);
+}
+
+void mqtt_unmute_feedback(void){
+    char *topic = "hermes/feedback/sound/toggleOn";
+    char application_message[1024];
+    sprintf(application_message, "{\"siteId\":\"%s\"}", RUN_PARA.snips_site_id);
+    mqtt_publish(&mqtt_client, topic, application_message, strlen(application_message), 0);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing to topic : %s ", __FUNCTION__, topic);
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing message : %s ", __FUNCTION__, application_message);
+}
+
 static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *published){
     char *topic_name = (char*) malloc(published->topic_name_size + 1);
     memcpy(topic_name, published->topic_name, published->topic_name_size);

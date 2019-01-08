@@ -1,3 +1,4 @@
+#include "common.h"
 #include "cAPA102.h"
 #include "state_handler.h"
 #include "mqtt_client.h"
@@ -7,9 +8,10 @@
 #include "verbose.h"
 #include "load_sw.h"
 #include "gpio_rw.h"
+#include "button.h"
 
-#include <mqtt.h>
-#include <common.h>
+#include "mqtt.h"
+
 #include <pthread.h>
 #include <time.h>
 
@@ -46,9 +48,25 @@ SNIPS_RUN_PARA RUN_PARA = {
     1,
     0,
     /* Animation Enable */
-    {1, 1, 1, 1, 1}
+    {1, 1, 1, 1, 1},
+
+    /* Mute*/
+    0
 };
 
+void long_press_hadler(void){
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" toggling sound feedback!", __FUNCTION__);
+    RUN_PARA.if_mute = ~RUN_PARA.if_mute;
+    if (RUN_PARA.if_mute)
+        mqtt_mute_feedback();
+    else
+        mqtt_unmute_feedback();
+}
+
+void short_press_handler(void){
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" triggering!", __FUNCTION__);
+    mqtt_hotword_trigger();
+}
 void interrupt_handler(int sig){
     RUN_PARA.if_terminate = 1;
 }
@@ -115,6 +133,7 @@ void close_all(int status){
     terminate_mqtt_client();
     cAPA102_Close();
     pthread_cancel(RUN_PARA.curr_thread);
+    Destroy_Key();
     exit(status);
 }
 
@@ -144,6 +163,10 @@ int main(int argc, char *argv[]){
                             RUN_PARA.LEDs.spi_bus,
                             RUN_PARA.LEDs.spi_dev,
                             RUN_PARA.max_brightness))
+        close_all(EXIT_FAILURE);
+
+    // test button
+    if ( -1 == Init_Key(17, short_press_handler, long_press_hadler))
         close_all(EXIT_FAILURE);
 
     dump_running_info();
