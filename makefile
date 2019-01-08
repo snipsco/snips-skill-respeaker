@@ -19,7 +19,8 @@ SOURCES = src/mqtt.c\
           src/cJSON.c\
           src/mqtt_client.c\
           src/cCONFIG.c\
-          src/verbose.c
+          src/verbose.c\
+		  src/button.c
 
 APP = action-app_respeaker
 
