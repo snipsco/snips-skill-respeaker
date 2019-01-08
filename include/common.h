@@ -166,6 +166,9 @@ typedef struct{
 
     /* Animation Enable */
     uint8_t animation_enable[STATE_NUM];
+
+    /* */
+    uint8_t if_mute;
 }SNIPS_RUN_PARA;
 
 #define CLIENT_ID_LEN 10
