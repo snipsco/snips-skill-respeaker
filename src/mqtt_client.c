@@ -104,6 +104,7 @@ void mqtt_mute_feedback(void){
     char application_message[1024];
     sprintf(application_message, "{\"siteId\":\"%s\"}", RUN_PARA.snips_site_id);
     mqtt_publish(&mqtt_client, topic, application_message, strlen(application_message), 0);
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Muting the feedback sound", __FUNCTION__);
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing to topic : %s ", __FUNCTION__, topic);
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing message : %s ", __FUNCTION__, application_message);
 }
@@ -113,6 +114,7 @@ void mqtt_unmute_feedback(void){
     char application_message[1024];
     sprintf(application_message, "{\"siteId\":\"%s\"}", RUN_PARA.snips_site_id);
     mqtt_publish(&mqtt_client, topic, application_message, strlen(application_message), 0);
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Unmuting the feedback sound", __FUNCTION__);
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing to topic : %s ", __FUNCTION__, topic);
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Publishing message : %s ", __FUNCTION__, application_message);
 }
