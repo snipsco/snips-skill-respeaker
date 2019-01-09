@@ -142,8 +142,12 @@ int load_sw_spec(void){
         parse_hour_minute(temp, &RUN_PARA.weak_hour, &RUN_PARA.weak_minute);
     }
 
-    if (!cCONFIG_Value_Is_True(C_FEEDBACK_SOUND))
+    if ( 1 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR))
         RUN_PARA.if_mute = 0;
+    else if ( 0 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR) ) {
+        RUN_PARA.if_mute = 1;
+    }else
+        verbose(VVV_DEBUG, stdout, "Feedback sound info not found!");
 
     cCONFIG_Delete_List();
     return 0;
@@ -202,6 +206,7 @@ void debug_run_para_dump(void){
 
 void dump_running_info(void){
     verbose(VV_INFO, stdout, "Initilisation Done!");
+    verbose(VV_INFO, stdout, "Version ............. %s", VERSION);
     verbose(VV_INFO, stdout, "Client Id ........... %s", RUN_PARA.client_id);
     verbose(VV_INFO, stdout, "Brightness .......... %d", RUN_PARA.max_brightness);
     verbose(VV_INFO, stdout, "Device .............. %s", RUN_PARA.hardware_model);

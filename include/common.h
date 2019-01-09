@@ -69,7 +69,7 @@ typedef enum {
 #define C_GO_WEAK_STR           "go_weak"
 #define C_ON_DISABLED_STR       "on_disabled"
 #define C_SITE_ID_STR           "site_id"
-#define C_FEEDBACK_SOUND        "feedback_sound"
+#define C_FEEDBACK_SOUND_STR    "feedback_sound"
 
 enum CONFIG_ENTITY{
     C_MODEL = 0,
