@@ -44,14 +44,14 @@ void state_machine_update(void){
 }
 
 void state_handler_main(const char *topic){
-  STATE last_state = RUN_PARA.curr_state;
-  state_handlers[RUN_PARA.curr_state](topic);
-  if (RUN_PARA.curr_state != last_state)
-    RUN_PARA.if_update = 1;
+    STATE last_state = RUN_PARA.curr_state;
+    state_handlers[RUN_PARA.curr_state](topic);
+    if (RUN_PARA.curr_state != last_state)
+        RUN_PARA.if_update = 1;
 }
 
 static void on_idle_handler(const char *topic){
-  if (!strcmp(topic, STA_LIS))
+    if (!strcmp(topic, STA_LIS))
         RUN_PARA.curr_state = ON_LISTEN;
     else if (!strcmp(topic, SUD_OFF))
         RUN_PARA.curr_state = TO_MUTE;
@@ -64,14 +64,14 @@ static void on_idle_handler(const char *topic){
 }
 
 static void on_listen_handler(const char *topic){
-  if (!strcmp(topic, END_LIS))
+    if (!strcmp(topic, END_LIS))
         RUN_PARA.curr_state = ON_IDLE;
     else if (!strcmp(topic, HOT_ON))
         RUN_PARA.curr_state = ON_IDLE;
 }
 
 static void on_speak_handler(const char *topic){
-  if (!strcmp(topic, END_SAY))
+    if (!strcmp(topic, END_SAY))
         RUN_PARA.curr_state = ON_IDLE;
     else if (!strcmp(topic, STA_LIS))
         RUN_PARA.curr_state = ON_LISTEN;
@@ -80,16 +80,20 @@ static void on_speak_handler(const char *topic){
 }
 
 static void to_mute_handler(const char *topic){
-  if (!strcmp(topic, HOT_ON))
+    if (!strcmp(topic, STA_LIS))
         RUN_PARA.curr_state = ON_LISTEN;
+    else if (!strcmp(topic, HOT_ON))
+        RUN_PARA.curr_state = ON_IDLE;
 }
 
 static void to_unmute_handler(const char *topic){
-  if (!strcmp(topic, HOT_ON))
+    if (!strcmp(topic, STA_LIS))
         RUN_PARA.curr_state = ON_LISTEN;
+    else if (!strcmp(topic, HOT_ON))
+        RUN_PARA.curr_state = ON_IDLE;
 }
 
 static void on_disabled_handler(const char *topic){
-  if (!strcmp(topic, LED_ON))
+    if (!strcmp(topic, LED_ON))
         RUN_PARA.curr_state = ON_IDLE;
 }
