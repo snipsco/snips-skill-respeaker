@@ -64,6 +64,7 @@ typedef enum {
 #define C_GO_WEAK_STR           "go_weak"
 #define C_ON_DISABLED_STR       "on_disabled"
 #define C_SITE_ID_STR           "site_id"
+#define C_FEEDBACK_SOUND        "feedback_sound"
 
 enum CONFIG_ENTITY{
     C_MODEL = 0,
@@ -167,7 +168,7 @@ typedef struct{
     /* Animation Enable */
     uint8_t animation_enable[STATE_NUM];
 
-    /* */
+    /* Feedback sound */
     uint8_t if_mute;
 }SNIPS_RUN_PARA;
 

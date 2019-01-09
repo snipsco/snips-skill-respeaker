@@ -34,3 +34,6 @@ site_id=default
 
 # Brightness Range 0,31
 led_bri=31
+
+# Default feedback sound
+feedback_sound=true
