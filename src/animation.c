@@ -32,22 +32,22 @@ void *on_idle(){
     cAPA102_Clear_All();
     srand((unsigned int)time(NULL));
 
-    step = 255 / STEP_COUNT;
+    step = RUN_PARA.max_brightness / STEP_COUNT;
     while(RUN_PARA.curr_state == ON_IDLE){
         delay_on_state(2000, ON_IDLE);
         cAPA102_Clear_All();
         led = rand()%RUN_PARA.LEDs.number;
 
         for (curr_bri = 0;
-            curr_bri < 255 &&
+            curr_bri < RUN_PARA.max_brightness &&
             RUN_PARA.curr_state == ON_IDLE;
             curr_bri += step){
             cAPA102_Set_Pixel_4byte(led, remap_4byte(RUN_PARA.animation_color.idle, curr_bri));
             cAPA102_Refresh();
             delay_on_state(100, ON_IDLE);
         }
-        curr_bri = 255;
-        for (curr_bri = 255;
+        curr_bri = RUN_PARA.max_brightness;
+        for (curr_bri = RUN_PARA.max_brightness;
             curr_bri > 0 &&
             RUN_PARA.curr_state == ON_IDLE;
             curr_bri -= step){
@@ -73,7 +73,7 @@ void *on_listen(){
     while(RUN_PARA.curr_state == ON_LISTEN){
         for(i=0;i<3 && RUN_PARA.curr_state == ON_LISTEN; i++){
             for (g=0; g < group && RUN_PARA.curr_state == ON_LISTEN; g++)
-                cAPA102_Set_Pixel_4byte(g*3+i, RUN_PARA.animation_color.listen);
+                cAPA102_Set_Pixel_4byte(g*3+i, remap_4byte(RUN_PARA.animation_color.listen, RUN_PARA.max_brightness));
             cAPA102_Refresh();
             delay_on_state(80, ON_LISTEN);
             cAPA102_Clear_All();
@@ -93,10 +93,10 @@ void *on_speak(){
     RUN_PARA.if_update = 0;
     cAPA102_Clear_All();
 
-    step = 255 / STEP_COUNT;
+    step = RUN_PARA.max_brightness / STEP_COUNT;
     while(RUN_PARA.curr_state == ON_SPEAK){
         for (curr_bri = 0;
-            curr_bri < 255 &&
+            curr_bri < RUN_PARA.max_brightness &&
             RUN_PARA.curr_state == ON_SPEAK;
             curr_bri += step){
             for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == ON_SPEAK; j++)
@@ -104,8 +104,8 @@ void *on_speak(){
             cAPA102_Refresh();
             delay_on_state(20, ON_SPEAK);
         }
-        curr_bri = 255;
-        for (curr_bri = 255;
+        curr_bri = RUN_PARA.max_brightness;
+        for (curr_bri = RUN_PARA.max_brightness;
             curr_bri > 0 &&
             RUN_PARA.curr_state == ON_SPEAK;
             curr_bri -= step){
@@ -131,15 +131,15 @@ void *to_mute(){
     RUN_PARA.if_update = 0;
     cAPA102_Clear_All();
 
-    step = 255 / STEP_COUNT;
-    for (curr_bri = 0; curr_bri < 255 && RUN_PARA.curr_state == TO_MUTE; curr_bri += step){
+    step = RUN_PARA.max_brightness / STEP_COUNT;
+    for (curr_bri = 0; curr_bri < RUN_PARA.max_brightness && RUN_PARA.curr_state == TO_MUTE; curr_bri += step){
         for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_MUTE; j++)
             cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.mute ,curr_bri));
         cAPA102_Refresh();
         delay_on_state(50, TO_MUTE);
     }
-    curr_bri = 255;
-    for (curr_bri = 255; curr_bri > 0 && RUN_PARA.curr_state == TO_MUTE; curr_bri -= step){
+    curr_bri = RUN_PARA.max_brightness;
+    for (curr_bri = RUN_PARA.max_brightness; curr_bri > 0 && RUN_PARA.curr_state == TO_MUTE; curr_bri -= step){
         for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_MUTE; j++)
             cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.mute ,curr_bri));
         cAPA102_Refresh();
@@ -164,15 +164,15 @@ void *to_unmute(){
     RUN_PARA.if_update = 0;
     cAPA102_Clear_All();
 
-    step = 255 / STEP_COUNT;
-    for (curr_bri = 0;curr_bri < 255 && RUN_PARA.curr_state == TO_UNMUTE; curr_bri += step){
+    step = RUN_PARA.max_brightness / STEP_COUNT;
+    for (curr_bri = 0;curr_bri < RUN_PARA.max_brightness && RUN_PARA.curr_state == TO_UNMUTE; curr_bri += step){
         for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_UNMUTE; j++)
             cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.unmute ,curr_bri));
         cAPA102_Refresh();
         delay_on_state(50, TO_UNMUTE);
     }
-    curr_bri = 255;
-    for (curr_bri = 255; curr_bri > 0 && RUN_PARA.curr_state == TO_UNMUTE; curr_bri -= step){
+    curr_bri = RUN_PARA.max_brightness;
+    for (curr_bri = RUN_PARA.max_brightness; curr_bri > 0 && RUN_PARA.curr_state == TO_UNMUTE; curr_bri -= step){
         for (j = 0; j < RUN_PARA.LEDs.number && RUN_PARA.curr_state == TO_UNMUTE; j++)
             cAPA102_Set_Pixel_4byte(j, remap_4byte(RUN_PARA.animation_color.unmute ,curr_bri));
         cAPA102_Refresh();

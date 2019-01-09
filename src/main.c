@@ -164,7 +164,7 @@ int main(int argc, char *argv[]){
     if ( -1 == cAPA102_Init(RUN_PARA.LEDs.number,
                             RUN_PARA.LEDs.spi_bus,
                             RUN_PARA.LEDs.spi_dev,
-                            RUN_PARA.max_brightness))
+                            GLOBAL_BRIGHTNESS))
         close_all(EXIT_FAILURE);
 
     if ( -1 == Init_Key( RUN_PARA.button.pin, short_press_handler, long_press_hadler ))

@@ -112,6 +112,8 @@ enum CONFIG_ENTITY{
 #define TEAL_C   0x00FFFF
 #define ORANGE_C 0xFF8000
 
+#define GLOBAL_BRIGHTNESS 31
+
 typedef struct{
     uint32_t idle;
     uint32_t listen;
