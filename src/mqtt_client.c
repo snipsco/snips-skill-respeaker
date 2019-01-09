@@ -154,12 +154,12 @@ static int match_site_id(const char *message){
         return 1;
 
     if(!strcmp(RUN_PARA.snips_site_id, rev_site_id->valuestring)){
-        verbose(VV_INFO, stdout, "Current site" GREEN " %s" NONE " / Received from site" GREEN " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
+        verbose(VVV_DEBUG, stdout, "Received from site" GREEN " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
         return 1;
     }
     else{
-        verbose(VV_INFO, stdout, "Current site" GREEN " %s" NONE " / Received from site" RED " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
+        verbose(VV_INFO, stdout, "Received from site" RED " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
         return 0;
     }

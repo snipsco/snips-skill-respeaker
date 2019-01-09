@@ -11,5 +11,4 @@ void *on_speak(void);
 void *to_mute(void);
 void *to_unmute(void);
 void *on_disabled(void);
-void delay_on_state(int ms, int state);
 #endif

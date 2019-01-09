@@ -36,7 +36,7 @@ void state_machine_update(void){
         verbose(VVV_DEBUG, stdout, "State is changed to %d", RUN_PARA.curr_state);
         // block until the previous terminate
         pthread_join(RUN_PARA.curr_thread,&ret_val);
-        verbose(VVV_DEBUG, stdout, "Previous thread %s terminated with success", (char*)ret_val);
+        verbose(VVV_DEBUG, stdout, "Previous thread "PURPLE"%s"NONE" terminated with success", (char*)ret_val);
         pthread_create(&RUN_PARA.curr_thread, NULL, state_functions[RUN_PARA.curr_state], NULL);
     }else{
         RUN_PARA.if_update = 0;
