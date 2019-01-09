@@ -99,6 +99,6 @@ static void print_usage(const char *prog){
 }
 
 static void print_version(void){
-    printf("snips-respeaker-skill version 0.5.1 \n");
+    printf("[%s] Version: %s Last update: %s \n", APP, VERSION, LAST_UPDATE);
     exit(1);
 }

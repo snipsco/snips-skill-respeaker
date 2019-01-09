@@ -11,6 +11,11 @@
 #include <pthread.h>
 #include <signal.h>
 
+#define APP "snips-led-animation"
+#define VERSION "1.3.1"
+#define LAST_UPDATE "JAN-09-2019"
+#define AUTHOR "KE FANG (SNIPS)"
+
 #define NUM_TOPIC       10
 #define HOT_ON          "hermes/hotword/toggleOn"
 #define HOT_OFF         "hermes/hotword/toggleOff"
