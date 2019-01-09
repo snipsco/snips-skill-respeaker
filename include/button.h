@@ -1,6 +1,7 @@
 #ifndef __BUTTON_H__
 #define __BUTTON_H__
 
+#define LONG_PRESS_SEC 2
 /**
  * @brief: Create a button from GPIO port
  *

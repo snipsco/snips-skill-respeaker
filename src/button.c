@@ -6,6 +6,8 @@
 #include <pthread.h>
 #include <time.h>
 
+extern SNIPS_RUN_PARA RUN_PARA;
+
 static uint8_t flag_long_press = 0;
 static uint8_t flag_short_press = 0;
 static uint8_t current_raw = 1;
@@ -32,13 +34,13 @@ static void Key_Status_Handler(void){
             start_time = curr_time;
             break;
         case 0b01: // released
-            if ((int)time_duration < 3)
+            if ((int)time_duration < LONG_PRESS_SEC)
                 flag_short_press = 1;
             time_duration = (time_t) 0;
             long_press_returned = 0;
             break;
         case 0b00: // still pressing
-            if ((int)time_duration > 3 && !long_press_returned){
+            if ((int)time_duration > LONG_PRESS_SEC && !long_press_returned){
                 flag_long_press = 1;
                 long_press_returned = 1;
             }
@@ -72,14 +74,16 @@ static void* Key_Status_Observer(void* mqtt_client){
         usleep(100000U);
         Key_Scan();
         if ( flag_long_press ) {
-            verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Button has been created on GPIO"PURPLE"LONG"NONE" detected", __FUNCTION__);
-            long_press_callback();
+            verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" "PURPLE"LONG"NONE" press is detected", __FUNCTION__);
+            if ( RUN_PARA.curr_state == ON_IDLE )
+                long_press_callback();
             flag_long_press = 0;
         }
 
         if ( flag_short_press ) {
-            verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Button has been created on GPIO"PURPLE"SHORT"NONE" detected", __FUNCTION__);
-            short_press_callback();
+            verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" "PURPLE"SHORT"NONE" press is detected", __FUNCTION__);
+            if ( RUN_PARA.curr_state == ON_IDLE )
+                short_press_callback();
             flag_short_press = 0;
         }
     }
