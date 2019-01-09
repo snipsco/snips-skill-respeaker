@@ -22,6 +22,6 @@
  *
  * @returns \-1 faild or \0 successful
  */
-int load_hw_spec_json(const char *hw_model);
+int load_hw_spec_json(void);
 
 #endif
