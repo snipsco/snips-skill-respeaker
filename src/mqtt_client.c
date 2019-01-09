@@ -124,7 +124,7 @@ static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *p
     memcpy(topic_name, published->topic_name, published->topic_name_size);
     topic_name[published->topic_name_size] = '\0';
 
-    verbose(VV_INFO, stdout, "[Receive] topic "PURPLE" %s "NONE, topic_name);
+    verbose(VVV_DEBUG, stdout, "[Receive] topic "PURPLE" %s "NONE, topic_name);
     //if(strcmp(topic_name, END_SAY))
     if (!match_site_id(published->application_message))
         return;
