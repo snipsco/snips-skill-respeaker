@@ -159,13 +159,14 @@ int main(int argc, char *argv[]){
                                  RUN_PARA.mqtt_pass))
         close_all(EXIT_FAILURE);
 
+    RUN_PARA.if_mute ? mqtt_mute_feedback() : mqtt_unmute_feedback();
+
     if ( -1 == cAPA102_Init(RUN_PARA.LEDs.number,
                             RUN_PARA.LEDs.spi_bus,
                             RUN_PARA.LEDs.spi_dev,
                             RUN_PARA.max_brightness))
         close_all(EXIT_FAILURE);
 
-    // test button
     if ( -1 == Init_Key( RUN_PARA.button.pin, short_press_handler, long_press_hadler ))
         close_all(EXIT_FAILURE);
 
