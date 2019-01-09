@@ -20,7 +20,8 @@ In general: Improve the performance base on the previous version, support more h
 - [ ] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control.
 - [x] support button press
 - [ ] separate version info to a file
-- [ ] feedback sound change animation should be able to be interrupt
+- [x] feedback sound change animation should be able to be interrupt
+- [ ] roll back the brightness setting
 
 ## Known Issue
 
