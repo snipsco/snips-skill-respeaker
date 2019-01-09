@@ -98,9 +98,14 @@ static void* Key_Status_Observer(void* mqtt_client){
  * @param[in] long_callback: callback function for a long press detection
  *
  * @returns: -1/ Error
- *            0/ Success
+ *            0/ No button pin
+ *            1/ Success
  */
 int Init_Key(int pin, void (*short_callback)(void), void (*long_callback)(void) ){
+    if ( pin == -1 ){
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no button", __FUNCTION__);
+        return 0;
+    }
     button_pin = pin;
 
     short_press_callback = short_callback;
@@ -130,9 +135,10 @@ int Init_Key(int pin, void (*short_callback)(void), void (*long_callback)(void) 
  *            0/ Success
  */
 int Destroy_Key(void){
-    if ( -1 != button_pin)
-        if ( -1 == GPIO_unexport(button_pin) )
-		      return -1;
+    if ( -1 == button_pin)
+        return 0;
+    if ( -1 == GPIO_unexport(button_pin) )
+	      return -1;
     if (key_status_observer_daemon)
         pthread_cancel(key_status_observer_daemon);
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Button has been released on GPIO"GREEN"%d"NONE, __FUNCTION__, button_pin);
