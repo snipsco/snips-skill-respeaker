@@ -144,7 +144,7 @@ int main(int argc, char *argv[]){
     parse_opts(argc, argv);
     signal(SIGINT, interrupt_handler);
 
-    if ( -1 == load_hw_spec_json(RUN_PARA.hardware_model))
+    if ( -1 == load_hw_spec_json())
         close_all(EXIT_FAILURE);
 
     if ( -1 == set_power_pin())
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]){
         close_all(EXIT_FAILURE);
 
     // test button
-    if ( -1 == Init_Key(17, short_press_handler, long_press_hadler))
+    if ( -1 == Init_Key( RUN_PARA.button.pin, short_press_handler, long_press_hadler ))
         close_all(EXIT_FAILURE);
 
     dump_running_info();

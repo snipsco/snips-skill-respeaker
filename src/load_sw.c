@@ -142,6 +142,9 @@ int load_sw_spec(void){
         parse_hour_minute(temp, &RUN_PARA.weak_hour, &RUN_PARA.weak_minute);
     }
 
+    if (!cCONFIG_Value_Is_True(C_FEEDBACK_SOUND))
+        RUN_PARA.if_mute = 0;
+
     cCONFIG_Delete_List();
     return 0;
 }
@@ -153,16 +156,25 @@ void debug_run_para_dump(void){
     verbose(VVV_DEBUG, stdout, "LED number :  %d", RUN_PARA.LEDs.number);
     verbose(VVV_DEBUG, stdout, "LED SPI BUS : %d", RUN_PARA.LEDs.spi_bus);
     verbose(VVV_DEBUG, stdout, "LED SPI DEV : %d", RUN_PARA.LEDs.spi_dev);
-    verbose(VVV_DEBUG, stdout, "Power PIN :   %d", RUN_PARA.power.pin);
-    verbose(VVV_DEBUG, stdout, "Power VAL :   %d", RUN_PARA.power.val);
+    if ( -1 != RUN_PARA.power.pin ) {
+        verbose(VVV_DEBUG, stdout, "Power PIN :   %d", RUN_PARA.power.pin);
+        verbose(VVV_DEBUG, stdout, "Power VAL :   %d", RUN_PARA.power.val);
+    }
+    if ( -1 != RUN_PARA.button.pin ) {
+        verbose(VVV_DEBUG, stdout, "Button PIN :   %d", RUN_PARA.button.pin);
+        verbose(VVV_DEBUG, stdout, "Button VAL :   %d", RUN_PARA.button.val);
+    }
+
     /* Brightness */
     verbose(VVV_DEBUG, stdout, "max_brightness : %d", RUN_PARA.max_brightness);
 
     /* MQTT connection */
     verbose(VVV_DEBUG, stdout, "mqtt_host : %s", RUN_PARA.mqtt_host);
     verbose(VVV_DEBUG, stdout, "mqtt_port : %s", RUN_PARA.mqtt_port);
-    verbose(VVV_DEBUG, stdout, "mqtt_user : %s", RUN_PARA.mqtt_user);
-    verbose(VVV_DEBUG, stdout, "mqtt_pass : %s", RUN_PARA.mqtt_pass);
+    if ( 0 != RUN_PARA.mqtt_user || 0 != RUN_PARA.mqtt_pass ) {
+        verbose(VVV_DEBUG, stdout, "mqtt_user : %s", RUN_PARA.mqtt_user);
+        verbose(VVV_DEBUG, stdout, "mqtt_pass : %s", RUN_PARA.mqtt_pass);
+    }
 
     /* SiteId */
     verbose(VVV_DEBUG, stdout, "site_id : %s", RUN_PARA.snips_site_id);
@@ -183,6 +195,9 @@ void debug_run_para_dump(void){
     verbose(VVV_DEBUG, stdout, "on_speak :  %s", RUN_PARA.animation_enable[ON_SPEAK] ? "true" : "false");
     verbose(VVV_DEBUG, stdout, "to_mute :   %s", RUN_PARA.animation_enable[TO_MUTE] ? "true" : "false");
     verbose(VVV_DEBUG, stdout, "to_unmute : %s", RUN_PARA.animation_enable[TO_UNMUTE] ? "true" : "false");
+
+    /* Feedback sound */
+    verbose(VVV_DEBUG, stdout, "if_mute_feedback sound : %s", RUN_PARA.if_mute ? "YES" : "NO");
 }
 
 void dump_running_info(void){
@@ -191,6 +206,13 @@ void dump_running_info(void){
     verbose(VV_INFO, stdout, "Brightness .......... %d", RUN_PARA.max_brightness);
     verbose(VV_INFO, stdout, "Device .............. %s", RUN_PARA.hardware_model);
     verbose(VV_INFO, stdout, "Nightmode ........... %s", RUN_PARA.if_sleepmode ? "Enabled": "Disabled");
+    verbose(VV_INFO, stdout, "Feedback Sound ...... %s", !RUN_PARA.if_mute ? "Enabled": "Disabled");
     verbose(VV_INFO, stdout, "MQTT Bus ............ %s:%s", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
+
+    if ( -1 != RUN_PARA.button.pin ) {
+        verbose(VV_INFO, stdout, "Button GPIO ......... %d", RUN_PARA.button.pin);
+        verbose(VV_INFO, stdout, "[Tips] Hit the button to start a new conversion. ");
+        verbose(VV_INFO, stdout, "[Tips] Hold the button to switch between mute/unmute the feedback sound ");
+    }
     verbose(VV_INFO, stdout, "Press CTRL-C to exit.");
 }

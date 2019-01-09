@@ -19,7 +19,7 @@ static pthread_t key_status_observer_daemon;
 void (*short_press_callback)(void);
 void (*long_press_callback)(void);
 
-static uint8_t button_pin;
+static int button_pin = -1;
 
 static void Key_Status_Handler(void){
     time_t curr_time;
@@ -96,7 +96,7 @@ static void* Key_Status_Observer(void* mqtt_client){
  * @returns: -1/ Error
  *            0/ Success
  */
-int Init_Key(uint8_t pin, void (*short_callback)(void), void (*long_callback)(void) ){
+int Init_Key(int pin, void (*short_callback)(void), void (*long_callback)(void) ){
     button_pin = pin;
 
     short_press_callback = short_callback;
@@ -126,8 +126,9 @@ int Init_Key(uint8_t pin, void (*short_callback)(void), void (*long_callback)(vo
  *            0/ Success
  */
 int Destroy_Key(void){
-    if ( -1 == GPIO_unexport(button_pin) )
-		return -1;
+    if ( -1 != button_pin)
+        if ( -1 == GPIO_unexport(button_pin) )
+		      return -1;
     if (key_status_observer_daemon)
         pthread_cancel(key_status_observer_daemon);
     verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Button has been released on GPIO"GREEN"%d"NONE, __FUNCTION__, button_pin);

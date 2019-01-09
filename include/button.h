@@ -11,7 +11,7 @@
  * @returns: -1/ Error
  *            0/ Success
  */
-int Init_Key(uint8_t pin, void (*short_callback)(void), void (*long_callback)(void) );
+int Init_Key(int pin, void (*short_callback)(void), void (*long_callback)(void) );
 
 /**
  * @brief: Release the GPIO port which is used for the button and kill the refreshing process

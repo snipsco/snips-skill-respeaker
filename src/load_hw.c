@@ -50,9 +50,51 @@ static int load_json_file(const char *_DIR, char *json_file_buffer){
 }
 
 /**
+ * @brief Load the button pin
+ *
+ * @returns -1\ Error
+ *           0\ No power pin config
+ *           1\ Success
+ */
+static int load_button_pin(cJSON *spec){
+    cJSON *pin = NULL;
+    cJSON *val = NULL;
+
+    cJSON *button_spec = cJSON_GetObjectItemCaseSensitive(spec, HW_BUTTON);
+    if (NULL == button_spec){
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" This model has no button pin", __FUNCTION__);
+        return 0;
+    }else{
+        pin = cJSON_GetObjectItemCaseSensitive(button_spec, HW_GPIO_PIN);
+        val = cJSON_GetObjectItemCaseSensitive(button_spec, HW_GPIO_VAL);
+        if (!cJSON_IsNumber(pin) || !cJSON_IsNumber(val)){
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Model has invalide button pin and val", __FUNCTION__);
+            return -1;
+        }
+
+        if (pin->valueint > 0)
+            RUN_PARA.button.pin = pin->valueint;
+        else{
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Model has invalide gpio_pin number", __FUNCTION__);
+            return -1;
+        }
+
+        if (val->valueint == 0 || val->valueint == 1)
+            RUN_PARA.button.val = val->valueint;
+        else{
+            verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Model has invalide gpio_val number (0,1)", __FUNCTION__);
+            return -1;
+        }
+        return 1;
+    }
+}
+
+/**
  * @brief Load the power pin
  *
- * @returns \-1 error or \0 no power pin config \1 successful
+ * @returns -1\ Error
+ *           0\ No power pin config
+ *           1\ Success
  */
 static int load_power_pin(cJSON *spec){
     cJSON *pin = NULL;
@@ -113,7 +155,7 @@ static int load_LEDs_spec(cJSON *spec){
     return 0;
 }
 
-int load_hw_spec_json(const char *hw_model){
+int load_hw_spec_json(void){
     char buffer[HW_SPEC_FILE_LEN];
     cJSON *hw_spec_model = NULL;
 
@@ -128,14 +170,16 @@ int load_hw_spec_json(const char *hw_model){
         return -1;
     }
 
-    hw_spec_model = cJSON_GetObjectItemCaseSensitive(hw_spec_json, hw_model);
+    hw_spec_model = cJSON_GetObjectItemCaseSensitive(hw_spec_json, RUN_PARA.hardware_model);
     if ( NULL == hw_spec_model){
-        verbose(V_NORMAL, stderr, "No hardware specification found for model: %s", hw_model);
+        verbose(V_NORMAL, stderr, "No hardware specification found for model: %s", RUN_PARA.hardware_model);
         return -1;
     }
-    if (-1 == load_LEDs_spec(hw_spec_model))
+    if ( -1 == load_LEDs_spec(hw_spec_model) )
         return -1;
-    if (-1 == load_power_pin(hw_spec_model))
+    if ( -1 == load_power_pin(hw_spec_model) )
+        return -1;
+    if ( -1 == load_button_pin(hw_spec_model) )
         return -1;
 
     cJSON_Delete(hw_spec_json);
