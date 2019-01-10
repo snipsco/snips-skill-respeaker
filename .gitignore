@@ -3,3 +3,4 @@ action-app_respeaker
 .ftpconfig
 .ftpignore
 test/
+hardware_specs/custom_*.json

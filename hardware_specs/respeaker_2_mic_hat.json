@@ -1,0 +1,9 @@
+{
+    "led_num":3,
+    "spi_bus":0,
+    "spi_dev":0,
+    "button":{
+        "gpio_pin":17,
+        "gpio_val":0
+    }
+}
