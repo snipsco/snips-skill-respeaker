@@ -24,7 +24,7 @@ unmute_colour=green
 # Nightmode (24h)
 nightmode=true
 go_sleep=22:15
-go_weak=8:35
+go_wake=8:35
 
 # Default feedback sound
 feedback_sound=true

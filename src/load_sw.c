@@ -139,7 +139,7 @@ int load_sw_spec(void){
         temp = cCONFIG_Value_Raw(C_GO_SLEEP_STR);
         parse_hour_minute(temp, &RUN_PARA.sleep_hour, &RUN_PARA.sleep_minute);
         temp = cCONFIG_Value_Raw(C_GO_WEAK_STR);
-        parse_hour_minute(temp, &RUN_PARA.weak_hour, &RUN_PARA.weak_minute);
+        parse_hour_minute(temp, &RUN_PARA.wake_hour, &RUN_PARA.wake_minute);
     }
 
     if ( 1 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR))

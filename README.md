@@ -20,13 +20,9 @@ In general: Improve the performance base on the previous version, support more h
 - [x] support button press
 - [x] feedback sound change animation should be able to be interrupt
 - [x] roll back the brightness setting
-- [ ] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control.
+- [x] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control.
 - [ ] separate version info to a file
 - [ ] auto detection of the hardware by `setup.sh`
-
-## Known Issue
-
-- If using the global current method to set the led brightness, it does not work under some certain condition. Better to limit the PWM value but the static current control.
 
 ## Support
 
@@ -138,7 +134,7 @@ These configuration options are written in `config.ini` file. Please refer to yo
 | --- | --- | --- | --- |
 | `nightmode` | If enable night mode | `true` , `false` | `true` |
 | `go_sleep` | The time when it sleep | `HH:MM` (24h) | `22:15` |
-| `go_weak` | The time when it weak up | `HH:MM` (24h) | `8:35` |
+| `go_wake` | The time when it wake up | `HH:MM` (24h) | `8:35` |
 
 > ***To be able to use this function, please properly set your timezone***
 >

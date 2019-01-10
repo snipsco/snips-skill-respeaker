@@ -119,8 +119,8 @@ void check_nightmode(void){
         RUN_PARA.if_update = 1;
         verbose(VV_INFO, stdout, "Nightmode started");
     }
-    if(read_time->tm_hour == RUN_PARA.weak_hour &&
-        read_time->tm_min == RUN_PARA.weak_minute &&
+    if(read_time->tm_hour == RUN_PARA.wake_hour &&
+        read_time->tm_min == RUN_PARA.wake_minute &&
         RUN_PARA.curr_state == ON_DISABLED){
         RUN_PARA.curr_state = ON_IDLE;
         RUN_PARA.if_update = 1;

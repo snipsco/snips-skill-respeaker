@@ -66,7 +66,7 @@ typedef enum {
 #define C_UNMUTE_COLOUR_STR     "unmute_colour"
 #define C_NIGHTMODE_STR         "nightmode"
 #define C_GO_SLEEP_STR          "go_sleep"
-#define C_GO_WEAK_STR           "go_weak"
+#define C_GO_WEAK_STR           "go_wake"
 #define C_ON_DISABLED_STR       "on_disabled"
 #define C_SITE_ID_STR           "site_id"
 #define C_FEEDBACK_SOUND_STR    "feedback_sound"
@@ -164,8 +164,8 @@ typedef struct{
     /* Sleep mode */
     uint8_t sleep_hour;
     uint8_t sleep_minute;
-    uint8_t weak_hour;
-    uint8_t weak_minute;
+    uint8_t wake_hour;
+    uint8_t wake_minute;
 
     /* Flags */
     volatile sig_atomic_t   if_terminate;
