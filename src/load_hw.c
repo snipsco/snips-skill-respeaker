@@ -29,6 +29,7 @@ static int load_json_file(const char *_DIR, char *json_file_buffer){
     FILE * pFILE;
     char temp;
     int count = 0;
+    verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" Opening file: %s ", __FUNCTION__, _DIR);
     pFILE = fopen(_DIR, "r");
     if (NULL == pFILE){
         verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Can not load "HW_SPEC_FILE" ", __FUNCTION__);
@@ -156,21 +157,16 @@ static int load_LEDs_spec(cJSON *spec){
 }
 
 int load_hw_spec_json(void){
+    char dir_buffer[HW_SPEC_NAME_LEN];
     char buffer[HW_SPEC_FILE_LEN];
     cJSON *hw_spec_model = NULL;
 
-    if(-1 == load_json_file(HW_SPEC_FILE, buffer))
+    sprintf(dir_buffer, HW_SPEC_FILE, RUN_PARA.hardware_model);
+
+    if(-1 == load_json_file(dir_buffer, buffer))
         return -1;
 
-    cJSON *hw_spec_json = cJSON_Parse(buffer);
-    if (hw_spec_json == NULL){
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL)
-            verbose(V_NORMAL, stderr, "from parsing message : %s", error_ptr);
-        return -1;
-    }
-
-    hw_spec_model = cJSON_GetObjectItemCaseSensitive(hw_spec_json, RUN_PARA.hardware_model);
+    hw_spec_model = cJSON_Parse(buffer);
     if ( NULL == hw_spec_model){
         verbose(V_NORMAL, stderr, "No hardware specification found for model: %s", RUN_PARA.hardware_model);
         return -1;
@@ -182,6 +178,6 @@ int load_hw_spec_json(void){
     if ( -1 == load_button_pin(hw_spec_model) )
         return -1;
 
-    cJSON_Delete(hw_spec_json);
+    cJSON_Delete(hw_spec_model);
     return 0;
 }

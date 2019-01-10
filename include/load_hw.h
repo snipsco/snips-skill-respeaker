@@ -4,8 +4,9 @@
 #include <common.h>
 
 #define HW_SPEC_FILE_LEN 2048
+#define HW_SPEC_NAME_LEN 1024
 
-#define HW_SPEC_FILE   "hw_spec.json"
+#define HW_SPEC_FILE   "./hardware_specs/%s.json"
 
 #define HW_LED_NUM     "led_num"
 #define HW_LED_SPI_BUS "spi_bus"
