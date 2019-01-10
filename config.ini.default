@@ -1,11 +1,21 @@
-[static]
-config_ver=0.2
+[secret]
+# MQTT
+mqtt_host=localhost
+mqtt_port=1883
+#mqtt_username=
+#mqtt_password=
+
+# Device Info
+site_id=default
 
 [global]
 # Hardware Info
 model=respeaker_2_mic_hat
 #model=respeaker_4_mic_hat
 #model=respeaker_core_v2
+
+# Brightness Range 0,255
+led_bri=63
 
 # Animation
 on_idle=true
@@ -29,15 +39,5 @@ go_wake=8:35
 # Default feedback sound
 feedback_sound=true
 
-[secret]
-# MQTT
-mqtt_host=localhost
-mqtt_port=1883
-#mqtt_username=
-#mqtt_password=
-
-# Device Info
-site_id=default
-
-# Brightness Range 0,255
-led_bri=63
+[static]
+config_ver=0.2
