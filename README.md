@@ -2,7 +2,9 @@
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 
-This skill controls the RGB LED on the respeaker mic hat.
+![Version](https://img.shields.io/badge/snips--led--animation-v1.5.3-blue.svg)
+
+This skill controls
 
 ## TO DO LIST FOR 0.52 Version
 
@@ -32,6 +34,8 @@ In general: Improve the performance base on the previous version, support more h
 
 ## Features
 
+### LED Animations
+
 :rocket: ***``` On idle: random led breathe in green```***
 
 :smiley: ***```On listen: all leds start to blink in blue```***
@@ -44,6 +48,12 @@ In general: Improve the performance base on the previous version, support more h
 
 :zzz: ***```On disabled: all leds turn off```***
 
+### Button
+
+:star: ***``` Short press: start a new conversion without saying hotword```***
+
+:star2: ***``` Long press: toggle the sound feedback```***
+
 ## Installation
 
 #### By using `sam`:
@@ -54,6 +64,20 @@ sam install actions -g https://github.com/snipsco/snips-skill-respeaker.git
 
 #### Manually:
 
+Firstly, add your current user to the `snips-skills-admin` group:
+
+```bash
+sudo usermod -a -G snips-skills-admin $USER
+```
+
+Secondly, add `_snips-skills` user to the `spi`, `gpio`, `audio` groups:
+
+```bash
+sudo usermod -a -G spi,gpio,audio _snips-skills
+```
+
+Finally, clone the repository and manually run `setup.sh`:
+
 ```bash
 git clone  https://github.com/snipsco/snips-skill-respeaker.git
 cp -r snips-skill-respeaker /var/lib/snips/skills/
@@ -61,29 +85,15 @@ cd /var/lib/snips/skills/snips-skill-respeaker
 ./setup.sh
 ```
 
-If you didn't use Sam to setup Snips platform and skills, and you wish the skill to be run by `snips-skill-server`, you need to add privileges to the `_snips-skills` user:
-
-```bash
-sudo usermod -a -G spi,gpio,audio _snips-skills
-```
-
-Also add your current user to the `snips-skills-admin` group:
-```bash
-sudo usermod -a -G snips-skills-admin $USER
-```
 ## Configurations
 
-These configuration options are written in `config.ini` file. Please refer to your actual usage to modify.
+All the configuration options are written in `config.ini` file. There are three sections used to represent three different kinds of parameters. Please refer to your actual usage to modify.
 
-### Hardware Info
+### [secret]
 
-| Config | Description | Value | Default |
-| --- | --- | --- | --- |
-| `model` | Current hardware platform | `rpi_*` , `rsp_corev2` | `rpi_*` |
-| `spi_dev` | SPI bus number and device number | Refering to the actual bus | `0:0` |
-| `led_num` | Number of LEDs | `0`:`255` | `3` |
+This section contains the options which will be asked to input from user during the installation. (Using sam)
 
-### Device Info
+#### Device Info
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
@@ -91,44 +101,56 @@ These configuration options are written in `config.ini` file. Please refer to yo
 
 > ***To make satellite work correctly, please change here***
 
-### MQTT
+#### MQTT
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
 | `mqtt_host` | MQTT host name | `<ip address>`/`<hostname>` | `localhost` |
 | `mqtt_port` | MQTT port number | `<mqtt port>` | `1883` |
-| `mqtt_username` | MQTT username | `<mqtt username>` | `null` |
-| `mqtt_password` | MQTT password | `<mqtt password>` | `null` |
+| `mqtt_username` | *Optional* - MQTT username | `<mqtt username>` | `null` |
+| `mqtt_password` | *Optional* - MQTT password | `<mqtt password>` | `null` |
 
 > ***To make satellite work correctly, please change here***
 
-### Brightness
+### [global]
+
+This section contains all the changeable options which may make the action more suit your expectation.
+
+#### Hardware Info
+
+| Config | Description | Value | Default |
+| --- | --- | --- | --- |
+| `model` | Hardware specification file name | Refering to the [hardware_specs](https://github.com/snipsco/snips-skill-respeaker/tree/master/hardware_specs) list | `respeaker_2_mic_hat` |
+
+If you would like to use an APA102 LEDs strip or an external button, please reach [here]() to create your own hardware configuration file.
+
+#### Brightness
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
 | `led_bri` | Max brightness of LEDs | `0`:`255` | `64` |
 
-### Colour
+#### Animation
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
-| `idle_colour` | Colour while idle | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
-| `listen_colour` | Colour while listening | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `blue` |
-| `speak_colour` | Colour while speaking | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `purple` |
-| `mute_colour` | Colour while muting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `yellow` |
-| `unmute_colour` | Colour while unmuting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
+| `on_idle` | Random LED breathe in green | `true` , `false` | `true` |
+| `on_listen` | All LEDs start to blink in blue | `true` , `false` | `true` |
+| `on_speak` | All LEDs start to breathe in purple | `true` , `false` | `true` |
+| `to_mute` | All LEDs breathe once in orange | `true` , `false` | `true` |
+| `to_unmute` | All LEDs breathe once in green | `true` , `false` | `true` |
 
-### Animation
+#### Colour
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
-| `on_idle` | Random led breathe in green | `true` , `false` | `true` |
-| `on_listen` | All leds start to blink in blue | `true` , `false` | `true` |
-| `on_speak` | All leds start to breathe in purple | `true` , `false` | `true` |
-| `to_mute` | All leds breathe once in orange | `true` , `false` | `true` |
-| `to_unmute` | All leds breathe once in green | `true` , `false` | `true` |
+| `idle_colour` | LEDs colour while idle | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
+| `listen_colour` | LEDs colour while listening | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `blue` |
+| `speak_colour` | LEDs colour while speaking | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `purple` |
+| `mute_colour` | LEDs colour while muting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `yellow` |
+| `unmute_colour` | LEDs colour while unmuting | `red` , `green` , `blue` , `yellow` , `purple` , `teal` , `orange` | `green` |
 
-### Nightmode
+#### Nightmode
 
 | Config | Description | Value | Default |
 | --- | --- | --- | --- |
@@ -139,6 +161,20 @@ These configuration options are written in `config.ini` file. Please refer to yo
 > ***To be able to use this function, please properly set your timezone***
 >
 > ***Timezone setting: `sudo raspi-config` -> `Localisation Options` -> `Change Timezone`***
+
+#### Default feedback sound
+
+| Config | Description | Value | Default |
+| --- | --- | --- | --- |
+| `feedback_sound` | If enable the feedback sound by default | `true`:`false` | `true` |
+
+### [static]
+
+This section only contains one option, `config_ver`, which is used to track the config file version. **You are not supposed to change this value at any time.**
+
+A general update will work based the old `config.ini` without any problem if there is not change required for adding new config options. But this also means that the config entities might be changed at some point. During the installation/updating, `setup.sh` will always check if the old config file meets the latest requirement. If it doesn't, a new default config will be copied as the user `conig.ini`. The old config information will be dropped.
+
+In this case, please do make sure that you need to re-modify the options' value after the installation/updating.
 
 ## LED feedback Enable/Disable mode
 
