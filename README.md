@@ -17,11 +17,12 @@ In general: Improve the performance base on the previous version, support more h
 - [x] try new SPI buffer writing (Could improve the steability if there are many leds)
 - [x] redefine the colour and brightness, the brightness should be separated from colour. Colour information should be modified by user, so consider to save it in a Json file instead.
 - [x] add verbose/debug mode
-- [ ] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control.
 - [x] support button press
-- [ ] separate version info to a file
 - [x] feedback sound change animation should be able to be interrupt
-- [ ] roll back the brightness setting
+- [x] roll back the brightness setting
+- [ ] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control.
+- [ ] separate version info to a file
+- [ ] auto detection of the hardware by `setup.sh`
 
 ## Known Issue
 
