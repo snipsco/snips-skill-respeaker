@@ -38,6 +38,8 @@ User are not only expected to attach a ReSpeaker Hat as the hardware, but also t
 | **Raspberry Pi 3+**       |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
 | **ReSpeaker Core V2**     |  :heavy_minus_sign: | :heavy_minus_sign: | :white_check_mark:   |
 
+> Known Issue: the button on the ReSpeaker Core V2 is not yet supported due to its special accessing design
+
 > If you would like to customise the hardware, please refer to [Build Your Own Hardware](https://github.com/snipsco/snips-skill-respeaker/tree/master#build-your-own-hardware) section.
 
 ## Installation
@@ -236,6 +238,33 @@ Relaunch `snips-skill-server`
 
 ```
 sudo systemctl restart snips-skill-server
+```
+
+## Command Line Mode
+
+If you would like to debug your hardware configuration, you can run the animation program with command line parameters. CMD input parameters will have higher priority than the parameters in the `config.ini` file, the missing parameters will be fetched from the `config.ini` file.
+
+```
+Usage: ./action-led_animation_x <options> command
+
+Global options:
+  -H, --help         this help
+  -d, --debug        debug mode
+  -v, --verbose      enable verbose mode
+  -V, --version      print version of this program
+
+MQTT connection options:
+  -h, --mqtt-host    hostname of mqtt broker (default localhost)
+  -p, --mqtt-port    port of mqtt broker (default 1883)
+  -P, --mqtt-pass    password of mqtt broker
+  -U, --mqtt-user    username of mqtt broker
+
+APA102 LED options:
+  -N, --led-n        number of leds
+  -D, --spi-dev      spi device to use (default /dev/spidev0.0)
+
+Snips device info:
+  -S, --site-id      siteId to use (default default)
 ```
 
 ## Enable/Disable LED feedback
