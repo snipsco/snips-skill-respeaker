@@ -2,7 +2,7 @@
 
 DEFAULT_CONFIG_FILE="./config.ini.default"
 CONFIG_FILE="./config.ini"
-ACTION_FILE="./action-app_respeaker"
+ACTION_FILE="./action-led_animation_*"
 
 # read a option value by its key from config.ini
 function ReadINIfile()
@@ -57,4 +57,4 @@ else
     echo "Setup Failed!"
 fi
 
-./action-app_respeaker --version
+./action-led_animation_* --version

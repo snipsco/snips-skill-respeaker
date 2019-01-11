@@ -1,7 +1,6 @@
 # snips-skill-respeaker
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
-
 ![Version](https://img.shields.io/badge/snips--led--animation-v1.5.3-blue.svg)
 
 This skill controls
@@ -26,11 +25,14 @@ In general: Improve the performance base on the previous version, support more h
 - [ ] separate version info to a file
 - [ ] auto detection of the hardware by `setup.sh`
 
-## Support
+## Official Hardware Support
 
-![RPi 0](https://img.shields.io/badge/RPi%200-success-brightgreen.svg)
-![RPi 3](https://img.shields.io/badge/RPi%203-success-brightgreen.svg)
-![respeaker core v2](https://img.shields.io/badge/respeaker%20core%20v2-success-brightgreen.svg)
+| Platform / ReSpeaker      | ReSpeaker 2Mic Hat  | ReSpeaker 4Mic Hat | ReSpeaker Core V2    |
+| :---:                     | :---:               | :---:              | :---:                |
+| **Raspberry Pi Zero**     |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
+| **Raspberry Pi 3**        |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
+| **Raspberry Pi 3+**       |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
+| **ReSpeaker Core V2**     |  :heavy_minus_sign: | :heavy_minus_sign: | :white_check_mark:   |
 
 ## Features
 
@@ -89,7 +91,7 @@ cd /var/lib/snips/skills/snips-skill-respeaker
 
 All the configuration options are written in `config.ini` file. There are three sections used to represent three different kinds of parameters. Please refer to your actual usage to modify.
 
-### [secret]
+### `[secret]`
 
 This section contains the options which will be asked to input from user during the installation. (Using sam)
 
@@ -112,7 +114,7 @@ This section contains the options which will be asked to input from user during 
 
 > ***To make satellite work correctly, please change here***
 
-### [global]
+### `[global]`
 
 This section contains all the changeable options which may make the action more suit your expectation.
 
@@ -168,7 +170,7 @@ If you would like to use an APA102 LEDs strip or an external button, please reac
 | --- | --- | --- | --- |
 | `feedback_sound` | If enable the feedback sound by default | `true`:`false` | `true` |
 
-### [static]
+### `[static]`
 
 This section only contains one option, `config_ver`, which is used to track the config file version. **You are not supposed to change this value at any time.**
 

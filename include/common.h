@@ -12,8 +12,8 @@
 #include <signal.h>
 
 #define APP "snips-led-animation"
-#define VERSION "1.3.1"
-#define LAST_UPDATE "JAN-09-2019"
+#define VERSION "1.5.0"
+#define LAST_UPDATE "JAN-11-2019"
 #define AUTHOR "KE FANG (SNIPS)"
 
 #define NUM_TOPIC       10
