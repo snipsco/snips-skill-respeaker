@@ -32,11 +32,11 @@ fi
 
 NEXT_NEW_VERSION="${SPLIT_VERSION[0]}.${SPLIT_VERSION[1]}.${SPLIT_VERSION[2]}"
 
-perl -p -i -e "s/^#define VERSION \".*\"\$/#define VERSION \"$NEW_VERSION\"/g" ../include/common.h
+perl -p -i -e "s/^#define VERSION \".*\"\$/#define VERSION \"$NEXT_NEW_VERSION\"/g" ../include/common.h
 perl -p -i -e "s/^#define LAST_UPDATE \".*\"\$/#define LAST_UPDATE \"$TIME\"/g" ../include/common.h
 
-perl -p -i -e "s/^snips--led--animation-v.*-blue.svg\$/snips--led--animation-v$NEW_VERSION-blue.svg/g" ../README.md
+perl -p -i -e "s/snips--led--animation-v.*-blue.svg/snips--led--animation-v$NEXT_NEW_VERSION-blue.svg/g" ../README.md
 
-perl -p -i -e "s/^APP = action-led_animation_.*\$/APP = action-led_animation_$NEW_VERSION/g" ../makefile
+perl -p -i -e "s/^APP = action-led_animation_.*\$/APP = action-led_animation_$NEXT_NEW_VERSION/g" ../makefile
 
 echo -e "New version bumped to \033[1;32;32m$NEXT_NEW_VERSION\033[m"
