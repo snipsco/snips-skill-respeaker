@@ -11,8 +11,6 @@ site_id=default
 [global]
 # Hardware Info
 model=respeaker_2_mic_hat
-#model=respeaker_4_mic_hat
-#model=respeaker_core_v2
 
 # Brightness Range 0,255
 led_bri=63

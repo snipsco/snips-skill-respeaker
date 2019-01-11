@@ -22,8 +22,8 @@ In general: Improve the performance base on the previous version, support more h
 - [x] feedback sound change animation should be able to be interrupt
 - [x] roll back the brightness setting
 - [x] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control.
-- [ ] separate version info to a file
-- [ ] auto detection of the hardware by `setup.sh`
+- [x] separate version info to a file
+- [x] auto detection of the hardware by `setup.sh`
 
 ## Official Hardware Support
 
