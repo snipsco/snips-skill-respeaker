@@ -5,3 +5,4 @@ action-led_animation*
 .ftpignore
 test/
 hardware_specs/custom_*.json
+dev_diary.md

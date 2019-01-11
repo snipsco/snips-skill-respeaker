@@ -1,52 +1,25 @@
 # snips-skill-respeaker
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 ![Version](https://img.shields.io/badge/snips--led--animation-v1.5.3-blue.svg)
 
-This skill controls
+This action code animates RGB LEDs and controls button as a human interface for Snips Voice Platform.
 
-## TO DO LIST FOR 0.52 Version
-
-In general: Improve the performance base on the previous version, support more hardware. (respeaker 4 mic hat)
-
-- [x] separate mqtt client setup from `main.c`
-- [x] add hardware config file
-- [x] support gpio operatings through file system
-- [x] change to `cJSON` for parsing json string
-- [x] improve the command line parameter input
-- [x] improve to a better config extract structure
-- [x] try new SPI buffer writing (Could improve the steability if there are many leds)
-- [x] redefine the colour and brightness, the brightness should be separated from colour. Colour information should be modified by user, so consider to save it in a Json file instead.
-- [x] add verbose/debug mode
-- [x] support button press
-- [x] feedback sound change animation should be able to be interrupt
-- [x] roll back the brightness setting
-- [x] consider the upgrading on `config.ini` and `hw_spec.json` file (should be able to both keep user's data and get new options) This should also be considered as version control.
-- [x] separate version info to a file
-- [x] auto detection of the hardware by `setup.sh`
-
-## Official Hardware Support
-
-| Platform / ReSpeaker      | ReSpeaker 2Mic Hat  | ReSpeaker 4Mic Hat | ReSpeaker Core V2    |
-| :---:                     | :---:               | :---:              | :---:                |
-| **Raspberry Pi Zero**     |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
-| **Raspberry Pi 3**        |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
-| **Raspberry Pi 3+**       |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
-| **ReSpeaker Core V2**     |  :heavy_minus_sign: | :heavy_minus_sign: | :white_check_mark:   |
+User are not only expected to attach a ReSpeaker Hat as the hardware, but also a customised RGB LED (APA102) strip and button are also supported.
 
 ## Features
 
 ### LED Animations
 
-:rocket: ***``` On idle: random led breathe in green```***
+:bulb: ***``` On idle: random led breathe in green```***
 
-:smiley: ***```On listen: all leds start to blink in blue```***
+:hourglass_flowing_sand: ***```On listen: all leds start to blink in blue```***
 
 :loudspeaker: ***```On speak: all leds start to breathe in purple```***
 
-:speak_no_evil: ***```To mute: all leds breathe once in yellow```***
+:mute: ***```To mute: all leds breathe once in yellow```***
 
-:smile_cat: ***```To unmute: all leds breathe once in green```***
+:sound: ***```To unmute: all leds breathe once in green```***
 
 :zzz: ***```On disabled: all leds turn off```***
 
@@ -55,6 +28,17 @@ In general: Improve the performance base on the previous version, support more h
 :star: ***``` Short press: start a new conversion without saying hotword```***
 
 :star2: ***``` Long press: toggle the sound feedback```***
+
+## Official Hardware Support
+
+| Platforms / ReSpeakers      | ReSpeaker 2Mic Hat  | ReSpeaker 4Mic Hat | ReSpeaker Core V2    |
+| :---:                     | :---:               | :---:              | :---:                |
+| **Raspberry Pi 0**     |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
+| **Raspberry Pi 3**        |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
+| **Raspberry Pi 3+**       |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
+| **ReSpeaker Core V2**     |  :heavy_minus_sign: | :heavy_minus_sign: | :white_check_mark:   |
+
+> If you would like to customise the hardware, please refer to [Build Your Own Hardware](https://github.com/snipsco/snips-skill-respeaker/tree/master#build-your-own-hardware) section.
 
 ## Installation
 
@@ -172,13 +156,89 @@ If you would like to use an APA102 LEDs strip or an external button, please reac
 
 ### `[static]`
 
-This section only contains one option, `config_ver`, which is used to track the config file version. **You are not supposed to change this value at any time.**
+This section only contains one option, `config_ver`, which is used to track the `config.ini` file version. **You are not supposed to change this value at any time.**
 
-A general update will work based the old `config.ini` without any problem if there is not change required for adding new config options. But this also means that the config entities might be changed at some point. During the installation/updating, `setup.sh` will always check if the old config file meets the latest requirement. If it doesn't, a new default config will be copied as the user `conig.ini`. The old config information will be dropped.
+A general update will work basing the old `config.ini` without any problem if there is no change required for adding new config options. But this also means that the config entities might be changed at some point. During the installation/updating, `setup.sh` will always check if the old `config.ini` file meets the latest requirement. If it doesn't, it will be overwrote by a new default config. The old config information will be dropped.
 
-In this case, please do make sure that you need to re-modify the options' value after the installation/updating.
+In this case, please do make sure that you have to re-modify the options' value after the installation/updating if needed.
 
-## LED feedback Enable/Disable mode
+## Build Your Own Hardware
+
+If you would like to have a customised setup, a APA102 IC based RGB LED strip will be needed. (ws2812 will be supported in the future)
+
+### Step 1
+
+Create a file under `hardware_specs` folder, name it with the `custom_` as prefix and end with `.json`:
+```
+cd hardware_specs
+touch custom_<YOUR_HW_CONFIG_NAME>.json
+```
+
+Name this file in the correct way will prevent it being tracked by `git` tool, so that the update will not overwrite this specification file.
+
+### Step 2
+
+Fill this file with a json formate specification. This json file should contain the following attributes:
+
+##### Specification Json
+
+| Key | Type | Value |
+| --- | --- | --- |
+| `led_num` | Integer | Number of LEDs |
+| `spi_bus` | Integer | SPI bus number |
+| `spi_dev` | Integer | SPI device number |
+| `power` | Object | *Optional* - See below |
+| `button` | Object | *Optional* - See below |
+
+##### Power Specs
+
+If your LED strip has a power control, specify the GPIO that uses.
+
+| Key | Type | Value |
+| --- | --- | --- |
+| `gpio_pin` | Integer | Number of the GPIO port |
+| `gpio_val` | Integer | Output level, `1` for high and `0` for low |
+
+##### Button Specs
+
+If you have a button connected, specify the GPIO that uses.
+
+| Key | Type | Value |
+| --- | --- | --- |
+| `gpio_pin` | Integer | Number of the GPIO port |
+| `gpio_val` | Integer | Active level, `1` for high and `0` for low |
+
+If you have a 24 LED strip with a power control on GPIO5, and you would also have a button connected to GPIO17, the following is an example that you need to put to the specification file:
+
+```json
+{
+    "led_num":24,
+    "spi_bus":0,
+    "spi_dev":0,
+    "power":{
+        "gpio_pin":5,
+        "gpio_val":1
+    },
+    "button":{
+        "gpio_pin":17,
+        "gpio_val":0
+    }
+}
+```
+
+### Step 3
+
+Change the `config.ini`, find the key `model`, give your hardware specification file name with out `.json`.
+
+### Step 4
+
+Relaunch `snips-skill-server`
+
+```
+sudo systemctl restart snips-skill-server
+```
+
+## Enable/Disable LED feedback
 
 Mode change follows hermes procotol.
 
