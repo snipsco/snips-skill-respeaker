@@ -2,7 +2,7 @@
 
 DEFAULT_CONFIG_FILE="./config.ini.default"
 CONFIG_FILE="./config.ini"
-ACTION_FILE="./action-led_animation_*"
+ACTION_FILE=$(ls action-* 2> /dev/null | wc -l)
 
 # auto detect hardware
 R=`arecord -l | grep "seeed" | sed 's/.*seeed-\([0-9]*\)mic-voicecard.*/\1/g'`
@@ -49,11 +49,11 @@ else
     fi
 fi
 
-echo -e "\033[1;32;34m[*]\033[m Cleaning... \c"
 # check if the old compiled file is outputed
-if [ -e $ACTION_FILE ]
+if [ "$ACTION_FILE" != "0" ]
 then
-    make clean
+    echo -e "\033[1;32;34m[*]\033[m Cleaning... "
+    rm action-*
 fi
 
 echo -e "\033[1;32;34m[*]\033[m Compiling... "
@@ -64,8 +64,9 @@ make all
 
 echo -e "\033[1;32;34m==============================\033[m"
 
+ACTION_FILE=$(ls action-* 2> /dev/null | wc -l)
 # check if the compiled file is outputed
-if [ -e $ACTION_FILE ]
+if [ "$ACTION_FILE" != "0" ]
 then
     echo -e "\033[1;32;34m[*]\033[m Setup Success!"
 	echo -e "\033[1;32;34m[*]\033[m \c"

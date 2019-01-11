@@ -22,7 +22,7 @@ SOURCES = src/mqtt.c\
           src/verbose.c\
 		  src/button.c
 
-APP = action-led_animation_1.5.0
+APP = action-led_animation_1.5.4
 
 all: $(APP)
 
@@ -30,4 +30,4 @@ $(APP): src/main.c $(SOURCES)
 	$(CC) $(CFLAGS) $^ -lpthread -o $@
 
 clean:
-	rm $(APP)
+	rm action-*

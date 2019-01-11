@@ -12,8 +12,8 @@
 #include <signal.h>
 
 #define APP "snips-led-animation"
-#define VERSION "1.5.0"
-#define LAST_UPDATE "JAN-11-2019"
+#define VERSION "1.5.4"
+#define LAST_UPDATE "Jan-11-2019"
 #define AUTHOR "KE FANG (SNIPS)"
 
 #define NUM_TOPIC       10
@@ -45,10 +45,7 @@ typedef enum {
     ON_DISABLED
 }STATE;
 
-#define CONFIG_NUM              23
 #define C_MODEL_STR             "model"
-#define C_SPI_DEV_STR           "spi_dev"
-#define C_LED_NUM_STR           "led_num"
 #define C_LED_BRI_STR           "led_bri"
 #define C_MQTT_HOST_STR         "mqtt_host"
 #define C_MQTT_PORT_STR         "mqtt_port"
@@ -71,36 +68,7 @@ typedef enum {
 #define C_SITE_ID_STR           "site_id"
 #define C_FEEDBACK_SOUND_STR    "feedback_sound"
 
-enum CONFIG_ENTITY{
-    C_MODEL = 0,
-    C_SPI_DEV,
-    C_LED_NUM,
-    C_LED_BRI,
-    C_MQTT_HOST,
-    C_MQTT_PORT,
-    C_MQTT_USER,
-    C_MQTT_PASS,
-    C_ON_IDLE,
-    C_ON_LISTEN,
-    C_ON_SPEAK,
-    C_TO_MUTE,
-    C_TO_UNMUTE,
-    C_IDLE_COLOUR,
-    C_LISTEN_COLOUR,
-    C_SPEAK_COLOUR,
-    C_MUTE_COLOUR,
-    C_UNMUTE_COLOUR,
-    C_NIGHTMODE,
-    C_GO_SLEEP,
-    C_GO_WEAK,
-    C_ON_DISABLED,
-    C_SITE_ID
-};
-
-#define TRUE_S    "true"
-#define FALSE_S   "false"
-
-#define CONFIG_FILE    "config.ini"
+#define CONFIG_FILE "config.ini"
 
 #define CLIENT_ID_LEN 10
 
