@@ -167,7 +167,7 @@ int main(int argc, char *argv[]){
                             GLOBAL_BRIGHTNESS))
         close_all(EXIT_FAILURE);
 
-    if ( -1 == Init_Key( RUN_PARA.button.pin, short_press_handler, long_press_hadler ))
+    if ( -1 == Init_Key( RUN_PARA.button.pin, RUN_PARA.button.val, short_press_handler, long_press_hadler ))
         close_all(EXIT_FAILURE);
 
     dump_running_info();
