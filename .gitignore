@@ -1,5 +1,6 @@
 config.ini
 action-app_respeaker
+action-led_animation*
 .ftpconfig
 .ftpignore
 test/
