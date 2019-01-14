@@ -40,7 +40,7 @@ int start_mqtt_client(const char *mqtt_client_id,
                       const char *password){
 
     fd_mqtt_sock = open_nb_socket(mqtt_addr, mqtt_port);
-    if (fd_mqtt_sock == -1) {
+    if (-1 == fd_mqtt_sock) {
         perror("[Error] Failed to open socket: ");
         return -1;
     }
@@ -63,7 +63,7 @@ int start_mqtt_client(const char *mqtt_client_id,
                  0,
                  400);
 
-    if (mqtt_client.error != MQTT_OK) {
+    if (MQTT_OK != mqtt_client.error) {
         verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" %s", __FUNCTION__, mqtt_error_str(mqtt_client.error));
         return -1;
     }
@@ -74,7 +74,7 @@ int start_mqtt_client(const char *mqtt_client_id,
     }
 
     for(int i=0;i<NUM_TOPIC;i++)
-        if( MQTT_OK != mqtt_subscribe(&mqtt_client, topics[i], 0)){
+        if(MQTT_OK != mqtt_subscribe(&mqtt_client, topics[i], 0)) {
             verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Subscribe error", __FUNCTION__);
             return -1;
         }
@@ -84,7 +84,7 @@ int start_mqtt_client(const char *mqtt_client_id,
 void terminate_mqtt_client(void){
     verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Disconnecting mqtt", __FUNCTION__);
     sleep(1);
-    if (fd_mqtt_sock != -1)
+    if (-1 != fd_mqtt_sock)
         close(fd_mqtt_sock);
     if (mqtt_client_daemon)
         pthread_cancel(mqtt_client_daemon);
@@ -125,7 +125,7 @@ static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *p
     topic_name[published->topic_name_size] = '\0';
 
     verbose(VVV_DEBUG, stdout, "[Receive] topic "PURPLE" %s "NONE, topic_name);
-    //if(strcmp(topic_name, END_SAY))
+
     if (!match_site_id(published->application_message))
         return;
     state_handler_main(topic_name);
@@ -144,18 +144,18 @@ static int match_site_id(const char *message){
     const cJSON *rev_site_id = NULL;
 
     cJSON *payload_json = cJSON_Parse(message);
-    if (payload_json == NULL){
+    if (!payload_json) {
         const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL)
+        if (error_ptr)
             verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" from parsing message : %s", __FUNCTION__, error_ptr);
         return -1;
     }
 
     rev_site_id = cJSON_GetObjectItemCaseSensitive(payload_json, "siteId");
-    if (rev_site_id == NULL)
+    if (!rev_site_id)
         return 1;
 
-    if(!strcmp(RUN_PARA.snips_site_id, rev_site_id->valuestring)){
+    if(!strcmp(RUN_PARA.snips_site_id, rev_site_id->valuestring)) {
         verbose(VVV_DEBUG, stdout, "Received from site" GREEN " %s "NONE, RUN_PARA.snips_site_id, rev_site_id->valuestring);
         cJSON_Delete(payload_json);
         return 1;

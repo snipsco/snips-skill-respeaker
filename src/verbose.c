@@ -12,17 +12,17 @@ void setVerbose(VERBOSE lvl) {
 }
 
 int verbose(VERBOSE lvl, FILE *stream, const char * restrict format, ...) {
-    if( lvl > LEVEL )
+    if (lvl > LEVEL)
         return 0;
 
     char *time_temp = get_time_stamp();
     char lable[50];
 
-    if ( lvl == V_NORMAL )
+    if (lvl == V_NORMAL)
         strcpy(lable, RED" [Error] "NONE);
-    if ( lvl == VV_INFO )
+    if (lvl == VV_INFO)
         strcpy(lable, BLUE" [Info] "NONE);
-    if ( lvl == VVV_DEBUG )
+    if (lvl == VVV_DEBUG)
         strcpy(lable, YELLOW" [Debug] "NONE);
 
     fputs(time_temp, stream);

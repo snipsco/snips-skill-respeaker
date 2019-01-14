@@ -34,14 +34,14 @@ static void Key_Status_Handler(void){
     time_duration = curr_time - start_time;
     uint8_t res = (last_raw << 1) | (current_raw);
 
-    if( res == pattern_press ){
+    if (res == pattern_press) {
         start_time = curr_time;
-    }else if ( res == pattern_release ) {
+    }else if (res == pattern_release) {
         if ((int)time_duration < LONG_PRESS_SEC)
             flag_short_press = 1;
         time_duration = (time_t) 0;
         long_press_returned = 0;
-    }else if ( res == pattern_hold ) {
+    }else if (res == pattern_hold) {
         if ((int)time_duration > LONG_PRESS_SEC && !long_press_returned){
             flag_long_press = 1;
             long_press_returned = 1;
@@ -56,10 +56,10 @@ static void Key_Status_Handler(void){
  */
 static void Key_Scan(void){
     current_raw = GPIO_read(button_pin);
-    if ( button_val == current_raw ){
+    if (button_val == current_raw){
         usleep(20);
         current_raw = GPIO_read(button_pin);
-        if ( button_val == current_raw ) {
+        if (button_val == current_raw) {
             Key_Status_Handler();
         }
     }else{
@@ -73,16 +73,16 @@ static void* Key_Status_Observer(void* mqtt_client){
     while (1){
         usleep(100000U);
         Key_Scan();
-        if ( flag_long_press ) {
+        if (flag_long_press) {
             verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" "PURPLE"LONG"NONE" press is detected", __FUNCTION__);
-            if ( RUN_PARA.curr_state == ON_IDLE )
+            if (ON_IDLE == RUN_PARA.curr_state)
                 long_press_callback();
             flag_long_press = 0;
         }
 
         if ( flag_short_press ) {
             verbose(VVV_DEBUG, stdout, BLUE"[%s]"NONE" "PURPLE"SHORT"NONE" press is detected", __FUNCTION__);
-            if ( RUN_PARA.curr_state == ON_IDLE )
+            if (ON_IDLE == RUN_PARA.curr_state)
                 short_press_callback();
             flag_short_press = 0;
         }
@@ -103,7 +103,7 @@ static void* Key_Status_Observer(void* mqtt_client){
  *            1/ Success
  */
 int Init_Key(int pin, int lvl, void (*short_callback)(void), void (*long_callback)(void) ){
-    if ( pin == -1 ){
+    if (-1 == pin) {
         verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no button", __FUNCTION__);
         return 0;
     }
@@ -112,15 +112,15 @@ int Init_Key(int pin, int lvl, void (*short_callback)(void), void (*long_callbac
     short_press_callback = short_callback;
     long_press_callback = long_callback;
 
-    if ( -1 == GPIO_export(button_pin) )
+    if (-1 == GPIO_export(button_pin))
 		return -1;
 
     sleep(1);
 
-    if ( -1 == GPIO_direction(button_pin, GPIO_IN) )
+    if (-1 == GPIO_direction(button_pin, GPIO_IN))
         return -1;
 
-    if(pthread_create(&key_status_observer_daemon, NULL, Key_Status_Observer, &Key_Status_Observer)) {
+    if (pthread_create(&key_status_observer_daemon, NULL, Key_Status_Observer, &Key_Status_Observer)) {
         verbose(V_NORMAL, stderr, BLUE"[%s]"NONE" Failed to start client daemon", __FUNCTION__);
         return -1;
     }
@@ -136,9 +136,9 @@ int Init_Key(int pin, int lvl, void (*short_callback)(void), void (*long_callbac
  *            0/ Success
  */
 int Destroy_Key(void){
-    if ( -1 == button_pin)
+    if (-1 == button_pin)
         return 0;
-    if ( -1 == GPIO_unexport(button_pin) )
+    if (-1 == GPIO_unexport(button_pin))
 	      return -1;
     if (key_status_observer_daemon)
         pthread_cancel(key_status_observer_daemon);

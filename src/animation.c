@@ -147,7 +147,7 @@ void *to_mute(){
     }
     cAPA102_Clear_All();
     cAPA102_Refresh();
-    if(RUN_PARA.curr_state == TO_MUTE){
+    if (TO_MUTE == RUN_PARA.curr_state) {
         RUN_PARA.curr_state = ON_IDLE;
         RUN_PARA.if_update = 1;
     }
@@ -180,7 +180,7 @@ void *to_unmute(){
     }
     cAPA102_Clear_All();
     cAPA102_Refresh();
-    if(RUN_PARA.curr_state == TO_UNMUTE){
+    if (TO_UNMUTE == RUN_PARA.curr_state) {
         RUN_PARA.curr_state = ON_IDLE;
         RUN_PARA.if_update = 1;
     }

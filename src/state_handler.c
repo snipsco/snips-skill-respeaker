@@ -32,7 +32,7 @@ static void (*state_handlers[STATE_NUM])(const char *)={
 void state_machine_update(void){
     void *ret_val="NONE";
 
-    if ( RUN_PARA.animation_enable[RUN_PARA.curr_state] ){
+    if (RUN_PARA.animation_enable[RUN_PARA.curr_state]) {
         verbose(VVV_DEBUG, stdout, "State is changed to %d", RUN_PARA.curr_state);
         // block until the previous terminate
         pthread_join(RUN_PARA.curr_thread,&ret_val);

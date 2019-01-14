@@ -5,20 +5,20 @@
 extern SNIPS_RUN_PARA RUN_PARA;
 
 static uint32_t text_to_colour(const char* cTxt) {
-    if (strlen(cTxt) != 0) {
-        if (strcmp(cTxt, "red") == 0) {
+    if (strlen(cTxt)) {
+        if (!strcmp(cTxt, "red")) {
             return RED_C;
-        } else if (strcmp(cTxt, "green") == 0) {
+        } else if (!strcmp(cTxt, "green")) {
             return GREEN_C;
-        } else if (strcmp(cTxt, "blue") == 0) {
+        } else if (!strcmp(cTxt, "blue")) {
             return BLUE_C;
-        } else if (strcmp(cTxt, "yellow") == 0) {
+        } else if (!strcmp(cTxt, "yellow")) {
             return YELLOW_C;
-        } else if (strcmp(cTxt, "purple") == 0) {
+        } else if (!strcmp(cTxt, "purple")) {
             return PURPLE_C;
-        } else if (strcmp(cTxt, "teal") == 0) {
+        } else if (!strcmp(cTxt, "teal")) {
             return TEAL_C;
-        } else if (strcmp(cTxt, "orange") == 0) {
+        } else if (!strcmp(cTxt, "orange")) {
             return ORANGE_C;
         }
     }
@@ -52,7 +52,7 @@ static int parse_hour_minute(const char *raw_value, uint8_t *hour, uint8_t *minu
     char m[3]="";
 
     p = strchr(raw_value, ':');
-    if (p != NULL){
+    if (p){
         strncpy(h, raw_value, p - raw_value);
         strcpy(m, p+1);
         *hour = atoi(h);
@@ -142,7 +142,7 @@ int load_sw_spec(void){
         parse_hour_minute(temp, &RUN_PARA.wake_hour, &RUN_PARA.wake_minute);
     }
 
-    if ( 1 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR))
+    if (1 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR))
         RUN_PARA.if_mute = 0;
     else if ( 0 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR) ) {
         RUN_PARA.if_mute = 1;
@@ -160,11 +160,11 @@ void debug_run_para_dump(void){
     verbose(VVV_DEBUG, stdout, "LED number :  %d", RUN_PARA.LEDs.number);
     verbose(VVV_DEBUG, stdout, "LED SPI BUS : %d", RUN_PARA.LEDs.spi_bus);
     verbose(VVV_DEBUG, stdout, "LED SPI DEV : %d", RUN_PARA.LEDs.spi_dev);
-    if ( -1 != RUN_PARA.power.pin ) {
+    if (-1 != RUN_PARA.power.pin) {
         verbose(VVV_DEBUG, stdout, "Power PIN :   %d", RUN_PARA.power.pin);
         verbose(VVV_DEBUG, stdout, "Power VAL :   %d", RUN_PARA.power.val);
     }
-    if ( -1 != RUN_PARA.button.pin ) {
+    if (-1 != RUN_PARA.button.pin) {
         verbose(VVV_DEBUG, stdout, "Button PIN :   %d", RUN_PARA.button.pin);
         verbose(VVV_DEBUG, stdout, "Button VAL :   %d", RUN_PARA.button.val);
     }
@@ -175,7 +175,7 @@ void debug_run_para_dump(void){
     /* MQTT connection */
     verbose(VVV_DEBUG, stdout, "mqtt_host : %s", RUN_PARA.mqtt_host);
     verbose(VVV_DEBUG, stdout, "mqtt_port : %s", RUN_PARA.mqtt_port);
-    if ( 0 != RUN_PARA.mqtt_user || 0 != RUN_PARA.mqtt_pass ) {
+    if (0 != RUN_PARA.mqtt_user || 0 != RUN_PARA.mqtt_pass) {
         verbose(VVV_DEBUG, stdout, "mqtt_user : %s", RUN_PARA.mqtt_user);
         verbose(VVV_DEBUG, stdout, "mqtt_pass : %s", RUN_PARA.mqtt_pass);
     }
@@ -214,7 +214,7 @@ void dump_running_info(void){
     verbose(VV_INFO, stdout, "Feedback Sound ...... %s", !RUN_PARA.if_mute ? "Enabled": "Disabled");
     verbose(VV_INFO, stdout, "MQTT Bus ............ %s:%s", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
 
-    if ( -1 != RUN_PARA.button.pin ) {
+    if (-1 != RUN_PARA.button.pin) {
         verbose(VV_INFO, stdout, "Button GPIO ......... %d", RUN_PARA.button.pin);
         verbose(VV_INFO, stdout, "[Tips] Hit the button to start a new conversion. ");
         verbose(VV_INFO, stdout, "[Tips] Hold the button to switch between mute/unmute the feedback sound ");

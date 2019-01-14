@@ -72,7 +72,7 @@ void interrupt_handler(int sig){
 }
 
 int set_power_pin(void){
-    if ( RUN_PARA.power.val == -1 || RUN_PARA.power.val == -1 ){
+    if (-1 == RUN_PARA.power.val || -1 == RUN_PARA.power.val) {
         verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
         return 0;
     }
@@ -93,7 +93,7 @@ int set_power_pin(void){
 }
 
 int reset_power_pin(void){
-    if ( RUN_PARA.power.val == -1 || RUN_PARA.power.val == -1 ){
+    if ( -1 == RUN_PARA.power.val || -1 == RUN_PARA.power.val){
         verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
         return 0;
     }
@@ -139,35 +139,38 @@ void close_all(int status){
 
 int main(int argc, char *argv[]){
     setVerbose(VV_INFO);
-    if ( -1 == load_sw_spec() )
+    if (-1 == load_sw_spec())
         close_all(EXIT_FAILURE);
     parse_opts(argc, argv);
     signal(SIGINT, interrupt_handler);
 
-    if ( -1 == load_hw_spec_json())
+    if (-1 == load_hw_spec_json())
         close_all(EXIT_FAILURE);
 
-    if ( -1 == set_power_pin())
+    if (-1 == set_power_pin())
         close_all(EXIT_FAILURE);
 
     debug_run_para_dump();
 
-    if ( -1 == start_mqtt_client(RUN_PARA.client_id,
-                                 RUN_PARA.mqtt_host,
-                                 RUN_PARA.mqtt_port,
-                                 RUN_PARA.mqtt_user,
-                                 RUN_PARA.mqtt_pass))
+    if (-1 == start_mqtt_client(RUN_PARA.client_id,
+                                RUN_PARA.mqtt_host,
+                                RUN_PARA.mqtt_port,
+                                RUN_PARA.mqtt_user,
+                                RUN_PARA.mqtt_pass))
         close_all(EXIT_FAILURE);
 
     RUN_PARA.if_mute ? mqtt_mute_feedback() : mqtt_unmute_feedback();
 
-    if ( -1 == cAPA102_Init(RUN_PARA.LEDs.number,
-                            RUN_PARA.LEDs.spi_bus,
-                            RUN_PARA.LEDs.spi_dev,
-                            GLOBAL_BRIGHTNESS))
+    if (-1 == cAPA102_Init(RUN_PARA.LEDs.number,
+                           RUN_PARA.LEDs.spi_bus,
+                           RUN_PARA.LEDs.spi_dev,
+                           GLOBAL_BRIGHTNESS))
         close_all(EXIT_FAILURE);
 
-    if ( -1 == Init_Key( RUN_PARA.button.pin, RUN_PARA.button.val, short_press_handler, long_press_hadler ))
+    if (-1 == Init_Key(RUN_PARA.button.pin,
+                       RUN_PARA.button.val,
+                       short_press_handler,
+                       long_press_hadler))
         close_all(EXIT_FAILURE);
 
     dump_running_info();
