@@ -18,7 +18,7 @@
  *
  * @returns \-1 failded or \0 successful
  */
-int GPIO_export(int pin);
+int cGPIO_export(int pin);
 
 /**
  * @brief: unexport a GPIO port
@@ -27,7 +27,7 @@ int GPIO_export(int pin);
  *
  * @returns \-1 failded or \0 successful
  */
-int GPIO_unexport(int pin);
+int cGPIO_unexport(int pin);
 
 /**
  * @brief: set direction
@@ -37,7 +37,7 @@ int GPIO_unexport(int pin);
  *
  * @returns \-1 failded or \0 successful
  */
-int GPIO_direction(int pin, int dir);
+int cGPIO_direction(int pin, int dir);
 
 /**
  * @brief: read a value from gpio pin
@@ -46,7 +46,7 @@ int GPIO_direction(int pin, int dir);
  *
  * @returns input on this gpio port
  */
-int GPIO_read(int pin);
+int cGPIO_read(int pin);
 
 /**
  * @brief: export a GPIO port
@@ -56,6 +56,6 @@ int GPIO_read(int pin);
  *
  * @returns \-1 failded or \0 successful
  */
-int GPIO_write(int pin, int value);
+int cGPIO_write(int pin, int value);
 
 #endif

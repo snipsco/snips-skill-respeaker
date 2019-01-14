@@ -20,7 +20,7 @@ SOURCES = src/mqtt.c\
           src/mqtt_client.c\
           src/cCONFIG.c\
           src/verbose.c\
-		  src/button.c
+          src/button.c
 
 APP = action-led_animation_1.5.4
 

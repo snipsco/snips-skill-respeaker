@@ -11,15 +11,19 @@
 #include "state_handler.h"
 #include "verbose.h"
 
-#include <time.h>
-#include <pthread.h>
-
 SNIPS_RUN_PARA RUN_PARA = {
     /* Hardware */
     "",
-    {-1, -1, -1},
-    {-1, -1},
-    {-1, -1},
+    {-1,
+        -1,
+        -1
+    },
+    {-1,
+        -1
+    },
+    {-1,
+        -1
+    },
 
     /* Brightness */
     31,
@@ -36,7 +40,13 @@ SNIPS_RUN_PARA RUN_PARA = {
     0, // NULL
     ON_IDLE,
     /* Colour */
-    {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C},
+    {
+        GREEN_C,
+        BLUE_C,
+        PURPLE_C,
+        YELLOW_C,
+        GREEN_C
+    },
     /* Sleep mode */
     0,
     0,
@@ -47,14 +57,21 @@ SNIPS_RUN_PARA RUN_PARA = {
     1,
     0,
     /* Animation Enable */
-    {1, 1, 1, 1, 1},
+    {
+        1,
+        1,
+        1,
+        1,
+        1
+    },
 
     /* Mute*/
     0
 };
 
-void long_press_hadler(void){
-    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" toggling sound feedback!", __FUNCTION__);
+void long_press_hadler(void) {
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " toggling sound feedback!", __FUNCTION__);
     RUN_PARA.if_mute = ~RUN_PARA.if_mute;
     if (RUN_PARA.if_mute)
         mqtt_mute_feedback();
@@ -62,72 +79,79 @@ void long_press_hadler(void){
         mqtt_unmute_feedback();
 }
 
-void short_press_handler(void){
-    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" triggering!", __FUNCTION__);
+void short_press_handler(void) {
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " triggering!", __FUNCTION__);
     mqtt_hotword_trigger();
 }
-void interrupt_handler(int sig){
+void interrupt_handler(int sig) {
     RUN_PARA.if_terminate = 1;
 }
 
-int set_power_pin(void){
+int set_power_pin(void) {
     if (-1 == RUN_PARA.power.val || -1 == RUN_PARA.power.val) {
-        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
+        verbose(VV_INFO, stdout, BLUE "[%s]"
+            NONE " Mode has no power pin", __FUNCTION__);
         return 0;
     }
 
-    if (-1 == GPIO_export(RUN_PARA.power.pin))
+    if (-1 == cGPIO_export(RUN_PARA.power.pin))
         return -1;
 
     sleep(1);
 
-    if (-1 == GPIO_direction(RUN_PARA.power.pin, GPIO_OUT))
+    if (-1 == cGPIO_direction(RUN_PARA.power.pin, GPIO_OUT))
         return -1;
 
-    if (-1 == GPIO_write(RUN_PARA.power.pin, RUN_PARA.power.val))
+    if (-1 == cGPIO_write(RUN_PARA.power.pin, RUN_PARA.power.val))
         return -1;
 
-    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Set power pin %d to "LIGHT_GREEN"<%s>"NONE, __FUNCTION__, RUN_PARA.power.pin, (RUN_PARA.power.val)?"HIGH":"LOW");
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " Set power pin %d to "
+        LIGHT_GREEN "<%s>"
+        NONE, __FUNCTION__, RUN_PARA.power.pin, (RUN_PARA.power.val) ? "HIGH" : "LOW");
     return 1;
 }
 
-int reset_power_pin(void){
-    if ( -1 == RUN_PARA.power.val || -1 == RUN_PARA.power.val){
-        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Mode has no power pin", __FUNCTION__);
+int reset_power_pin(void) {
+    if (-1 == RUN_PARA.power.val || -1 == RUN_PARA.power.val) {
+        verbose(VV_INFO, stdout, BLUE "[%s]"
+            NONE " Mode has no power pin", __FUNCTION__);
         return 0;
     }
 
-    if (-1 == GPIO_unexport(RUN_PARA.power.pin))
+    if (-1 == cGPIO_unexport(RUN_PARA.power.pin))
         return -1;
 
-    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Released power pin", __FUNCTION__);
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " Released power pin", __FUNCTION__);
     return 1;
 }
 
-void check_nightmode(void){
+void check_nightmode(void) {
     time_t curr_time;
-    struct tm *read_time = NULL;
+    struct tm * read_time = NULL;
 
     curr_time = time(NULL);
     read_time = localtime(&curr_time);
 
-    if(read_time->tm_hour == RUN_PARA.sleep_hour &&
+    if (read_time->tm_hour == RUN_PARA.sleep_hour &&
         read_time->tm_min == RUN_PARA.sleep_minute &&
-        RUN_PARA.curr_state != ON_DISABLED){
+        RUN_PARA.curr_state != ON_DISABLED) {
         RUN_PARA.curr_state = ON_DISABLED;
         RUN_PARA.if_update = 1;
         verbose(VV_INFO, stdout, "Nightmode started");
     }
-    if(read_time->tm_hour == RUN_PARA.wake_hour &&
+    if (read_time->tm_hour == RUN_PARA.wake_hour &&
         read_time->tm_min == RUN_PARA.wake_minute &&
-        RUN_PARA.curr_state == ON_DISABLED){
+        RUN_PARA.curr_state == ON_DISABLED) {
         RUN_PARA.curr_state = ON_IDLE;
         RUN_PARA.if_update = 1;
         verbose(VV_INFO, stdout, "Nightmode terminated");
     }
 }
 
-void close_all(int status){
+void close_all(int status) {
     reset_power_pin();
     terminate_mqtt_client();
     cAPA102_Close();
@@ -136,7 +160,7 @@ void close_all(int status){
     exit(status);
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char * argv[]) {
     setVerbose(VV_INFO);
     if (-1 == load_sw_spec())
         close_all(EXIT_FAILURE);
@@ -174,7 +198,7 @@ int main(int argc, char *argv[]){
 
     dump_running_info();
 
-    while(1){
+    while (1) {
         if (RUN_PARA.if_sleepmode)
             check_nightmode();
 

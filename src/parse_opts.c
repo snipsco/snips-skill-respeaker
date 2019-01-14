@@ -3,15 +3,15 @@
 
 #include <getopt.h>
 
-static void print_usage(const char *prog);
+static void print_usage(const char * prog);
 static void print_version(void);
 
 extern SNIPS_RUN_PARA RUN_PARA;
 
-void parse_opts(int argc, char *argv[]){
-	while (1) {
-		static const struct option lopts[] = {
-			{ "help",       0, 0, 'H' },
+void parse_opts(int argc, char * argv[]) {
+    while (1) {
+        static const struct option lopts[] = {
+            { "help",       0, 0, 'H' },
             { "debug",      0, 0, 'd' },
             { "verbose",    0, 0, 'v' },
             { "version",    0, 0, 'V' },
@@ -22,57 +22,57 @@ void parse_opts(int argc, char *argv[]){
             { "led-n",      1, 0, 'N' },
             { "spi-dev",    1, 0, 'D' },
             { "site-id",    1, 0, 'S' },
-			{ NULL,         0, 0,  0  },
-		};
-		int c;
+            { NULL,         0, 0,  0  },
+        };
+        int c;
 
-		c = getopt_long(argc, argv, "HdvVh:p:U:P:N:D:S:",lopts, NULL);
+        c = getopt_long(argc, argv, "HdvVh:p:U:P:N:D:S:", lopts, NULL);
 
-		if (c == -1)
-			break;
+        if (c == -1)
+            break;
 
-		switch (c) {
-    		case 'H':
-    			print_usage(argv[0]);
-    			break;
-    		case 'd':
-                setVerbose(VVV_DEBUG);
-    			break;
-    		case 'v':
-                setVerbose(VV_INFO);
-    			break;
-    		case 'V':
-    			print_version();
-    			break;
-    		case 'h':
-                strcpy(RUN_PARA.mqtt_host,optarg);
-    			break;
-    		case 'p':
-                strcpy(RUN_PARA.mqtt_port, optarg);
-    			break;
-    		case 'U':
-                strcpy(RUN_PARA.mqtt_user, optarg);
-    			break;
-    		case 'P':
-                strcpy(RUN_PARA.mqtt_pass, optarg);
-    			break;
-    		case 'N':
-                //atoi(optarg);
-    			break;
-    		case 'D':
-                //atoi(optarg);
-    			break;
-    		case 'S':
-                strcpy(RUN_PARA.snips_site_id, optarg);
-    			break;
-    		default:
-    			print_usage(argv[0]);
-    			break;
-		}
-	}
+        switch (c) {
+        case 'H':
+            print_usage(argv[0]);
+            break;
+        case 'd':
+            setVerbose(VVV_DEBUG);
+            break;
+        case 'v':
+            setVerbose(VV_INFO);
+            break;
+        case 'V':
+            print_version();
+            break;
+        case 'h':
+            strcpy(RUN_PARA.mqtt_host, optarg);
+            break;
+        case 'p':
+            strcpy(RUN_PARA.mqtt_port, optarg);
+            break;
+        case 'U':
+            strcpy(RUN_PARA.mqtt_user, optarg);
+            break;
+        case 'P':
+            strcpy(RUN_PARA.mqtt_pass, optarg);
+            break;
+        case 'N':
+            //atoi(optarg);
+            break;
+        case 'D':
+            //atoi(optarg);
+            break;
+        case 'S':
+            strcpy(RUN_PARA.snips_site_id, optarg);
+            break;
+        default:
+            print_usage(argv[0]);
+            break;
+        }
+    }
 }
 
-static void print_usage(const char *prog){
+static void print_usage(const char * prog) {
     printf("Usage: %s <options> command\n", prog);
     puts("\n"
         "Global options: \n"
@@ -96,7 +96,7 @@ static void print_usage(const char *prog){
     exit(1);
 }
 
-static void print_version(void){
+static void print_version(void) {
     printf("[%s] Version: %s Last update: %s \n", APP, VERSION, LAST_UPDATE);
     exit(1);
 }

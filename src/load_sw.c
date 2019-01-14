@@ -4,7 +4,7 @@
 
 extern SNIPS_RUN_PARA RUN_PARA;
 
-static uint32_t text_to_colour(const char* cTxt) {
+static uint32_t text_to_colour(const char * cTxt) {
     if (strlen(cTxt)) {
         if (!strcmp(cTxt, "red")) {
             return RED_C;
@@ -25,45 +25,47 @@ static uint32_t text_to_colour(const char* cTxt) {
     return 0;
 }
 
-static char *generate_client_id(void){
-    int i ,seed;
-    static char id[CLIENT_ID_LEN + 1] = {0};
+static char * generate_client_id(void) {
+    int i, seed;
+    static char id[CLIENT_ID_LEN + 1] = {
+        0
+    };
     srand(time(NULL));
-    for (i = 0; i < CLIENT_ID_LEN; i++){
-        seed = rand()%3;
-        switch(seed){
-            case 0:
-                id[i] = rand()%26 + 'a';
-                break;
-            case 1:
-                id[i] = rand()%26 + 'A';
-                break;
-            case 2:
-                id[i] = rand()%10 + '0';
-                break;
+    for (i = 0; i < CLIENT_ID_LEN; i++) {
+        seed = rand() % 3;
+        switch (seed) {
+        case 0:
+            id[i] = rand() % 26 + 'a';
+            break;
+        case 1:
+            id[i] = rand() % 26 + 'A';
+            break;
+        case 2:
+            id[i] = rand() % 10 + '0';
+            break;
         }
     }
     return id;
 }
 
-static int parse_hour_minute(const char *raw_value, uint8_t *hour, uint8_t *minute){
-    char *p;
-    char h[3]="";
-    char m[3]="";
+static int parse_hour_minute(const char * raw_value, uint8_t * hour, uint8_t * minute) {
+    char * p;
+    char h[3] = "";
+    char m[3] = "";
 
     p = strchr(raw_value, ':');
-    if (p){
+    if (p) {
         strncpy(h, raw_value, p - raw_value);
-        strcpy(m, p+1);
-        *hour = atoi(h);
-        *minute = atoi(m);
+        strcpy(m, p + 1);
+        * hour = atoi(h);
+        * minute = atoi(m);
         return 1;
     }
     return 0;
 }
 
-int load_sw_spec(void){
-    const char *temp = NULL;
+int load_sw_spec(void) {
+    const char * temp = NULL;
     int res;
 
     RUN_PARA.client_id = generate_client_id();
@@ -134,7 +136,7 @@ int load_sw_spec(void){
         RUN_PARA.animation_enable[TO_UNMUTE] = 0;
 
     /* Sleep mode */
-    if (cCONFIG_Value_Is_True(C_NIGHTMODE_STR)){
+    if (cCONFIG_Value_Is_True(C_NIGHTMODE_STR)) {
         RUN_PARA.if_sleepmode = 1;
         temp = cCONFIG_Value_Raw(C_GO_SLEEP_STR);
         parse_hour_minute(temp, &RUN_PARA.sleep_hour, &RUN_PARA.sleep_minute);
@@ -144,16 +146,16 @@ int load_sw_spec(void){
 
     if (1 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR))
         RUN_PARA.if_mute = 0;
-    else if ( 0 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR) ) {
+    else if (0 == cCONFIG_Value_Is_True(C_FEEDBACK_SOUND_STR)) {
         RUN_PARA.if_mute = 1;
-    }else
+    } else
         verbose(VVV_DEBUG, stdout, "Feedback sound info not found!");
 
     cCONFIG_Delete_List();
     return 0;
 }
 
-void debug_run_para_dump(void){
+void debug_run_para_dump(void) {
     /* Hardware */
     verbose(VVV_DEBUG, stdout, "hardware_model : %s", RUN_PARA.hardware_model);
 
@@ -204,14 +206,14 @@ void debug_run_para_dump(void){
     verbose(VVV_DEBUG, stdout, "if_mute_feedback sound : %s", RUN_PARA.if_mute ? "YES" : "NO");
 }
 
-void dump_running_info(void){
+void dump_running_info(void) {
     verbose(VV_INFO, stdout, "Initilisation Done!");
     verbose(VV_INFO, stdout, "Version ............. %s", VERSION);
     verbose(VV_INFO, stdout, "Client Id ........... %s", RUN_PARA.client_id);
     verbose(VV_INFO, stdout, "Brightness .......... %d", RUN_PARA.max_brightness);
     verbose(VV_INFO, stdout, "Device .............. %s", RUN_PARA.hardware_model);
-    verbose(VV_INFO, stdout, "Nightmode ........... %s", RUN_PARA.if_sleepmode ? "Enabled": "Disabled");
-    verbose(VV_INFO, stdout, "Feedback Sound ...... %s", !RUN_PARA.if_mute ? "Enabled": "Disabled");
+    verbose(VV_INFO, stdout, "Nightmode ........... %s", RUN_PARA.if_sleepmode ? "Enabled" : "Disabled");
+    verbose(VV_INFO, stdout, "Feedback Sound ...... %s", !RUN_PARA.if_mute ? "Enabled" : "Disabled");
     verbose(VV_INFO, stdout, "MQTT Bus ............ %s:%s", RUN_PARA.mqtt_host, RUN_PARA.mqtt_port);
 
     if (-1 != RUN_PARA.button.pin) {

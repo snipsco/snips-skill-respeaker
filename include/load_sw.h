@@ -6,4 +6,5 @@
 int load_sw_spec(void);
 void debug_run_para_dump(void);
 void dump_running_info(void);
+
 #endif
