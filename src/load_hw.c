@@ -163,10 +163,15 @@ static int load_LEDs_spec(cJSON * spec) {
     if (-1 == spi_dev)
         return -1;
 
-    RUN_PARA.LEDs.number = number;
-    RUN_PARA.LEDs.spi_bus = spi_bus;
-    RUN_PARA.LEDs.spi_dev = spi_dev;
-    //cAPA102_Init(number, spi_bus, spi_dev, 31);
+    if (-1 == RUN_PARA.LEDs.number)
+        RUN_PARA.LEDs.number = number;
+
+    if (-1 == RUN_PARA.LEDs.spi_bus)
+        RUN_PARA.LEDs.spi_bus = spi_bus;
+
+    if (-1 == RUN_PARA.LEDs.spi_dev)
+        RUN_PARA.LEDs.spi_dev = spi_dev;
+
     return 0;
 }
 

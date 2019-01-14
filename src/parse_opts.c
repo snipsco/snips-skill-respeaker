@@ -57,10 +57,11 @@ void parse_opts(int argc, char * argv[]) {
             strcpy(RUN_PARA.mqtt_pass, optarg);
             break;
         case 'N':
-            //atoi(optarg);
+            RUN_PARA.LEDs.number = atoi(optarg);
             break;
         case 'D':
-            //atoi(optarg);
+			RUN_PARA.LEDs.spi_bus = atoi(strtok(optarg, ":"));
+			RUN_PARA.LEDs.spi_dev = atoi(strtok(NULL, ":"));
             break;
         case 'S':
             strcpy(RUN_PARA.snips_site_id, optarg);
