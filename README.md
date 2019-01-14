@@ -46,11 +46,17 @@ User are not only expected to attach a ReSpeaker Hat as the hardware, but also t
 
 #### By using `sam`:
 
+> Beware that `sam` only supports Raspberry Pi platform. For other platforms, please refer to manual installation guide.
+
 ```bash
 sam install actions -g https://github.com/snipsco/snips-skill-respeaker.git
 ```
 
 #### Manually:
+
+> If there is no `snips-skill-server` installed yet, please run the following command:
+>
+> `sudo apt-get install snips-skill-server`
 
 Firstly, add your current user to the `snips-skills-admin` group:
 
