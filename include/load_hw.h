@@ -1,7 +1,7 @@
 #ifndef __LOAD_HW_H__
 #define __LOAD_HW_H__
 
-#include <common.h>
+#include "common.h"
 
 #define HW_SPEC_FILE_LEN 2048
 #define HW_SPEC_NAME_LEN 1024

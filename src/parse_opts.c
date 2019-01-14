@@ -1,9 +1,7 @@
 #include "parse_opts.h"
 #include "verbose.h"
 
-#include <unistd.h>
 #include <getopt.h>
-#include <string.h>
 
 static void print_usage(const char *prog);
 static void print_version(void);

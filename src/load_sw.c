@@ -1,5 +1,5 @@
-#include "load_sw.h"
 #include "cCONFIG.h"
+#include "load_sw.h"
 #include "verbose.h"
 
 extern SNIPS_RUN_PARA RUN_PARA;

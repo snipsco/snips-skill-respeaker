@@ -1,7 +1,6 @@
 #include "verbose.h"
 
 #include <stdarg.h>
-#include <time.h>
 
 static char *get_time_stamp(void);
 

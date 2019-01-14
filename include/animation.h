@@ -1,7 +1,7 @@
 #ifndef __ANIMATION_H__
 #define __ANIMATION_H__
 
-#include <common.h>
+#include "common.h"
 
 #define STEP_COUNT 20
 

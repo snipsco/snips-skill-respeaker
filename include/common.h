@@ -1,15 +1,15 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <stdint.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <stdint.h>
 #include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 #define APP "snips-led-animation"
 #define VERSION "1.5.4"

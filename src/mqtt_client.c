@@ -1,11 +1,9 @@
-#include "mqtt_client.h"
-#include "state_handler.h"
 #include "cJSON.h"
 #include "mqtt.h"
+#include "mqtt_client.h"
 #include "posix_sockets.h"
+#include "state_handler.h"
 #include "verbose.h"
-
-#include <pthread.h>
 
 static void mqtt_callback_handler(void** unused, struct mqtt_response_publish *published);
 static int match_site_id(const char *message);

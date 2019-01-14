@@ -1,7 +1,7 @@
-#include "load_hw.h"
 #include "cJSON.h"
-#include "gpio_rw.h"
 #include "cAPA102.h"
+#include "gpio_rw.h"
+#include "load_hw.h"
 #include "verbose.h"
 
 extern SNIPS_RUN_PARA RUN_PARA;
@@ -177,7 +177,7 @@ int load_hw_spec_json(void){
         goto err;
     if (-1 == load_button_pin(hw_spec_model))
         goto err;
-    
+
     cJSON_Delete(hw_spec_model);
     return 0;
 err:

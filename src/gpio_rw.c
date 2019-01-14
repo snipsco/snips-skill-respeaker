@@ -3,10 +3,6 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 int GPIO_export(int pin){
 #define BUFFER_MAX 3

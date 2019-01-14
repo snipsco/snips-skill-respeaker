@@ -1,5 +1,5 @@
-#include "state_handler.h"
 #include "animation.h"
+#include "state_handler.h"
 #include "verbose.h"
 
 extern SNIPS_RUN_PARA       RUN_PARA;

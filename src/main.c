@@ -1,19 +1,18 @@
+#include "button.h"
 #include "common.h"
 #include "cAPA102.h"
-#include "state_handler.h"
-#include "mqtt_client.h"
-#include "load_hw.h"
-#include "parse_opts.h"
 #include "cCONFIG.h"
-#include "verbose.h"
-#include "load_sw.h"
 #include "gpio_rw.h"
-#include "button.h"
-
+#include "load_hw.h"
+#include "load_sw.h"
 #include "mqtt.h"
+#include "mqtt_client.h"
+#include "parse_opts.h"
+#include "state_handler.h"
+#include "verbose.h"
 
-#include <pthread.h>
 #include <time.h>
+#include <pthread.h>
 
 SNIPS_RUN_PARA RUN_PARA = {
     /* Hardware */
@@ -133,7 +132,7 @@ void close_all(int status){
     terminate_mqtt_client();
     cAPA102_Close();
     pthread_cancel(RUN_PARA.curr_thread);
-    Destroy_Key();
+    destroy_key();
     exit(status);
 }
 
@@ -167,7 +166,7 @@ int main(int argc, char *argv[]){
                            GLOBAL_BRIGHTNESS))
         close_all(EXIT_FAILURE);
 
-    if (-1 == Init_Key(RUN_PARA.button.pin,
+    if (-1 == init_key(RUN_PARA.button.pin,
                        RUN_PARA.button.val,
                        short_press_handler,
                        long_press_hadler))

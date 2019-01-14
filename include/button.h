@@ -1,6 +1,8 @@
 #ifndef __BUTTON_H__
 #define __BUTTON_H__
 
+#include "common.h"
+
 #define LONG_PRESS_SEC 2
 /**
  * @brief: Create a button from GPIO port
@@ -12,7 +14,7 @@
  * @returns: -1/ Error
  *            0/ Success
  */
-int Init_Key(int pin, int lvl, void (*short_callback)(void), void (*long_callback)(void) );
+int init_key(int pin, int lvl, void (*short_callback)(void), void (*long_callback)(void) );
 
 /**
  * @brief: Release the GPIO port which is used for the button and kill the refreshing process
@@ -20,6 +22,6 @@ int Init_Key(int pin, int lvl, void (*short_callback)(void), void (*long_callbac
  * @returns: -1/ Error
  *            0/ Success
  */
-int Destroy_Key(void);
+int destroy_key(void);
 
 #endif
