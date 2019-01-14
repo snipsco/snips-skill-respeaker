@@ -211,6 +211,8 @@ If your LED strip has a power control, specify the GPIO that uses.
 
 If you have a button connected, specify the GPIO that uses.
 
+> You may need an external pull-up/pull-down resistor connected to your button.
+
 | Key | Type | Value |
 | --- | --- | --- |
 | `gpio_pin` | Integer | Number of the GPIO port |
@@ -300,6 +302,10 @@ Payload:
 | Key | Type | Value |
 | --- | --- | --- |
 | siteId | String | Site where feedback led will be toggled Off |
+
+## To Do
+
+- [ ] Support WS281x RGB LEDs
 
 ## Contributing
 
