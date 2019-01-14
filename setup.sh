@@ -29,7 +29,6 @@ echo -e "\033[1;32;34m[*]\033[m Detected hardware model: \033[0;35m<$MODEL>\033[
 if [ ! -e $CONFIG_FILE ]
 then
     cp config.ini.default config.ini
-	sed -i s/model=.*\$/model=$MODEL/g config.ini
 else
 	user_ver=`cat $CONFIG_FILE | grep "config_ver" | sed 's/^config_ver=\([0-9]\.[0-9]\)/\1/g'`
 	def_ver=`cat $DEFAULT_CONFIG_FILE | grep "config_ver" | sed 's/^config_ver=\([0-9]\.[0-9]\)/\1/g'`
@@ -43,11 +42,12 @@ else
         read -s -n1 -p "..."
         echo ""
         cp config.ini.default config.ini
-		sed -i s/model=.*\$/model=$MODEL/g config.ini
 	else
 		echo -e "\033[1;32;34m[*]\033[m Good config.ini version: \033[0;35m<$user_ver>\033[m"
     fi
 fi
+
+sed -i s/model=.*\$/model=$MODEL/g config.ini
 
 # check if the old compiled file is outputed
 if [ "$ACTION_FILE" != "0" ]
