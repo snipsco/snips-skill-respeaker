@@ -14,16 +14,9 @@
 SNIPS_RUN_PARA RUN_PARA = {
     /* Hardware */
     "",
-    {-1,
-        -1,
-        -1
-    },
-    {-1,
-        -1
-    },
-    {-1,
-        -1
-    },
+    {-1, -1, -1},
+    {-1, -1},
+    {-1, -1},
 
     /* Brightness */
     31,
@@ -40,13 +33,7 @@ SNIPS_RUN_PARA RUN_PARA = {
     0, // NULL
     ON_IDLE,
     /* Colour */
-    {
-        GREEN_C,
-        BLUE_C,
-        PURPLE_C,
-        YELLOW_C,
-        GREEN_C
-    },
+    {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C},
     /* Sleep mode */
     0,
     0,
@@ -57,13 +44,7 @@ SNIPS_RUN_PARA RUN_PARA = {
     1,
     0,
     /* Animation Enable */
-    {
-        1,
-        1,
-        1,
-        1,
-        1
-    },
+    {1, 1, 1, 1, 1},
 
     /* Mute*/
     0
