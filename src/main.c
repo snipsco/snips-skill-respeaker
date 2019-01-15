@@ -44,15 +44,14 @@ SNIPS_RUN_PARA RUN_PARA = {
     1,
     0,
     /* Animation Enable */
-    {1, 1, 1, 1, 1},
+    {1, 1, 1, 1, 1, 1},
 
     /* Mute*/
     0
 };
 
 void long_press_hadler(void) {
-    verbose(VV_INFO, stdout, BLUE "[%s]"
-        NONE " toggling sound feedback!", __FUNCTION__);
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" toggling sound feedback!", __FUNCTION__);
     RUN_PARA.if_mute = ~RUN_PARA.if_mute;
     if (RUN_PARA.if_mute)
         mqtt_mute_feedback();
@@ -61,10 +60,22 @@ void long_press_hadler(void) {
 }
 
 void short_press_handler(void) {
-    verbose(VV_INFO, stdout, BLUE "[%s]"
-        NONE " triggering!", __FUNCTION__);
+    verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Starting new conversation!", __FUNCTION__);
     mqtt_hotword_trigger();
 }
+
+void double_press_handler(void) {
+    if (ON_DISABLED == RUN_PARA.curr_state) {
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Enabling LEDs!", __FUNCTION__);
+        RUN_PARA.if_update = 1;
+        RUN_PARA.curr_state = ON_IDLE;
+    }else{
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Disabling LEDs!", __FUNCTION__);
+        RUN_PARA.if_update = 1;
+        RUN_PARA.curr_state = ON_DISABLED;
+    }
+}
+
 void interrupt_handler(int sig) {
     RUN_PARA.if_terminate = 1;
 }
@@ -174,6 +185,7 @@ int main(int argc, char * argv[]) {
     if (-1 == init_key(RUN_PARA.button.pin,
                        RUN_PARA.button.val,
                        short_press_handler,
+                       double_press_handler,
                        long_press_hadler))
         close_all(EXIT_FAILURE);
 
