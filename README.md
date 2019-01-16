@@ -1,6 +1,6 @@
 # snips-skill-respeaker
 
-![Version](https://img.shields.io/badge/snips--led--animation-v1.5.4-blue.svg)
+![Version](https://img.shields.io/badge/snips--led--animation-v1.6.0-blue.svg)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 
 This action code animates RGB LEDs and controls button as a human interface for Snips Voice Platform.
@@ -27,7 +27,9 @@ User are not only expected to attach a ReSpeaker Hat as the hardware, but also t
 
 :star: ***```Short press: start a new conversion without saying hotword```***
 
-:star2: ***```Long press: toggle the sound feedback```***
+:star2: ***```Double press: toggle the animation feedback```***
+
+:dizzy: ***```Long press: toggle the sound feedback```***
 
 ## Official Hardware Support
 
