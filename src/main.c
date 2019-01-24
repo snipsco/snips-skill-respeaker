@@ -42,7 +42,11 @@ SNIPS_RUN_PARA RUN_PARA = {
  */
 void long_press_hadler(void) {
     verbose(VV_INFO, stdout, BLUE"[%s]"NONE" toggling sound feedback!", __FUNCTION__);
-    RUN_PARA.if_mute = ~RUN_PARA.if_mute;
+    if (RUN_PARA.if_mute)
+        RUN_PARA.if_mute = 0;
+    else
+        RUN_PARA.if_mute = 1;
+
     if (RUN_PARA.if_mute)
         mqtt_mute_feedback();
     else
