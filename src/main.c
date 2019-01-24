@@ -30,7 +30,7 @@ SNIPS_RUN_PARA RUN_PARA = {
     /* Sleep mode */
     0, 0, 0, 0,
     /* Flags */
-    0, 1, 0,
+    0, 1, 0, 0,
     /* Animation Enable */
     {1, 1, 1, 1, 1, 1},
     /* Mute*/
@@ -65,14 +65,19 @@ void short_press_handler(void) {
  * @brief: callback for double click
  */
 void double_press_handler(void) {
-    if (ON_DISABLED == RUN_PARA.curr_state) {
-        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Enabling LEDs!", __FUNCTION__);
-        RUN_PARA.if_update = 1;
-        RUN_PARA.curr_state = ON_IDLE;
-    }else{
+    if (RUN_PARA.if_disable)
+        RUN_PARA.if_disable = 0;
+    else
+        RUN_PARA.if_disable = 1;
+
+    if (RUN_PARA.if_disable) {
         verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Disabling LEDs!", __FUNCTION__);
         RUN_PARA.if_update = 1;
         RUN_PARA.curr_state = ON_DISABLED;
+    }else{
+        verbose(VV_INFO, stdout, BLUE"[%s]"NONE" Enabling LEDs!", __FUNCTION__);
+        RUN_PARA.if_update = 1;
+        RUN_PARA.curr_state = ON_IDLE;
     }
 }
 
@@ -220,7 +225,7 @@ int main(int argc, char * argv[]) {
     dump_running_info();
 
     while (1) {
-        if (RUN_PARA.if_sleepmode)
+        if (RUN_PARA.if_sleepmode && !RUN_PARA.if_disable)
             check_nightmode();
 
         if (RUN_PARA.if_update)

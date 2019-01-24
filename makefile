@@ -22,7 +22,7 @@ SOURCES = src/mqtt.c\
           src/verbose.c\
           src/button.c
 
-APP = action-led_animation_1.6.0
+APP = action-led_animation_1.6.1
 
 all: $(APP)
 

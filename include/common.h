@@ -12,8 +12,8 @@
 #include <unistd.h>
 
 #define APP "snips-led-animation"
-#define VERSION "1.6.0"
-#define LAST_UPDATE "Jan-16-2019"
+#define VERSION "1.6.1"
+#define LAST_UPDATE "Jan-24-2019"
 #define AUTHOR "KE FANG (SNIPS)"
 
 #define NUM_TOPIC       10
@@ -139,6 +139,7 @@ typedef struct{
     volatile sig_atomic_t   if_terminate;
     uint8_t                 if_update;
     uint8_t                 if_sleepmode;
+    uint8_t                 if_disable;
 
     /* Animation Enable */
     uint8_t animation_enable[STATE_NUM];
