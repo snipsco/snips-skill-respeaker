@@ -1,2 +1,8 @@
 config.ini
 action-app_respeaker
+action-led_animation*
+.ftpconfig
+.ftpignore
+test/
+hardware_specs/custom_*.json
+dev_diary.md

@@ -1,331 +1,195 @@
-#include "apa102.h"
-#include "get_config.h"
+#include "button.h"
+#include "common.h"
+#include "cAPA102.h"
+#include "cCONFIG.h"
+#include "gpio_rw.h"
+#include "load_hw.h"
+#include "load_sw.h"
+#include "mqtt.h"
+#include "mqtt_client.h"
+#include "parse_opts.h"
 #include "state_handler.h"
-#include "rsp_corev2.h"
+#include "verbose.h"
 
-#include <common.h>
-#include <mqtt.h>
-#include <pthread.h>
-#include <signal.h>
-#include <posix_sockets.h>
+SNIPS_RUN_PARA RUN_PARA = {
+    /* Hardware */
+    "",
+    {-1, -1, -1},
+    {-1, -1},
+    {-1, -1},
 
-#define CLIENT_ID_LEN 10
+    /* Brightness */
+    31,
+    /* MQTT connection */
+    "localhost",
+    "1883",
+    "",
+    "",
+    /* SiteId */
+    "default",
+    /* Client ID */
+    NULL,
+    /* Animation thread */
+    0, // NULL
+    ON_IDLE,
+    /* Colour */
+    {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C},
+    /* Sleep mode */
+    0,
+    0,
+    0,
+    0,
+    /* Flags */
+    0,
+    1,
+    0,
+    /* Animation Enable */
+    {1, 1, 1, 1, 1},
 
-static void get_site_id(const char *msg);
-static void interrupt_handler(int sig);
-
-void check_nightmode(void);
-void publish_callback(void** unused, struct mqtt_response_publish *published);
-void *client_refresher(void* client);
-char *generate_client_id(void);
-void close_all(int status, pthread_t *client_daemon);
-void get_action_colours();
-
-volatile sig_atomic_t   flag_terminate = 0;
-short                   flag_update = 1;
-short                   flag_sleepmode = 0;
-
-APA102      leds = {0, -1, NULL, 127};
-STATE       curr_state = ON_IDLE;
-COLOURS     action_colours = {GREEN_C, BLUE_C, PURPLE_C, YELLOW_C, GREEN_C};
-
-int         fd_sock = -1;
-pthread_t   curr_thread;
-uint8_t     sleep_hour;
-uint8_t     sleep_minute;
-uint8_t     weak_hour;
-uint8_t     weak_minute;
-
-char        rcv_site_id[255]= "";
-
-const char	*addr;
-const char	*port;
-const char  *username;
-const char  *password;
-
-const char* topics[]={
-    HOT_OFF,
-    STA_LIS,
-    END_LIS,
-    STA_SAY,
-    END_SAY,
-    HOT_ON,
-    SUD_ON,
-    SUD_OFF,
-    LED_ON,
-    LED_OFF
+    /* Mute*/
+    0
 };
 
-snipsSkillConfig configList[CONFIG_NUM]=
-{
-    {{C_MODEL_STR}, {0}},
-    {{C_SPI_DEV_STR}, {0}},
-    {{C_LED_NUM_STR}, {0}},
-    {{C_LED_BRI_STR}, {0}},
-    {{C_MQTT_HOST_STR}, {0}},
-    {{C_MQTT_PORT_STR}, {0}},
-    {{C_MQTT_USER_STR}, {0}},
-    {{C_MQTT_PASS_STR}, {0}},
-    {{C_ON_IDLE_STR}, {0}},
-    {{C_ON_LISTEN_STR}, {0}},
-    {{C_ON_SPEAK_STR}, {0}},
-    {{C_TO_MUTE_STR}, {0}},
-    {{C_TO_UNMUTE_STR}, {0}},
-    {{C_IDLE_COLOUR_STR}, {0}},
-    {{C_LISTEN_COLOUR_STR}, {0}},
-    {{C_SPEAK_COLOUR_STR}, {0}},
-    {{C_MUTE_COLOUR_STR}, {0}},
-    {{C_UNMUTE_COLOUR_STR}, {0}},
-    {{C_NIGHTMODE_STR}, {0}},
-    {{C_GO_SLEEP_STR}, {0}},
-    {{C_GO_WEAK_STR}, {0}},
-    {{C_ON_DISABLED_STR}, {"1"}},
-    {{C_SITE_ID_STR}, {0}}
-};
-
-int main(int argc, char const *argv[])
-{
-    int i;
-    char *client_id;
-    // generate a random id as client id
-    client_id = generate_client_id();
-    signal(SIGINT, interrupt_handler);
-    // get config.ini
-    read_config_file(configList, CONFIG_NUM);
-
-    switch_on_power();
-    // get input parameters
-    leds.numLEDs = (argc > 1)? atoi(argv[1]) : atoi(configList[C_LED_NUM].value);
-    addr = (argc > 2)? argv[2] : configList[C_MQTT_HOST].value; // mqtt_host
-    port = (argc > 3)? argv[3] : configList[C_MQTT_PORT].value; // mqtt_port
-    username = (argc > 4)? argv[4] : configList[C_MQTT_USER].value; // mqtt_username
-    password = (argc > 5)? argv[5] : configList[C_MQTT_PASS].value; // mqtt_password
-    // get brightness
-    leds.brightness = (strlen(configList[C_LED_BRI].value) != 0) ? atoi(configList[C_LED_BRI].value) : 127;
-    get_action_colours();
-
-    // if sleep mode is enabled
-    if (if_config_true("nightmode", configList, NULL) == 1){
-        flag_sleepmode = 1;
-        parse_hour_minute(configList[C_GO_SLEEP].value, &sleep_hour, &sleep_minute);
-        parse_hour_minute(configList[C_GO_WEAK].value, &weak_hour, &weak_minute);
-    }
-
-    /* open the non-blocking TCP socket (connecting to the broker) */
-    int sockfd = open_nb_socket(addr, port);
-    if (sockfd == -1) {
-        perror("Failed to open socket: ");
-        close_all(EXIT_FAILURE, NULL);
-    }
-    /* setup a client */
-    struct mqtt_client client;
-    uint8_t sendbuf[2048]; /* sendbuf should be large enough to hold multiple whole mqtt messages */
-    uint8_t recvbuf[1024]; /* recvbuf should be large enough any whole mqtt message expected to be received */
-    mqtt_init(&client, sockfd, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback);
-    
-    if (*username && *password)
-        mqtt_connect(&client, client_id, NULL, NULL, 0, username, password, 0, 400);
+void long_press_hadler(void) {
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " toggling sound feedback!", __FUNCTION__);
+    RUN_PARA.if_mute = ~RUN_PARA.if_mute;
+    if (RUN_PARA.if_mute)
+        mqtt_mute_feedback();
     else
-        mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, 0, 400);
-    
-    /* check that we don't have any errors */
-    if (client.error != MQTT_OK) {
-        fprintf(stderr, "[Error] %s\n", mqtt_error_str(client.error));
-        close_all(EXIT_FAILURE, NULL);
+        mqtt_unmute_feedback();
+}
+
+void short_press_handler(void) {
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " triggering!", __FUNCTION__);
+    mqtt_hotword_trigger();
+}
+void interrupt_handler(int sig) {
+    RUN_PARA.if_terminate = 1;
+}
+
+int set_power_pin(void) {
+    if (-1 == RUN_PARA.power.val || -1 == RUN_PARA.power.val) {
+        verbose(VV_INFO, stdout, BLUE "[%s]"
+            NONE " Mode has no power pin", __FUNCTION__);
+        return 0;
     }
-    /* start a thread to refresh the client (handle egress and ingree client traffic) */
-    pthread_t client_daemon;
-    if(pthread_create(&client_daemon, NULL, client_refresher, &client)) {
-        fprintf(stderr, "[Error] Failed to start client daemon.\n");
-        close_all(EXIT_FAILURE, NULL);
-    }
-    /* subscribe */
-    for(i=0;i<NUM_TOPIC;i++)
-        mqtt_subscribe(&client, topics[i], 0);
 
-    // for(i=0;i<CONFIG_NUM;i++)
-    //     fprintf(stdout, "[Conf] %s - <%s>\n", configList[i].key, configList[i].value);
+    if (-1 == cGPIO_export(RUN_PARA.power.pin))
+        return -1;
 
-    if(!apa102_spi_setup())
-        close_all(EXIT_FAILURE, NULL);
-
-    /* start publishing the time */
-    fprintf(stdout, "[Info] Initilisation Done! \n");
-    fprintf(stdout, "[Info] Client Id ........... %s\n", client_id);
-    fprintf(stdout, "[Info] Program ............. %s\n", argv[0]);
-    fprintf(stdout, "[Info] LED Number .......... %d\n", leds.numLEDs);
-    fprintf(stdout, "[Info] Brightness .......... %d\n", leds.brightness);
-    fprintf(stdout, "[Info] Device .............. %s\n", configList[C_MODEL].value);
-    fprintf(stdout, "[Info] Nightmode ........... %s\n", flag_sleepmode ? "Enabled": "Disabled");
-    fprintf(stdout, "[Info] MQTT Bus ............ %s:%s \n", addr, port);
-    fprintf(stdout, "[Info] Press CTRL-C to exit.\n\n");
-
-    /* block */
-    while(1){
-        if(flag_sleepmode)
-            check_nightmode();
-
-        if (flag_update)
-            state_machine_update();
-
-        if (flag_terminate) break;
-
-        usleep(10000);
-    }
-    // disconnect
-    fprintf(stdout, "[Info] %s disconnecting from %s\n", argv[0], addr);
     sleep(1);
 
-    // clean
-    close_all(EXIT_SUCCESS, &client_daemon);
-    return 0;
+    if (-1 == cGPIO_direction(RUN_PARA.power.pin, GPIO_OUT))
+        return -1;
+
+    if (-1 == cGPIO_write(RUN_PARA.power.pin, RUN_PARA.power.val))
+        return -1;
+
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " Set power pin %d to "
+        LIGHT_GREEN "<%s>"
+        NONE, __FUNCTION__, RUN_PARA.power.pin, (RUN_PARA.power.val) ? "HIGH" : "LOW");
+    return 1;
 }
 
-uint32_t text_to_colour(const char* cTxt) {
-    if (strlen(cTxt) != 0) {
-        if (strcmp(cTxt, "red") == 0) {
-            return RED_C;
-        } else if (strcmp(cTxt, "green") == 0) {
-            return GREEN_C;
-        } else if (strcmp(cTxt, "blue") == 0) {
-            return BLUE_C;
-        } else if (strcmp(cTxt, "yellow") == 0) {
-            return YELLOW_C;
-        } else if (strcmp(cTxt, "purple") == 0) {
-            return PURPLE_C;
-        } else if (strcmp(cTxt, "teal") == 0) {
-            return TEAL_C;
-        } else if (strcmp(cTxt, "orange") == 0) {
-            return ORANGE_C;
-        }
+int reset_power_pin(void) {
+    if (-1 == RUN_PARA.power.val || -1 == RUN_PARA.power.val) {
+        verbose(VV_INFO, stdout, BLUE "[%s]"
+            NONE " Mode has no power pin", __FUNCTION__);
+        return 0;
     }
-    return 0;
+
+    if (-1 == cGPIO_unexport(RUN_PARA.power.pin))
+        return -1;
+
+    verbose(VV_INFO, stdout, BLUE "[%s]"
+        NONE " Released power pin", __FUNCTION__);
+    return 1;
 }
 
-void get_action_colours() {
-    uint32_t idle_c = text_to_colour(configList[C_IDLE_COLOUR].value);
-    if (idle_c != 0) 
-        action_colours.idle = idle_c;
-    uint32_t listen_c = text_to_colour(configList[C_LISTEN_COLOUR].value);
-    if (listen_c != 0) 
-        action_colours.listen = listen_c;
-    uint32_t speak_c = text_to_colour(configList[C_SPEAK_COLOUR].value);
-    if (speak_c != 0) 
-        action_colours.speak = speak_c;
-    uint32_t mute_c = text_to_colour(configList[C_MUTE_COLOUR].value);
-    if (mute_c != 0) 
-        action_colours.mute = mute_c;
-    uint32_t unmute_c = text_to_colour(configList[C_UNMUTE_COLOUR].value);
-    if (unmute_c != 0) 
-        action_colours.unmute = unmute_c;
-}
-
-void check_nightmode(void){
+void check_nightmode(void) {
     time_t curr_time;
-    struct tm *read_time = NULL;
+    struct tm * read_time = NULL;
 
     curr_time = time(NULL);
     read_time = localtime(&curr_time);
 
-    if(read_time->tm_hour == sleep_hour &&
-        read_time->tm_min == sleep_minute &&
-        curr_state != ON_DISABLED){
-        curr_state = ON_DISABLED;
-        flag_update = 1;
-        fprintf(stdout, "[Info] ------>  Nightmode started\n");
+    if (read_time->tm_hour == RUN_PARA.sleep_hour &&
+        read_time->tm_min == RUN_PARA.sleep_minute &&
+        RUN_PARA.curr_state != ON_DISABLED) {
+        RUN_PARA.curr_state = ON_DISABLED;
+        RUN_PARA.if_update = 1;
+        verbose(VV_INFO, stdout, "Nightmode started");
     }
-    if(read_time->tm_hour == weak_hour &&
-        read_time->tm_min == weak_minute &&
-        curr_state == ON_DISABLED){
-        curr_state = ON_IDLE;
-        flag_update = 1;
-        fprintf(stdout, "[Info] ------>  Nightmode terminated\n");
+    if (read_time->tm_hour == RUN_PARA.wake_hour &&
+        read_time->tm_min == RUN_PARA.wake_minute &&
+        RUN_PARA.curr_state == ON_DISABLED) {
+        RUN_PARA.curr_state = ON_IDLE;
+        RUN_PARA.if_update = 1;
+        verbose(VV_INFO, stdout, "Nightmode terminated");
     }
 }
 
-void publish_callback(void** unused, struct mqtt_response_publish *published) {
-    /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
-    char *topic_name = (char*) malloc(published->topic_name_size + 1);
-
-    memcpy(topic_name, published->topic_name, published->topic_name_size);
-
-    topic_name[published->topic_name_size] = '\0';
-    get_site_id(published->application_message);
-    if (strcmp(configList[C_SITE_ID].value, rcv_site_id) != 0)
-        return;
-
-    fprintf(stdout, "[Received] %s on Site: %s\n", topic_name, rcv_site_id);
-
-    state_handler_main(topic_name);
-
-    free(topic_name);
-}
-
-void* client_refresher(void* client){
-    while(1)
-    {
-        mqtt_sync((struct mqtt_client*) client);
-        usleep(100000U);
-    }
-    return NULL;
-}
-
-char *generate_client_id(void){
-    int i ,seed;
-    static char id[CLIENT_ID_LEN + 1] = {0};
-    srand(time(NULL));
-    for (i = 0; i < CLIENT_ID_LEN; i++){
-        seed = rand()%3;
-        switch(seed){
-            case 0:
-                id[i] = rand()%26 + 'a';
-                break;
-            case 1:
-                id[i] = rand()%26 + 'A';
-                break;
-            case 2:
-                id[i] = rand()%10 + '0';
-                break;
-        }
-    }
-    return id;
-}
-
-void close_all(int status, pthread_t *client_daemon){
-    int fd_gpio;
-    char gpio_66[]={'6','6'};
-
-    clear();
-    if(if_config_true("model", configList, "rsp_corev2")){
-        fd_gpio = open("/sys/class/gpio/unexport", O_RDWR);
-        if(write(fd_gpio, gpio_66, sizeof(gpio_66))){
-            fprintf(stdout, "[Info] Closed GPIO66..\n");
-            close(fd_gpio);
-        }
-    }
-    if (fd_sock != -1) close(fd_sock);
-    if (leds.fd_spi != -1) close(leds.fd_spi);
-    if (leds.pixels) free(leds.pixels);
-    if (client_daemon != NULL) pthread_cancel(*client_daemon);
-    pthread_cancel(curr_thread);
+void close_all(int status) {
+    reset_power_pin();
+    terminate_mqtt_client();
+    cAPA102_Close();
+    pthread_cancel(RUN_PARA.curr_thread);
+    destroy_key();
     exit(status);
 }
 
-static void get_site_id(const char *msg){
-    char *start;
-    int count = 0;
-    start = strstr(msg, "\"siteId\":\""); // len = 10
-    if (start == NULL )
-        return;
-    start += 10;
-    while(*start != '\"'){
-        rcv_site_id[count] = *start;
-        start += 1;
-        count += 1;
-    }
-    rcv_site_id[count] = '\0';
-}
+int main(int argc, char * argv[]) {
+    setVerbose(VV_INFO);
+    if (-1 == load_sw_spec())
+        close_all(EXIT_FAILURE);
+    parse_opts(argc, argv);
+    signal(SIGINT, interrupt_handler);
 
-static void interrupt_handler(int sig){
-    flag_terminate = 1;
+    if (-1 == load_hw_spec_json())
+        close_all(EXIT_FAILURE);
+
+    if (-1 == set_power_pin())
+        close_all(EXIT_FAILURE);
+
+    debug_run_para_dump();
+
+    if (-1 == start_mqtt_client(RUN_PARA.client_id,
+                                RUN_PARA.mqtt_host,
+                                RUN_PARA.mqtt_port,
+                                RUN_PARA.mqtt_user,
+                                RUN_PARA.mqtt_pass))
+        close_all(EXIT_FAILURE);
+
+    RUN_PARA.if_mute ? mqtt_mute_feedback() : mqtt_unmute_feedback();
+
+    if (-1 == cAPA102_Init(RUN_PARA.LEDs.number,
+                           RUN_PARA.LEDs.spi_bus,
+                           RUN_PARA.LEDs.spi_dev,
+                           GLOBAL_BRIGHTNESS))
+        close_all(EXIT_FAILURE);
+
+    if (-1 == init_key(RUN_PARA.button.pin,
+                       RUN_PARA.button.val,
+                       short_press_handler,
+                       long_press_hadler))
+        close_all(EXIT_FAILURE);
+
+    dump_running_info();
+
+    while (1) {
+        if (RUN_PARA.if_sleepmode)
+            check_nightmode();
+
+        if (RUN_PARA.if_update)
+            state_machine_update();
+
+        if (RUN_PARA.if_terminate)
+            break;
+        usleep(10000);
+    }
+    close_all(EXIT_SUCCESS);
+    return 0;
 }

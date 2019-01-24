@@ -1,7 +1,7 @@
 #ifndef __ANIMATION_H__
 #define __ANIMATION_H__
 
-#include <common.h>
+#include "common.h"
 
 #define STEP_COUNT 20
 
@@ -11,5 +11,4 @@ void *on_speak(void);
 void *to_mute(void);
 void *to_unmute(void);
 void *on_disabled(void);
-void delay_on_state(int ms, int state);
 #endif

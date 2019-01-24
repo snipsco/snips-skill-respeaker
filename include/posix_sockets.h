@@ -1,5 +1,6 @@
 #ifndef __POSIX_SOCKET_TEMPLATE_H__
 #define __POSIX_SOCKET_TEMPLATE_H__
+#include "verbose.h"
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -22,7 +23,7 @@ int open_nb_socket(const char* addr, const char* port) {
     /* get address information */
     rv = getaddrinfo(addr, port, &hints, &servinfo);
     if(rv != 0) {
-        fprintf(stderr, "Failed to open socket (getaddrinfo): %s\n", gai_strerror(rv));
+        verbose(V_NORMAL, stderr, "Failed to open socket (getaddrinfo): %s", gai_strerror(rv));
         return -1;
     }
 
@@ -35,7 +36,7 @@ int open_nb_socket(const char* addr, const char* port) {
         rv = connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
         if(rv == -1) continue;
         break;
-    }  
+    }
 
     /* free servinfo */
     freeaddrinfo(servinfo);
@@ -44,7 +45,7 @@ int open_nb_socket(const char* addr, const char* port) {
     if (sockfd != -1) fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFL) | O_NONBLOCK);
 
     /* return the new socket fd */
-    return sockfd;  
+    return sockfd;
 }
 
 #endif

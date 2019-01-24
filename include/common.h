@@ -1,14 +1,20 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <stdint.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <stdint.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
+#define APP "snips-led-animation"
+#define VERSION "1.5.4"
+#define LAST_UPDATE "Jan-11-2019"
+#define AUTHOR "KE FANG (SNIPS)"
 
 #define NUM_TOPIC       10
 #define HOT_ON          "hermes/hotword/toggleOn"
@@ -39,10 +45,7 @@ typedef enum {
     ON_DISABLED
 }STATE;
 
-#define CONFIG_NUM              23
 #define C_MODEL_STR             "model"
-#define C_SPI_DEV_STR           "spi_dev"
-#define C_LED_NUM_STR           "led_num"
 #define C_LED_BRI_STR           "led_bri"
 #define C_MQTT_HOST_STR         "mqtt_host"
 #define C_MQTT_PORT_STR         "mqtt_port"
@@ -60,62 +63,24 @@ typedef enum {
 #define C_UNMUTE_COLOUR_STR     "unmute_colour"
 #define C_NIGHTMODE_STR         "nightmode"
 #define C_GO_SLEEP_STR          "go_sleep"
-#define C_GO_WEAK_STR           "go_weak"
+#define C_GO_WEAK_STR           "go_wake"
 #define C_ON_DISABLED_STR       "on_disabled"
 #define C_SITE_ID_STR           "site_id"
-
-enum CONFIG_ENTITY{
-    C_MODEL = 0,
-    C_SPI_DEV,
-    C_LED_NUM,
-    C_LED_BRI,
-    C_MQTT_HOST,
-    C_MQTT_PORT,
-    C_MQTT_USER,
-    C_MQTT_PASS,
-    C_ON_IDLE,
-    C_ON_LISTEN,
-    C_ON_SPEAK,
-    C_TO_MUTE,
-    C_TO_UNMUTE,
-    C_IDLE_COLOUR,
-    C_LISTEN_COLOUR,
-    C_SPEAK_COLOUR,
-    C_MUTE_COLOUR,
-    C_UNMUTE_COLOUR,
-    C_NIGHTMODE,
-    C_GO_SLEEP,
-    C_GO_WEAK,
-    C_ON_DISABLED,
-    C_SITE_ID
-};
-
-#define TRUE_S    "true"
-#define FALSE_S   "false"
+#define C_FEEDBACK_SOUND_STR    "feedback_sound"
 
 #define CONFIG_FILE "config.ini"
 
-typedef struct{
-    char key[20];
-    char value[50];
-}snipsSkillConfig;
-
 #define CLIENT_ID_LEN 10
 
-typedef struct{
-    uint8_t numLEDs;
-    int     fd_spi;
-    uint8_t *pixels;
-    uint8_t brightness;
-}APA102;
+#define RED_C    0xFF0000
+#define GREEN_C  0x00FF00
+#define BLUE_C   0x0000FF
+#define YELLOW_C 0xFFFF00
+#define PURPLE_C 0xFF00FF
+#define TEAL_C   0x00FFFF
+#define ORANGE_C 0xFF8000
 
-#define RED_C    0xFF000000
-#define GREEN_C  0x00FF0000
-#define BLUE_C   0x0000FF00
-#define YELLOW_C 0xFFFF0000
-#define PURPLE_C 0xFF00FF00
-#define TEAL_C   0x00FFFF00
-#define ORANGE_C 0xFF800000
+#define GLOBAL_BRIGHTNESS 31
 
 typedef struct{
     uint32_t idle;
@@ -125,5 +90,63 @@ typedef struct{
     uint32_t unmute;
 }COLOURS;
 
+typedef struct{
+    int number;
+    int spi_bus;
+    int spi_dev;
+}HW_LED_SPEC;
+
+typedef struct{
+    int pin;
+    int val;
+}HW_GPIO_SPEC;
+
+typedef struct{
+    /* Hardware */
+    char hardware_model[50];
+    HW_LED_SPEC LEDs;
+    HW_GPIO_SPEC power;
+    HW_GPIO_SPEC button;
+
+    /* Brightness */
+    uint8_t max_brightness;
+    /* MQTT connection */
+    char mqtt_host[50];
+    char mqtt_port[50];
+    char mqtt_user[50];
+    char mqtt_pass[50];
+
+    /* SiteId */
+    char snips_site_id[50];
+
+    /* Client ID */
+    char *client_id;
+
+    /* Animation thread */
+    pthread_t curr_thread;
+    STATE     curr_state;
+
+    /* Colour */
+    COLOURS animation_color;
+
+    /* Sleep mode */
+    uint8_t sleep_hour;
+    uint8_t sleep_minute;
+    uint8_t wake_hour;
+    uint8_t wake_minute;
+
+    /* Flags */
+    volatile sig_atomic_t   if_terminate;
+    uint8_t                 if_update;
+    uint8_t                 if_sleepmode;
+
+    /* Animation Enable */
+    uint8_t animation_enable[STATE_NUM];
+
+    /* Feedback sound */
+    uint8_t if_mute;
+}SNIPS_RUN_PARA;
+
+#define CLIENT_ID_LEN 10
 
 #endif
