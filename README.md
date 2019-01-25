@@ -118,7 +118,7 @@ This section contains all the changeable options which may make the action more 
 | --- | --- | --- | --- |
 | `model` | Hardware specification file name | Refering to the [hardware_specs](https://github.com/snipsco/snips-skill-respeaker/tree/master/hardware_specs) list | `respeaker_2_mic_hat` |
 
-If you would like to use an APA102 LEDs strip or an external button, please reach [here]() to create your own hardware configuration file.
+If you would like to use an APA102 LEDs strip or an external button, please reach [here](https://github.com/snipsco/snips-skill-respeaker#build-your-own-hardware) to create your own hardware configuration file.
 
 #### Brightness
 
