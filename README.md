@@ -1,6 +1,6 @@
 # snips-skill-respeaker
 
-![Version](https://img.shields.io/badge/snips--led--animation-v1.6.1-blue.svg)
+![Version](https://img.shields.io/badge/snips--led--animation-v1.6.2-blue.svg)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 
 This action code animates RGB LEDs and controls button as a human interface for Snips Voice Platform.
@@ -33,15 +33,15 @@ User are not only expected to attach a ReSpeaker Hat as the hardware, but also t
 
 ## Official Hardware Support
 
-| Platforms / ReSpeakers      | ReSpeaker 2Mic Hat  | ReSpeaker 4Mic Hat | ReSpeaker Core V2    |
-| :---:                     | :---:               | :---:              | :---:                |
-| **Raspberry Pi 0**     |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
-| **Raspberry Pi 3**        |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
-| **Raspberry Pi 3+**       |  :white_check_mark: | :white_check_mark: | :heavy_minus_sign:   |
-| **ReSpeaker Core V2**     |  :heavy_minus_sign: | :heavy_minus_sign: | :white_check_mark:   |
+| Platforms / ReSpeakers    |  2-Mic Hat          | 4-Mic Hat           | 6-Mic Hat          | Core V2              |
+| :---:                     |  :---:              | :---:               | :---:              | :---:                |
+| **Raspberry Pi 0**        |  :white_check_mark: | :white_check_mark:  | :white_check_mark: | :heavy_minus_sign:   |
+| **Raspberry Pi 3**        |  :white_check_mark: | :white_check_mark:  | :white_check_mark: | :heavy_minus_sign:   |
+| **Raspberry Pi 3+**       |  :white_check_mark: | :white_check_mark:  | :white_check_mark: | :heavy_minus_sign:   |
+| **ReSpeaker Core V2**     |  :heavy_minus_sign: | :heavy_minus_sign:  | :heavy_minus_sign: | :white_check_mark:   |
 
 > Known Issue: the button on the ReSpeaker Core V2 is not yet supported due to its special accessing design
-
+>
 > If you would like to customise the hardware, please refer to [Build Your Own Hardware](https://github.com/snipsco/snips-skill-respeaker/tree/master#build-your-own-hardware) section.
 
 ## Installation

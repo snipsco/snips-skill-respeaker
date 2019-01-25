@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.2](#) - 2019-01-25
+
+### Added
+
+- Support ReSpeaker 6 mic hat
+
 ## [1.6.1](https://github.com/snipsco/snips-skill-respeaker/releases/tag/v1.6.1) - 2019-01-24
 
 ### Added
