@@ -1,6 +1,6 @@
 # snips-skill-respeaker
 
-![Version](https://img.shields.io/badge/snips--led--animation-v1.6.2-blue.svg)
+[![Version](https://img.shields.io/badge/snips--led--animation-v1.6.2-blue.svg)](https://github.com/snipsco/snips-skill-respeaker/releases)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 
 This action code animates RGB LEDs and controls button as a human interface for Snips Voice Platform.
