@@ -1,6 +1,10 @@
 # snips-skill-respeaker
 
+<<<<<<< HEAD
 ![Version](https://img.shields.io/badge/snips--led--animation-v1.6.3-blue.svg)
+=======
+[![Version](https://img.shields.io/badge/snips--led--animation-v1.6.2-blue.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/CHANGELOG.md)
+>>>>>>> 8eb87f718b21c3ed251b2b1ddd8db569388be40b
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 
 This action code animates RGB LEDs and controls button as a human interface for Snips Voice Platform.
@@ -124,7 +128,7 @@ This section contains all the changeable options which may make the action more 
 | --- | --- | --- | --- |
 | `model` | Hardware specification file name | Refering to the [hardware_specs](https://github.com/snipsco/snips-skill-respeaker/tree/master/hardware_specs) list | `respeaker_2_mic_hat` |
 
-If you would like to use an APA102 LEDs strip or an external button, please reach [here]() to create your own hardware configuration file.
+If you would like to use an APA102 LEDs strip or an external button, please reach [here](https://github.com/snipsco/snips-skill-respeaker#build-your-own-hardware) to create your own hardware configuration file.
 
 #### Brightness
 
