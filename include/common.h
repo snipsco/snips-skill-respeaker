@@ -12,8 +12,8 @@
 #include <unistd.h>
 
 #define APP "snips-led-animation"
-#define VERSION "1.6.2"
-#define LAST_UPDATE "Jan-25-2019"
+#define VERSION "1.6.3"
+#define LAST_UPDATE "Jan-28-2019"
 #define AUTHOR "KE FANG (SNIPS)"
 
 #define NUM_TOPIC       10

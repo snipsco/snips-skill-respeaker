@@ -1,6 +1,6 @@
 # snips-skill-respeaker
 
-![Version](https://img.shields.io/badge/snips--led--animation-v1.6.2-blue.svg)
+![Version](https://img.shields.io/badge/snips--led--animation-v1.6.3-blue.svg)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/snipsco/snips-skill-respeaker/blob/master/LICENSE)
 
 This action code animates RGB LEDs and controls button as a human interface for Snips Voice Platform.
@@ -52,6 +52,12 @@ User are not only expected to attach a ReSpeaker Hat as the hardware, but also t
 
 ```bash
 sam install actions -g https://github.com/snipsco/snips-skill-respeaker.git
+```
+
+To be able to access GPIO and SPI hardware, `_snips-skills` user need to be appended with `spi`, `gpio`, `audio` groups. Run the following command on your snips device:
+
+```bash
+sudo usermod -a -G spi,gpio,audio _snips-skills
 ```
 
 #### Manually:

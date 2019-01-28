@@ -25,14 +25,14 @@ case $OS in
             *)
                 MODEL="NONE"
                 echo -e "\033[1;32;31m[!]\033[mDid not found any official supported hardware"
-                echo -e "\033[1;32;31m[*]\033[mPlease refer to README.md, manyally create your hardware specification"
+                echo -e "\033[1;32;31m[*]\033[mPlease refer to README.md, manually create your hardware specification"
                 ;;
         esac
         ;;
     *)
         MODEL="NONE"
         echo -e "\033[1;32;31m[!]\033[mDid not found any official supported hardware"
-        echo -e "\033[1;32;31m[*]\033[mPlease refer to README.md, manyally create your hardware specification"
+        echo -e "\033[1;32;31m[*]\033[mPlease refer to README.md, manually create your hardware specification"
         ;;
 esac
 
@@ -74,11 +74,29 @@ make all
 
 echo -e "\033[1;32;34m==============================\033[m"
 
+# check if snips user has the permission to execute the action code
+P_SPI=`groups _snips-skills | grep spi`
+P_GPIO=`groups _snips-skills | grep gpio`
+
+if [ -z "$P_SPI" ]
+then
+    echo -e "\033[1;32;31m[!]\033[m SPI operating permission required, please manually enable it!"
+    echo -e "\033[1;32;31m[-]\033[m Run the following command on your snips device:"
+    echo -e "\033[1;32;31m[-]\033[m     \033[0;35msudo usermod -a -G spi _snips-skills\033[m"
+fi
+
+if [ -z "$P_GPIO" ]
+then
+    echo -e "\033[1;32;31m[!]\033[m GPIO operating permission required, please manually enable it!"
+    echo -e "\033[1;32;31m[-]\033[m Run the following command on your snips device:"
+    echo -e "\033[1;32;31m[-]\033[m     \033[0;35msudo usermod -a -G gpio _snips-skills\033[m"
+fi
+
 ACTION_FILE=$(ls action-* 2> /dev/null | wc -l)
 # check if the compiled file is outputed
 if [ "$ACTION_FILE" != "0" ]
 then
-    echo -e "\033[1;32;34m[*]\033[m Setup Success!"
+    echo -e "\033[1;32;34m[*]\033[m Setup Finished!"
     echo -e "\033[1;32;34m[*]\033[m \c"
     ./action-led_animation_* --version
 else

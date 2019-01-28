@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.3](#) - 2019-01-28
+
+### Improved
+
+- Check if `_snips-skills` user has the `spi` and `gpio` access permission
+
 ## [1.6.2](#) - 2019-01-25
 
 ### Added
