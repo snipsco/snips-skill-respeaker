@@ -35,7 +35,7 @@ go_sleep=22:15
 go_wake=8:35
 
 # Default feedback sound
-feedback_sound=true
+feedback_sound=false
 
 [static]
 config_ver=0.2
