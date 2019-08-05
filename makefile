@@ -1,7 +1,6 @@
 CC = gcc
 
 CFLAGS =  -std=gnu99\
-          -Wall\
           -Iinclude\
           -fomit-frame-pointer \
           -I/opt/vc/include\
