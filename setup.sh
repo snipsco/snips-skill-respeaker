@@ -1,4 +1,4 @@
-#/usr/bin/env bash -e
+#/usr/bin/env bash
 
 DEFAULT_CONFIG_FILE="./config.ini.default"
 CONFIG_FILE="./config.ini"
