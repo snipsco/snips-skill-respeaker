@@ -52,7 +52,7 @@ else
         #echo "[*] The lastest config.ini version is <$def_ver>"
         #echo "[*] Please change it manually to adapt to your old setup after installation"
         cp config.ini.default config.ini
-    else
+    #else
         #echo "[*] Good config.ini version: <$user_ver>"
     fi
 fi
@@ -78,27 +78,27 @@ make all
 P_SPI=`groups _snips-skills | grep spi`
 P_GPIO=`groups _snips-skills | grep gpio`
 
-if [ -z "$P_SPI" ]
-then
+#if [ -z "$P_SPI" ]
+#then
     #echo "[!] SPI operating permission required, please manually enable it!"
     #echo "[-] Run the following command on your snips device:"
     #echo "[-]     sudo usermod -a -G spi _snips-skills"
-fi
+#fi
 
-if [ -z "$P_GPIO" ]
-then
+#if [ -z "$P_GPIO" ]
+#then
     #echo "[!] GPIO operating permission required, please manually enable it!"
     #echo "[-] Run the following command on your snips device:"
     #echo "[-]     sudo usermod -a -G gpio _snips-skills"
-fi
+#fi
 
 ACTION_FILE=$(ls action-* 2> /dev/null | wc -l)
 # check if the compiled file is outputed
-if [ "$ACTION_FILE" != "0" ]
-then
+#if [ "$ACTION_FILE" != "0" ]
+#then
     #echo "[*] Setup Finished!"
     #echo "[*] \c"
     #./action-led_animation_* --version
-else
+#else
     #echo "[!] Setup Failed!"
-fi
+#fi
