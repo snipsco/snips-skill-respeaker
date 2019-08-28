@@ -36,7 +36,7 @@ case $OS in
         ;;
 esac
 
-echo "[*] Detected hardware model: <$MODEL>"
+#echo "[*] Detected hardware model: <$MODEL>"
 
 # user config version checking
 if [ ! -e $CONFIG_FILE ]
@@ -48,12 +48,12 @@ else
 
     if [ "$def_ver" != "$user_ver" ]
     then
-        echo "[!] Current config options are overwrote by the new default value since they are out of date"
-        echo "[*] The lastest config.ini version is <$def_ver>"
-        echo "[*] Please change it manually to adapt to your old setup after installation"
+        #echo "[!] Current config options are overwrote by the new default value since they are out of date"
+        #echo "[*] The lastest config.ini version is <$def_ver>"
+        #echo "[*] Please change it manually to adapt to your old setup after installation"
         cp config.ini.default config.ini
     else
-        echo "[*] Good config.ini version: <$user_ver>"
+        #echo "[*] Good config.ini version: <$user_ver>"
     fi
 fi
 
@@ -62,17 +62,17 @@ sed -i s/model=.*\$/model=$MODEL/g config.ini
 # check if the old compiled file is outputed
 if [ "$ACTION_FILE" != "0" ]
 then
-    echo "[*] Cleaning... "
+    #echo "[*] Cleaning... "
     rm action-*
 fi
 
-echo "[*] Compiling... "
-echo "=============================="
+#echo "[*] Compiling... "
+#echo "=============================="
 
 # compile application
 make all
 
-echo "=============================="
+#echo "=============================="
 
 # check if snips user has the permission to execute the action code
 P_SPI=`groups _snips-skills | grep spi`
@@ -80,25 +80,25 @@ P_GPIO=`groups _snips-skills | grep gpio`
 
 if [ -z "$P_SPI" ]
 then
-    echo "[!] SPI operating permission required, please manually enable it!"
-    echo "[-] Run the following command on your snips device:"
-    echo "[-]     sudo usermod -a -G spi _snips-skills"
+    #echo "[!] SPI operating permission required, please manually enable it!"
+    #echo "[-] Run the following command on your snips device:"
+    #echo "[-]     sudo usermod -a -G spi _snips-skills"
 fi
 
 if [ -z "$P_GPIO" ]
 then
-    echo "[!] GPIO operating permission required, please manually enable it!"
-    echo "[-] Run the following command on your snips device:"
-    echo "[-]     sudo usermod -a -G gpio _snips-skills"
+    #echo "[!] GPIO operating permission required, please manually enable it!"
+    #echo "[-] Run the following command on your snips device:"
+    #echo "[-]     sudo usermod -a -G gpio _snips-skills"
 fi
 
 ACTION_FILE=$(ls action-* 2> /dev/null | wc -l)
 # check if the compiled file is outputed
 if [ "$ACTION_FILE" != "0" ]
 then
-    echo "[*] Setup Finished!"
-    echo "[*] \c"
-    ./action-led_animation_* --version
+    #echo "[*] Setup Finished!"
+    #echo "[*] \c"
+    #./action-led_animation_* --version
 else
-    echo "[!] Setup Failed!"
+    #echo "[!] Setup Failed!"
 fi
